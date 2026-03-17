@@ -270,9 +270,10 @@ def add_silkscreen_labels(board, components, placed_fps, layout):
         'U_CHG': 'CHARGER',
         'U_AVDD': 'AVDD LDO',
         'U_DVDD': 'DVDD LDO',
-        'U_ADC1': 'ADC CH1-4',
-        'U_ADC2': 'ADC CH5-8',
-        'U_DAC': 'DAC',
+        'U_ADC1': 'ADC CH1+2',
+        'U_ADC2': 'ADC CH3+4',
+        'U_ADC3': 'ADC CH5+6 / DAC',
+        'U_ADC4': 'ADC CH7+8',
         'U_SUM': 'SUMMING AMP',
         'U_OUTBUF': 'OUT BUFFER',
         'U_MUX1': 'MUX 1',
@@ -468,14 +469,14 @@ def assign_passives_to_anchors(fps, nets, anchor_positions):
         if best_anchor is None:
             my_power = my_nets & POWER_NETS
             if 'AVDD' in my_power or 'AGND' in my_power:
-                analog_ics = [c for c in ['U1', 'U2', 'U5', 'U9', 'U10', 'U7', 'U8', 'U3']
+                analog_ics = [c for c in ['U1', 'U2', 'U3', 'U4', 'U5', 'U10', 'U11', 'U8', 'U9']
                               if c in anchor_refs]
                 if analog_ics:
                     idx = _power_rr_counters.get('analog', 0) % len(analog_ics)
                     best_anchor = analog_ics[idx]
                     _power_rr_counters['analog'] = idx + 1
             elif 'DVDD' in my_power or 'DGND' in my_power:
-                digital_ics = [c for c in ['U6', 'U4', 'U1', 'U2', 'U5']
+                digital_ics = [c for c in ['U7', 'U6', 'U1', 'U2', 'U3', 'U4']
                                if c in anchor_refs]
                 if digital_ics:
                     idx = _power_rr_counters.get('digital', 0) % len(digital_ics)
@@ -711,18 +712,19 @@ def layout_main():
     # Explicit IC and connector placement by reference designator
     # =================================================================
     #
-    # Ref mapping (from netlist analysis):
+    # Ref mapping (from netlist analysis, v2.6):
     #   J19 = USB-C          J4 = Battery connector
-    #   U4 = MCP73831        U3 = LP2985 (AVDD)     U6 = AP2114H (DVDD)
+    #   U6 = MCP73831        U5 = LP2985 (AVDD)     U7 = AP2114H (DVDD)
     #   D1 = BAT54           D2 = LED (charge status)
     #   J1 = Master left socket (1x20)   J2 = Master right socket (1x20)
     #   J8/J15 = Slave A     J9/J16 = Slave B
     #   J10/J17 = Slave C    J11/J18 = Slave D
-    #   U1 = ES8388 #1       U2 = ES8388 #2
+    #   U1 = ES8388 #1 (CH1+2)   U2 = ES8388 #2 (CH3+4)
+    #   U3 = ES8388 #3 (CH5+6 + DAC out)   U4 = ES8388 #4 (CH7+8)
     #   J3 = J_AFE (2x5 preamp cable)
-    #   U5 = HT8988A DAC     U9 = NE5532 summing    U10 = NE5532 output buf
-    #   U7 = CD4052B mux #1  U8 = CD4052B mux #2
-    #   J7 = HP jack         J12 = Line jack
+    #   U11 = NE5532 summing   U10 = NE5532 output buf
+    #   U8 = CD4052B mux #1    U9 = CD4052B mux #2
+    #   J7 = HP jack           J12 = Line jack
     #   RV1/RV2 = Volume pots
     #   J13/J14 = Output headers   J5/J6 = Footswitch connectors
     #   FB1 = Ferrite bead (AGND-DGND bridge)
@@ -743,12 +745,11 @@ def layout_main():
     pwr_row1 = master_cy - 3     # upper row
     pwr_row2 = master_cy + 3     # lower row
     layout['J19'] = (ox + 18, pwr_row1, 270)     # USB-C
-    layout['U4']  = (ox + 28, pwr_row1, 0)       # MCP73831 charger
+    layout['U6']  = (ox + 28, pwr_row1, 0)       # MCP73831 charger
     layout['D2']  = (ox + 38, pwr_row1, 0)       # Charge status LED
     layout['D1']  = (ox + 44, pwr_row1, 0)       # BAT54 reverse protection
     layout['J4']  = (ox + 18, pwr_row2, 0)       # Battery connector
-    layout['U3']  = (42, 53, 0)                   # LP2985 analog LDO
-    layout['U6']  = (ox + 48, pwr_row2, 0)       # AP2114H digital LDO
+    layout['U7']  = (ox + 48, pwr_row2, 0)       # AP2114H digital LDO
 
     # Ferrite bead at analog/digital zone boundary
     layout['FB1'] = (ox + 69, oy + 32, 0)
@@ -791,16 +792,18 @@ def layout_main():
     layout['J5'] = (ox + 86, oy + bh - 6, 0)     # Footswitch 1
     layout['J6'] = (ox + bw - 8, oy + bh - 6, 0) # Footswitch 2
 
-    # --- Interior ICs — single column at x≈90.5, ~10mm spacing ---
-    layout['U1']  = (90.5625, 32, 0)              # ES8388 ADC #1
-    layout['U2']  = (90.5625, 41.94, 0)           # ES8388 ADC #2
-    layout['U5']  = (90.5625, 52.4, 0)            # HT8988A DAC
-    layout['U9']  = (90, 64.4, 0)                 # NE5532 summing amp
-    layout['U10'] = (90, 74.5, 0)                 # NE5532 output buffer
+    # --- Interior ICs — 4x ES8388 column + analog LDO (user-placed positions) ---
+    layout['U1']  = (90.4,    30.1,    0)          # ES8388 ADC #1 (CH1+2)
+    layout['U2']  = (90.4,    35.9375, 0)          # ES8388 ADC #2 (CH3+4)
+    layout['U3']  = (90.4375, 42,      0)          # ES8388 ADC #3 (CH5+6 + DAC)
+    layout['U4']  = (90.7,    47.9375, 0)          # ES8388 ADC #4 (CH7+8)
+    layout['U5']  = (91.6375, 57,      0)          # LP2985 AVDD analog LDO
+    layout['U11'] = (90,      64.4,    0)          # NE5532 summing amp
+    layout['U10'] = (90,      74.5,    0)          # NE5532 output buffer
 
     # Muxes — right of IC column
-    layout['U7']  = (100.025, 63.635, 0)           # CD4052B mux #1
-    layout['U8']  = (100.025, 75.635, 0)           # CD4052B mux #2
+    layout['U8']  = (100.025, 63.635, 0)           # CD4052B mux #1
+    layout['U9']  = (100.025, 75.635, 0)           # CD4052B mux #2
 
     # ================================================================
     # Mounting holes (2 diagonal corners)

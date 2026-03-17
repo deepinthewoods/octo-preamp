@@ -1,8 +1,17 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.5 — 17 March 2026**
+**Version 2.6 — 17 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.6 changes (4x ES8388, remove HT8988A):**
+- ES8388 is stereo (2-ch ADC per IC), not 4-ch as previously assumed
+- Replaced 2x ES8388 + HT8988A with 4x ES8388 (2-ch stereo each = 8 ADC channels total)
+- ES8388 #3 DAC section active: headphone output (LOUT1/ROUT1) + line output (LOUT2/ROUT2)
+- Added second I2C bus (GPIO43=SDA2, GPIO44=SCL2) for ES8388 #3+#4 (address conflict resolution)
+- New ADC data lines: GPIO4 (ADCDAT_C, ES8388 #3), GPIO48 (ADCDAT_D, ES8388 #4; shares DevKit RGB LED pin)
+- GPIO13 DACDAT now routes to ES8388 #3 DSDIN (same GPIO, replaces HT8988A)
+- Single JLCPCB part for all ADC+DAC (C365736, $0.95, 9,686 in stock); open items #1 and #2 closed
 
 **v2.5 changes (gain trimpot SMD):**
 - Gain trimpots changed from Bourns 3296W (THT) to Bourns 3314J-1-103E (SMD, top-adjust)
@@ -34,13 +43,13 @@ An electronic system for an 8-string guitar with independent per-string pickup p
 2. **8-channel ADC path** — feeding the digital DSP system (pitch detection, oscillator synthesis, filtering, or per-string effects)
 3. **Analog summing path** — stereo summed dry signal for traditional amplifier use
 
-The system uses 2x ES8388 codec ICs for ADC, 5x ESP32-S3 microcontrollers (1 master + 4 slaves) for DSP, and an HT8988A codec for the final stereo DAC output with built-in headphone amplifier. Power is supplied by a single-cell LiPo battery charged via USB-C.
+The system uses 4x ES8388 codec ICs (stereo ADC+DAC, 2 channels each = 8 ADC channels total) and 5x ESP32-S3 microcontrollers (1 master + 4 slaves) for DSP. ES8388 #3 provides the final stereo DAC output with headphone and line outputs. Power is supplied by a single-cell LiPo battery charged via USB-C.
 
 ### Boards
 
 | Board | Source | Components | Layers | Size | Description |
 |-------|--------|------------|--------|------|-------------|
-| **MAIN** | `boards/main/main.zen` | ~113 | 4 | ~160x80mm | Merged master + ADC + DAC-router + 4x slave sockets |
+| **MAIN** | `boards/main/main.zen` | ~120 | 4 | ~160x80mm | Merged master + ADC + DAC-router + 4x slave sockets |
 | **Preamp/AFE** | `boards/preamp/preamp.zen` | ~151 | 4 | ~100x60mm | Pure analog front-end, 13x NE5532 dual op-amps |
 
 Single cable between boards: Preamp `J_OUT` -> MAIN `J_AFE` (2x5 header: 8 signals + AVDD + AGND).
@@ -251,8 +260,10 @@ Board: ESP32-S3 DevKit N16R8 (16MB flash, 8MB PSRAM), mounted in 2x 20-pin machi
 | 5 | MCLK | 12.288MHz at 48kHz Fs |
 | 6 | BCLK | Bit clock |
 | 7 | LRCK | Word select |
-| 15 | ADCDAT_A | ES8388 #1 data out (CH 1-4) |
-| 16 | ADCDAT_B | ES8388 #2 data out (CH 5-8) |
+| 15 | ADCDAT_A | ES8388 #1 data out (CH 1-2) |
+| 16 | ADCDAT_B | ES8388 #2 data out (CH 3-4) |
+| 4 | ADCDAT_C | ES8388 #3 data out (CH 5-6) |
+| 48 | ADCDAT_D | ES8388 #4 data out (CH 7-8); shares DevKit onboard RGB LED pin |
 
 **I2S — Slave Bus (Peripheral 1, TDM):**
 
@@ -266,14 +277,16 @@ Board: ESP32-S3 DevKit N16R8 (16MB flash, 8MB PSRAM), mounted in 2x 20-pin machi
 | 14 | DIN_D | In | Return audio from slave 4 (strings 7+8) |
 | 17 | SD_FWD_AB | Out | Forward data to slaves 1+2 (pin-muxed UART TX for OTA) |
 | 18 | SD_FWD_CD | Out | Forward data to slaves 3+4 (pin-muxed UART RX for OTA) |
-| 13 | DOUT_DAC | Out | Final stereo mix to HT8988A |
+| 13 | DACDAT | Out | Final stereo mix to ES8388 #3 DSDIN |
 
 **I2C — Codec Control:**
 
 | GPIO | Signal | Notes |
 |------|--------|-------|
-| 21 | SDA | Shared: ES8388 #1 @0x10, ES8388 #2 @0x11, HT8988A @0x1A |
-| 38 | SCL | 4.7k pull-ups to AVDD |
+| 21 | SDA | I2C bus 0: ES8388 #1 @0x10, ES8388 #2 @0x11 |
+| 38 | SCL | I2C bus 0: 4.7k pull-ups to AVDD |
+| 43 | SDA2 | I2C bus 1: ES8388 #3 @0x10, ES8388 #4 @0x11 |
+| 44 | SCL2 | I2C bus 1: 4.7k pull-ups to AVDD |
 
 **Analog Routing Matrix (CD4052B):**
 
@@ -363,29 +376,32 @@ WiFi and Bluetooth are disabled on all slave boards at firmware level to elimina
 
 ### ES8388 Codec Configuration
 
-Two ES8388 ICs provide 8 ADC channels total (4 per IC). Both share the same I2S clock bus and I2C control bus.
+Four ES8388 ICs provide 8 ADC channels total (2 per IC — ES8388 is a stereo codec). ES8388 #3 also provides the stereo DAC output. All four share the same I2S clock bus (MCLK, BCLK, LRCK). Two I2C buses handle the address conflict (only two I2C addresses available per IC: 0x10 and 0x11).
 
 | Parameter | Value |
 |-----------|-------|
 | ADC resolution | 24-bit (truncated to 16-bit on I2S TDM bus) |
 | ADC SNR | 93 dBFS typical |
+| DAC SNR | 90 dBFS typical (ES8388 #3 only) |
 | Sample rate | 48kHz |
 | MCLK | 12.288MHz (256x Fs) |
 | I2S format | Standard I2S, 16-bit word length |
 
-**ES8388 #1 (U_ADC1):**
-- Channels 1-4 (strings 1-4)
-- I2C address: 0x10 (AD0 -> AGND)
-- Inputs: LIN1=SIG_CH1, RIN1=SIG_CH2, LIN2=SIG_CH3, RIN2=SIG_CH4
-- Data output: ADCDAT_A -> master GPIO15
+**I2C Bus 0 (SDA GPIO21, SCL GPIO38):**
 
-**ES8388 #2 (U_ADC2):**
-- Channels 5-8 (strings 5-8)
-- I2C address: 0x11 (AD0 -> AVDD via 10k)
-- Inputs: LIN1=SIG_CH5, RIN1=SIG_CH6, LIN2=SIG_CH7, RIN2=SIG_CH8
-- Data output: ADCDAT_B -> master GPIO16
+| IC | I2C Address | AD0 | Channels | ADC Data Out |
+|----|-------------|-----|----------|--------------|
+| ES8388 #1 (U_ADC1) | 0x10 | AGND | CH1+2 (LIN1/RIN1) | ADCDAT_A → GPIO15 |
+| ES8388 #2 (U_ADC2) | 0x11 | AVDD via 10k | CH3+4 (LIN1/RIN1) | ADCDAT_B → GPIO16 |
 
-DAC sections powered down via register — not used.
+**I2C Bus 1 (SDA2 GPIO43, SCL2 GPIO44):**
+
+| IC | I2C Address | AD0 | Channels | ADC Data Out | DAC |
+|----|-------------|-----|----------|--------------|-----|
+| ES8388 #3 (U_ADC3) | 0x10 | AGND | CH5+6 (LIN1/RIN1) | ADCDAT_C → GPIO4 | Active: LOUT1/2 + ROUT1/2 |
+| ES8388 #4 (U_ADC4) | 0x11 | AVDD via 10k | CH7+8 (LIN1/RIN1) | ADCDAT_D → GPIO48 | Powered down |
+
+LIN2/RIN2 inputs are unused on all four ICs (left floating). DAC sections on ES8388 #1, #2, and #4 are powered down via register.
 
 ### J_AFE Connector
 
@@ -403,26 +419,24 @@ SIGNAL lines route to **both** ES8388 ADC inputs **and** Zone C summing amp inpu
 
 ## 7. MAIN Board — Zone C: DAC / Output Analog
 
-### HT8988A Codec (WM8988 Compatible)
+### ES8388 #3 DAC Output
 
-Replaces PCM5102A from v2.0. Provides DAC output with built-in Class G headphone amplifier.
+ES8388 #3 (U_ADC3) provides the stereo DAC output. Its DAC section is enabled via I2C register; the other three ES8388s have DAC sections powered down.
 
 | Parameter | Value |
 |-----------|-------|
-| DAC SNR | 100dB (A-weighted) |
-| DAC THD | -90dB |
-| HP output | >40mW @ 16 Ohm, 90dB SNR |
+| DAC SNR | 90 dBFS typical |
+| DAC THD | -85dB typical |
 | Line output | ~1Vrms |
-| Interface | I2S + I2C control |
-| I2C address | 0x1A (CSB=low, MODE=low) |
-| Package | QFN-28 |
+| Interface | I2S (shared BCLK/LRCK with ADC section) + I2C bus 1 |
+| I2C address | 0x10 on bus 1 |
+| Package | QFN-28 (same as ADC ICs) |
 
 **Connections:**
-- I2S: DACDAT from master GPIO13, BCLK/LRC from slave bus
-- I2C: shared SDA/SCL bus
-- LOUT1/ROUT1 -> headphone output (via volume pot + 3.5mm TRS jack)
-- LOUT2/ROUT2 -> line output (via coupling caps + 3.5mm TRS jack)
-- Analog inputs: tied to AGND (not used)
+- I2S DAC input: DACDAT from master GPIO13 → ES8388 #3 DSDIN
+- BCLK/LRCK: shared with ADC I2S bus
+- LOUT1/ROUT1 → headphone output (via 47uF coupling caps + volume pot + 3.5mm TRS jack)
+- LOUT2/ROUT2 → line output (via 10uF coupling caps + 3.5mm TRS jack)
 
 ### Headphone Output
 
@@ -608,8 +622,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | Qty | Component | Part | Function |
 |-----|-----------|------|----------|
 | 5 | Microcontroller | ESP32-S3 DevKit N16R8 | 1x master, 4x slave |
-| 2 | Audio ADC codec | ES8388 (JLCPCB C365736) | 4ch ADC each, I2S out |
-| 1 | Output DAC/codec | HT8988A (QFN-28) | Stereo DAC + headphone amp |
+| 4 | Audio ADC/DAC codec | ES8388 (JLCPCB C365736, $0.95) | Stereo 2-ch ADC; #3 also active as DAC out |
 | 1 | LiPo charger | MCP73831T-2ACI/OT | USB-C to LiPo charging |
 | 1 | Analog LDO | LP2985-33DBVR (SOT-23-5) | 3.3V AVDD, ultra-low noise |
 | 1 | Digital LDO | AP2114H-3.3 (SOT-223) | 3.3V DVDD, 1A max |
@@ -655,16 +668,18 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | Confirm HT8988A JLCPCB/LCSC part number and assembly availability | OPEN |
-| 2 | Confirm HT8988A I2C address (0x1A) does not conflict with ES8388s (0x10, 0x11) | OPEN |
-| 3 | Review AFE board dimensions with 13x NE5532 + passives — target ~100x60mm | OPEN |
-| 4 | Determine latency impact of pin-muxing GPIO17/18 between I2S and UART for mode switch | LOW RISK |
+| 1 | Review AFE board dimensions with 13x NE5532 + passives — target ~100x60mm | OPEN |
+| 2 | Determine latency impact of pin-muxing GPIO17/18 between I2S and UART for mode switch | LOW RISK |
+| 3 | GPIO48 shares DevKit onboard RGB LED — verify ES8388 #4 ADCDAT_D signal integrity with LED load | LOW RISK |
 
 ### Resolved Items
 
 - I2S return from 4 slaves via TDM mode (4 SD lines on Peripheral 1) — **RESOLVED**
 - 16-bit TDM slot width selected (hardware constraint, 8 slots per peripheral) — **RESOLVED**
 - I2S full-duplex TDM on slave (TX + RX share BCLK/LRCK, confirmed by ESP-IDF) — **RESOLVED**
+- HT8988A availability (not in JLCPCB stock) — **RESOLVED** (replaced by ES8388 #3 DAC section)
+- HT8988A I2C address conflict with ES8388s — **RESOLVED** (HT8988A removed; two I2C buses handle 4x ES8388)
+- ES8388 assumed 4-ch ADC — **CORRECTED** (stereo 2-ch per IC; 4x ICs for 8 channels)
 - Synth mode control word packing (interleaved frames, 24kHz update rate) — **RESOLVED**
 - RC click suppression on mux outputs — **IMPLEMENTED** (1k + 100nF per output)
 - Footswitch pinouts — **DECIDED** (one per mode, user wires as appropriate)
