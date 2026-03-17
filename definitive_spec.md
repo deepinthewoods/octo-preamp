@@ -1,8 +1,15 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.6 — 17 March 2026**
+**Version 2.7 — 17 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.7 changes (preamp board local LDO):**
+- Added LP2985-33DBVR to preamp board for local AVDD generation (from VBAT)
+- Removes ~104mA NE5532 load from MAIN board LP2985 (was exceeding 150mA limit)
+- MAIN LP2985 now supplies only ~78mA (ES8388 AVDD + MAIN analog ICs — well within limit)
+- J_OUT/J_AFE cable pin 9 changed from AVDD to VBAT
+- Fixed VBAT_MON/VBAT_DIV net split bug (GPIO36 now connects to voltage divider midpoint)
 
 **v2.6 changes (4x ES8388, remove HT8988A):**
 - ES8388 is stereo (2-ch ADC per IC), not 4-ch as previously assumed
@@ -77,7 +84,7 @@ Pickups -> AFE (buffer, gain, AA filter)
   -> Slaves: oscillator synthesis + filter DSP
   -> I2S return to master
   -> Master mixes all returns
-  -> HT8988A DAC -> Outputs
+  -> ES8388 #3 DAC -> Outputs
 ```
 
 ### Effects Mode
@@ -88,7 +95,7 @@ Pickups -> AFE -> ES8388 ADC (I2S to master)
   -> I2S to slaves
   -> Slaves: per-string effects (EQ, dynamics, modulation, delay)
   -> I2S return to master
-  -> Master mixes -> HT8988A DAC -> Outputs
+  -> Master mixes -> ES8388 #3 DAC -> Outputs
 ```
 
 ### Analog Dry Path (Parallel)
@@ -117,8 +124,13 @@ MCP73831T-2ACI/OT (SOT-23-5, ~210mA charge current)
   v
 LiPo Cell (single cell, 3.7V nom, 4.2V full, 3.5V cutoff)
   |
-  +---> LP2985-33DBVR --> 3.3V AVDD (analog, ultra-low noise, ~30uV RMS)
-  +---> AP2114H-3.3   --> 3.3V DVDD (digital, 1A max)
+  +---> LP2985-33DBVR (MAIN) --> 3.3V AVDD (analog, ~30uV RMS)
+  |       Feeds: 4x ES8388 AVDD + MAIN analog ICs (~78mA)
+  |
+  +---> LP2985-33DBVR (Preamp, via J_AFE pin 9 VBAT) --> 3.3V AVDD (preamp local)
+  |       Feeds: 13x NE5532 + virtual ground (~104mA)
+  |
+  +---> AP2114H-3.3 --> 3.3V DVDD (digital, 1A max)
 ```
 
 ### MCP73831 Charger
@@ -129,19 +141,30 @@ LiPo Cell (single cell, 3.7V nom, 4.2V full, 3.5V cutoff)
 - BAT54 Schottky reverse protection on VBAT line
 - Decoupling: 47uF + 100nF on VBAT output
 
-### Analog Rail — LP2985-33DBVR (AVDD)
+### Analog Rail — LP2985-33DBVR × 2 (AVDD)
 
+Two instances of LP2985-33DBVR, one per board:
+
+**MAIN board LP2985:**
 - Package: SOT-23-5
 - Output: 3.3V AVDD, ~30uV RMS noise
-- Feeds: ES8388 AVDD, all AFE op-amps, virtual ground, HT8988A analog pins
-- 10nF bypass cap on BYP pin (per datasheet)
-- Copper pour: AGND, separate from DGND
+- Feeds: 4x ES8388 AVDD, 2x NE5532 summing amp, 2x CD4052B (~78mA)
+- 10nF NP0 bypass cap on BYP pin
+- VBAT routed to preamp via J_AFE pin 9
+
+**Preamp board LP2985:**
+- Package: SOT-23-5
+- Output: 3.3V AVDD (local), ~30uV RMS noise
+- Feeds: 13x NE5532 op-amps, virtual ground buffer (~104mA)
+- 10nF NP0 bypass cap on BYP pin
+- Powered from VBAT via J_OUT pin 9 (from MAIN board)
+- Copper pour: GND (single analog ground on preamp)
 
 ### Digital Rail — AP2114H-3.3 (DVDD)
 
 - Package: SOT-223, 1A max output
 - Output: 3.3V DVDD
-- Feeds: 5x ESP32-S3 DevKits (~80mA each), ES8388 DVDD, HT8988A digital pins
+- Feeds: 5x ESP32-S3 DevKits (~80mA each), ES8388 DVDD
 - Current budget: ~430mA typical, ~580mA peak
 - Decoupling: 22uF bulk + standard 100nF/10uF
 - Copper pour: DGND, separate from AGND
@@ -225,8 +248,8 @@ Direct outputs tap directly from the input buffer output (no dedicated buffer IC
 |-----|------|----------|
 | J_IN1-J_IN8 | 2-pin headers (2.54mm THT) | Pickup inputs |
 | J_DOUT1-J_DOUT8 | 2-pin solder pad headers (2.54mm THT) | Direct outputs (wire soldering) |
-| J_OUT | 2x5 header (2.54mm THT) | 8 signals + AVDD + GND to MAIN board |
-| J_PWR | 2-pin header | AVDD + GND power input |
+| J_OUT | 2x5 header (2.54mm THT) | 8 signals + VBAT + GND to MAIN board |
+| J_PWR | 2-pin header | VBAT + GND power input (feeds local LP2985) |
 | H1-H2 | M3 mounting holes | Board mounting |
 
 ---
@@ -245,7 +268,7 @@ Board: ESP32-S3 DevKit N16R8 (16MB flash, 8MB PSRAM), mounted in 2x 20-pin machi
 - Pack control data or route raw audio into forward I2S TDM slots
 - Receive I2S audio returns from all 4 slaves
 - Software mix all streams into final stereo output
-- Drive HT8988A output DAC via I2S
+- Drive ES8388 #3 DAC section via I2S (DACDAT → GPIO13)
 - Control analog routing matrix (CD4052B) via GPIOs
 - Monitor LiPo battery voltage via ADC
 - Handle footswitch inputs for mode switching
@@ -410,7 +433,7 @@ LIN2/RIN2 inputs are unused on all four ICs (left floating). DAC sections on ES8
 | Pin | Signal |
 |-----|--------|
 | 1-8 | SIG_CH1 through SIG_CH8 |
-| 9 | AVDD |
+| 9 | VBAT (powers preamp local LP2985) |
 | 10 | AGND |
 
 SIGNAL lines route to **both** ES8388 ADC inputs **and** Zone C summing amp inputs — this is the key benefit of board unification.
@@ -440,18 +463,18 @@ ES8388 #3 (U_ADC3) provides the stereo DAC output. Its DAC section is enabled vi
 
 ### Headphone Output
 
-- HT8988A HP outputs -> 47uF AC coupling caps -> 10k audio taper dual pot -> 3.5mm TRS stereo jack (J_HP)
+- ES8388 #3 LOUT1/ROUT1 -> 47uF AC coupling caps -> 10k audio taper dual pot -> 3.5mm TRS stereo jack (J_HP)
 
 ### Line Output
 
-- HT8988A line outputs -> 10uF AC coupling caps -> 3.5mm TRS stereo jack (J_LINE)
+- ES8388 #3 LOUT2/ROUT2 -> 10uF AC coupling caps -> 3.5mm TRS stereo jack (J_LINE)
 
 ### Analog Summing Amplifier (Dry Path)
 
-Two NE5532 dual op-amps sum 8 channels to stereo:
+Two NE5532 dual op-amps sum 8 channels to two mono outputs:
 
-- **Left channel:** SIG_CH1-CH4 through 10k input resistors -> inverting summing node -> 1.2k feedback (unity gain of 4-input sum)
-- **Right channel:** SIG_CH5-CH8 through 10k input resistors -> inverting summing node -> 1.2k feedback
+- **Output A:** SIG_CH1-CH4 through 10k input resistors -> inverting summing node -> 1.2k feedback (unity gain of 4-input sum)
+- **Output B:** SIG_CH5-CH8 through 10k input resistors -> inverting summing node -> 1.2k feedback
 
 Output buffers: NE5532 voltage followers (U_OUTBUF)
 
@@ -461,19 +484,19 @@ Two CD4052B dual 4:1 analog muxes with shared control lines.
 
 **Output Mode Truth Table:**
 
-| MUX_A | MUX_B | Mode | Main L Output | Main R Output |
-|-------|-------|------|---------------|---------------|
-| 0 | 0 | Dry only | Summed dry L | Summed dry R |
+| MUX_A | MUX_B | Mode | J_OUT_A | J_OUT_B |
+|-------|-------|------|---------|---------|
+| 0 | 0 | Dry only | Summed dry A | Summed dry B |
 | 1 | 0 | Synth only | DAC synth L | DAC synth R |
-| 0 | 1 | Hybrid | Dry + synth L | Dry + synth R |
-| 1 | 1 | Wet/dry split | Dry L | Synth R |
+| 0 | 1 | Hybrid | Dry + synth A | Dry + synth B |
+| 1 | 1 | Wet/dry split | Dry A | Synth (DAC R) |
 
 MUX_INH asserted briefly during switching to prevent clicks. RC click suppression (1k + 100nF) on mux outputs.
 
 ### Main Output Stage
 
-- Mux output -> 1k RC filter -> 47uF coupling cap -> 1k series resistor -> 6.35mm TRS jack
-- Two outputs: J_OUT_L and J_OUT_R (3-pin headers as TRS placeholders)
+- Mux output -> 1k RC filter -> 47uF coupling cap -> 1k series resistor -> 6.35mm TS jack
+- Two outputs: J_OUT_A and J_OUT_B (2-pin headers: Tip + GND)
 - Two footswitch connectors: J_FS1, J_FS2 (2-pin headers)
 
 ---
@@ -609,8 +632,8 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | Output | Qty | Type | Board | Signal |
 |--------|-----|------|-------|--------|
 | Direct outs | 8 | 2-pin solder pads | Preamp | Per-string pickup tap |
-| Main L | 1 | 6.35mm TRS | MAIN | Routing matrix output L |
-| Main R | 1 | 6.35mm TRS | MAIN | Routing matrix output R |
+| Main A | 1 | 6.35mm TS | MAIN | Routing matrix output A (ch 1-4 dry sum) |
+| Main B | 1 | 6.35mm TS | MAIN | Routing matrix output B (ch 5-8 dry sum) |
 | Line out | 1 | 3.5mm TRS stereo | MAIN | HT8988A line output |
 | Headphone | 1 | 3.5mm TRS stereo | MAIN | HT8988A HP output (with pot) |
 | Footswitches | 2 | 2-pin headers | MAIN | Mode selection |
@@ -624,7 +647,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | 5 | Microcontroller | ESP32-S3 DevKit N16R8 | 1x master, 4x slave |
 | 4 | Audio ADC/DAC codec | ES8388 (JLCPCB C365736, $0.95) | Stereo 2-ch ADC; #3 also active as DAC out |
 | 1 | LiPo charger | MCP73831T-2ACI/OT | USB-C to LiPo charging |
-| 1 | Analog LDO | LP2985-33DBVR (SOT-23-5) | 3.3V AVDD, ultra-low noise |
+| 2 | Analog LDO | LP2985-33DBVR (SOT-23-5) | 3.3V AVDD, ultra-low noise (1x MAIN, 1x Preamp) |
 | 1 | Digital LDO | AP2114H-3.3 (SOT-223) | 3.3V DVDD, 1A max |
 | 1 | Reverse protection | BAT54 Schottky | VBAT protection |
 | 2 | Analog mux | CD4052B | Output routing matrix |
@@ -685,9 +708,9 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 - Footswitch pinouts — **DECIDED** (one per mode, user wires as appropriate)
 - AP2112K 600mA limit — **RESOLVED** (upgraded to AP2114H-3.3, 1A max)
 - Op-amp consolidation — **RESOLVED** (all NE5532 on AFE board)
-- Output connector type — **RESOLVED** (2-pin solder pads for direct outs, 6.35mm TRS for main, 3.5mm TRS for line/HP)
+- Output connector type — **RESOLVED** (2-pin solder pads for direct outs, 6.35mm TS for main, 3.5mm TRS for line/HP)
 - UART replaced by I2S TDM for real-time data — **RESOLVED** (v2.2)
 
 ---
 
-*End of Definitive Specification — Version 2.5*
+*End of Definitive Specification — Version 2.7*

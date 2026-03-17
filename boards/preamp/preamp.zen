@@ -29,6 +29,7 @@ PinHeader = Module("@stdlib/generics/PinHeader.zen")
 MountingHole = Module("@stdlib/generics/MountingHole.zen")
 
 NE5532 = Module("../../components/ne5532/ne5532.zen")
+LP2985 = Module("../../components/lp2985/lp2985.zen")
 Trimpot = Module("../../components/trimpot/trimpot.zen")
 Decoupling = Module("../../modules/decoupling/decoupling.zen")
 
@@ -36,9 +37,36 @@ Decoupling = Module("../../modules/decoupling/decoupling.zen")
 # Power nets
 # =============================================================================
 
-AVDD = Net("AVDD")
+VBAT = Net("VBAT")   # Battery voltage input (from J_OUT pin 9 / J_PWR pin 1)
+AVDD = Net("AVDD")   # 3.3V analog rail, generated locally by U_AVDD
 GND = Net("GND")
 VGND_NET = Net("VGND")
+
+# =============================================================================
+# Local LP2985 LDO: VBAT -> 3.3V AVDD (preamp board generates its own rail)
+# Keeps preamp NE5532 current (~104mA) off the MAIN board LP2985.
+# =============================================================================
+
+VBAT_BYP = Net("AVDD_BYP")
+
+U_AVDD = LP2985(
+    name="U_AVDD",
+    VIN=VBAT,
+    GND=GND,
+    EN=VBAT,   # Always enabled
+    BYP=VBAT_BYP,
+    VOUT=AVDD,
+)
+
+# 10nF NP0 on BYP pin (per LP2985 datasheet for noise reduction)
+Capacitor(name="C_AVDD_BYP", value=Capacitance("10nF"), package="0402", dielectric="NP0", P1=VBAT_BYP, P2=GND)
+
+# VBAT input decoupling
+Capacitor(name="C_VBAT_BULK", value=Capacitance("10uF"), package="0805", P1=VBAT, P2=GND)
+Capacitor(name="C_VBAT_BYP", value=Capacitance("100nF"), package="0402", P1=VBAT, P2=GND)
+
+# AVDD output decoupling
+Decoupling(name="DC_AVDD_LDO", VCC=AVDD, GND=GND)
 
 # =============================================================================
 # Virtual ground generator (1.65V mid-rail)
@@ -205,7 +233,9 @@ for i in range(8):
         P2=GND,
     )
 
-# J_OUT: 2x5 header to ADC board (8 signals + AVDD + GND)
+# J_OUT: 2x5 header to MAIN board (8 signals + VBAT + GND)
+# Pin 9 carries VBAT (not AVDD) — preamp generates its own AVDD locally.
+# MAIN board J_AFE pin 9 must connect to VBAT accordingly.
 PinHeader(
     name="J_OUT",
     pins=5,
@@ -220,18 +250,18 @@ PinHeader(
     P6=SIGNAL[5],
     P7=SIGNAL[6],
     P8=SIGNAL[7],
-    P9=AVDD,
+    P9=VBAT,
     P10=GND,
 )
 
-# J_PWR: 2-pin power input header
+# J_PWR: 2-pin power input header (VBAT + GND — feeds local LP2985)
 PinHeader(
     name="J_PWR",
     pins=2,
     rows=1,
     mount="THT",
     pitch="2.54mm",
-    P1=AVDD,
+    P1=VBAT,
     P2=GND,
 )
 
