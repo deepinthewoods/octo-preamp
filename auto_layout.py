@@ -391,7 +391,7 @@ def build_net_map(nets):
     return ref_to_nets, net_to_refs
 
 
-POWER_NETS = {'AGND', 'DGND', 'AVDD', 'DVDD', 'VBUS', 'VBAT', 'VBAT_RAW'}
+POWER_NETS = {'AGND', 'DGND', 'AVDD', 'DVDD', 'VBUS', 'VBAT', 'VBAT_RAW', 'GND', 'VGND'}
 
 
 def assign_passives_to_anchors(fps, nets, anchor_positions):
@@ -492,47 +492,72 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
     Rotation is KiCad degrees (CCW positive, Y-axis pointing down).
     """
     margin = 0.15
+    native = None
 
-    # Native (rot=0) bounding box as (x_min, x_max, y_min, y_max) relative to origin
-    if ref.startswith('RV'):
-        # Alps RK09K Vertical: F.CrtYd (-1.15,-4.15) to (13.25,9.15)
-        native = (-1.15, 13.25, -4.15, 9.15)
-    elif ref in ('J7', 'J12'):
-        # CUI SJ1-3523N Horizontal: F.CrtYd (-6.25,-7.95) to (6.25,6.55)
-        native = (-6.25, 6.25, -7.95, 6.55)
-    elif ref in ('J3',):
-        # PinHeader_2x05 at 90°: ~12.7mm long, 5mm wide (native: long in Y)
-        native = (-2.54, 2.54, -1.27, 11.43)
-    elif ref in ('J13', 'J14'):
-        # PinHeader_1x03: 2.54mm wide, ~7.62mm long
-        native = (-1.27, 1.27, -1.27, 6.35)
-    elif ref in ('J5', 'J6'):
-        # PinHeader_1x02: 2.54mm wide, 5.08mm long
-        native = (-1.27, 1.27, -1.27, 3.81)
-    elif ref.startswith('U'):
-        if ref in ('U7', 'U8'):
-            # SOIC-16_3.9x9.9mm: courtyard roughly ±4.2 x ±5.7 (symmetric)
-            native = (-4.2, 4.2, -5.7, 5.7)
+    # Footprint-string-based detection first (board-independent)
+    if 'Bourns_3296' in fp_str:
+        # Bourns 3296W Vertical: ~5x11mm courtyard
+        native = (-2.5, 2.5, -5.5, 5.5)
+    elif 'PinHeader_2x' in fp_str or 'PinSocket_2x' in fp_str:
+        if '2x05' in fp_str:
+            native = (-2.54, 2.54, -1.27, 11.43)
+        elif '2x06' in fp_str:
+            native = (-2.54, 2.54, -1.27, 13.97)
         else:
-            # SOIC-8 / QFN-28: roughly ±3.5 symmetric
-            native = (-3.5, 3.5, -3.5, 3.5)
-    elif ref.startswith('H'):
-        # Mounting hole: ~5mm diameter courtyard
-        native = (-2.5, 2.5, -2.5, 2.5)
-    elif ref.startswith(('FB', 'D')):
-        # Ferrite / diode: ~4x3mm
-        native = (-2.0, 2.0, -1.5, 1.5)
-    else:
-        # Passives — use footprint string to determine size
-        if '0805' in fp_str:
-            # 0805 courtyard: 2.7x1.75mm
-            native = (-1.35, 1.35, -0.875, 0.875)
-        elif '0603' in fp_str:
-            # 0603 courtyard: 2.2x1.2mm
-            native = (-1.1, 1.1, -0.6, 0.6)
+            native = (-2.54, 2.54, -1.27, 11.43)
+    elif 'PinHeader_1x' in fp_str or 'PinSocket_1x' in fp_str:
+        if '1x20' in fp_str:
+            native = (-1.27, 1.27, -1.27, 49.53)
+        elif '1x08' in fp_str:
+            native = (-1.27, 1.27, -1.27, 19.05)
+        elif '1x03' in fp_str:
+            native = (-1.27, 1.27, -1.27, 6.35)
+        elif '1x02' in fp_str:
+            native = (-1.27, 1.27, -1.27, 3.81)
         else:
-            # 0402 courtyard: 1.4x0.8mm
-            native = (-0.7, 0.7, -0.4, 0.4)
+            native = (-1.27, 1.27, -1.27, 3.81)
+
+    # Fall back to ref-based heuristics
+    if native is None:
+        if ref.startswith('RV'):
+            # Alps RK09K Vertical: F.CrtYd (-1.15,-4.15) to (13.25,9.15)
+            native = (-1.15, 13.25, -4.15, 9.15)
+        elif ref in ('J7', 'J12'):
+            # CUI SJ1-3523N Horizontal: F.CrtYd (-6.25,-7.95) to (6.25,6.55)
+            native = (-6.25, 6.25, -7.95, 6.55)
+        elif ref in ('J3',):
+            # PinHeader_2x05 at 90°: ~12.7mm long, 5mm wide (native: long in Y)
+            native = (-2.54, 2.54, -1.27, 11.43)
+        elif ref in ('J13', 'J14'):
+            # PinHeader_1x03: 2.54mm wide, ~7.62mm long
+            native = (-1.27, 1.27, -1.27, 6.35)
+        elif ref in ('J5', 'J6'):
+            # PinHeader_1x02: 2.54mm wide, 5.08mm long
+            native = (-1.27, 1.27, -1.27, 3.81)
+        elif ref.startswith('U'):
+            if 'SOIC-16' in fp_str or '3.9x9.9' in fp_str:
+                # SOIC-16_3.9x9.9mm: courtyard roughly ±4.2 x ±5.7 (symmetric)
+                native = (-4.2, 4.2, -5.7, 5.7)
+            else:
+                # SOIC-8 / QFN-28: roughly ±3.5 symmetric
+                native = (-3.5, 3.5, -3.5, 3.5)
+        elif ref.startswith('H'):
+            # Mounting hole: ~5mm diameter courtyard
+            native = (-2.5, 2.5, -2.5, 2.5)
+        elif ref.startswith(('FB', 'D')):
+            # Ferrite / diode: ~4x3mm
+            native = (-2.0, 2.0, -1.5, 1.5)
+        else:
+            # Passives — use footprint string to determine size
+            if '0805' in fp_str:
+                # 0805 courtyard: 2.7x1.75mm
+                native = (-1.35, 1.35, -0.875, 0.875)
+            elif '0603' in fp_str:
+                # 0603 courtyard: 2.2x1.2mm
+                native = (-1.1, 1.1, -0.6, 0.6)
+            else:
+                # 0402 courtyard: 1.4x0.8mm
+                native = (-0.7, 0.7, -0.4, 0.4)
 
     xn_min, xn_max, yn_min, yn_max = native
     # Rotate the four corners and compute new AABB
@@ -547,8 +572,8 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
     return (min(rxs) - margin, max(rxs) + margin, min(rys) - margin, max(rys) + margin)
 
 
-def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=None):
-    """Place right-section passives near their parent anchor, avoiding overlaps.
+def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=None, x_min_offset=70):
+    """Place passives near their parent anchor, avoiding overlaps.
 
     Uses AABB collision detection with actual footprint courtyard dimensions so
     asymmetric parts (potentiometers, horizontal jacks) are correctly handled.
@@ -557,9 +582,10 @@ def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=
         right_assignments: dict of anchor_ref -> [passive_refs]
         layout: shared layout dict (modified in place)
         fps: dict of ref -> footprint object (used to determine passive sizes)
+        x_min_offset: left boundary offset from ox (default 70 for main board right section)
     """
-    # Board bounds — right section only, inset from board edge
-    x_min, x_max = ox + 70, ox + bw - 3
+    # Board bounds, inset from board edge
+    x_min, x_max = ox + x_min_offset, ox + bw - 3
     y_min, y_max = oy + 2, oy + bh - 2
 
     # Candidate grid with 2.0mm step — AABB check handles per-footprint clearance
@@ -839,77 +865,119 @@ def layout_preamp():
 
     board, fps = create_board("preamp", components, nets, {'layers': 4})
 
-    # Preamp board: ~100x60mm (size-optimized v2.3, 151 components, 13x NE5532)
-    bw, bh = 100, 60
+    # Match main board dimensions: 100x80mm
+    bw, bh = 100, 80
     ox, oy = 10, 10
 
     layout = {}
 
-    channel_width = 11  # mm per channel (tighter with 0402 passives)
+    # Build ref -> zen_name map from parsed components
+    ref_to_zen = {comp['ref']: comp.get('zen_name', '') for comp in components}
 
-    # Op-amps (NE5532): arrange by function
-    opamp_refs = sorted([r for r in fps if r.startswith('U')])
+    # ================================================================
+    # J17 (output to main board) — match main board's J3 (J_AFE) position
+    # Main board: J3 at (79.46, 87.54, 90)
+    # ================================================================
+    layout['J17'] = (79.46, 87.54, 90)
 
-    # Input headers along left edge
-    input_refs = sorted([r for r in fps if 'J_IN' in fps[r].GetValue()])
+    # ================================================================
+    # Pickup input pads (J9-J16) — along bottom edge, left side
+    # ================================================================
+    input_refs = sorted([r for r in fps if ref_to_zen.get(r, '').startswith('J_IN')])
     for i, ref in enumerate(input_refs):
-        layout[ref] = (ox + 2, oy + 6 + i * 6.5, 0)
+        layout[ref] = (ox + 3 + i * 4.5, oy + bh - 4, 0)
 
-    # Direct output solder pads along top edge (2-pin headers)
-    dout_refs = sorted([r for r in fps if 'J_DOUT' in fps[r].GetValue()])
+    # ================================================================
+    # Direct output pads (J1-J8) — along left edge, towards top
+    # ================================================================
+    dout_refs = sorted([r for r in fps if ref_to_zen.get(r, '').startswith('J_DOUT')])
     for i, ref in enumerate(dout_refs):
-        layout[ref] = (ox + 14 + i * channel_width, oy + 2, 0)
+        layout[ref] = (ox + 4, oy + 13 + i * 4.5, 0)
 
-    # Output connector on right
+    # ================================================================
+    # Power input J18 — near J17
+    # ================================================================
     for ref in fps:
-        val = fps[ref].GetValue()
-        if 'J_OUT' in val:
-            layout[ref] = (ox + bw - 4, oy + bh / 2, 0)
-        elif 'J_PWR' in val:
-            layout[ref] = (ox + bw - 4, oy + 6, 0)
+        if ref_to_zen.get(ref, '') == 'J_PWR':
+            layout[ref] = (50, 70, 0)
 
-    # Trimpots in a row along bottom
-    trim_refs = sorted([r for r in fps if 'trim' in fps[r].GetFPIDAsString().lower() or 'TRIM' in fps[r].GetValue().upper()])
+    # ================================================================
+    # ICs — evenly spaced grid
+    # Signal flow: buffer (U5-U8) -> gain (U9-U12) -> filter (U1-U4)
+    # U13 = VGND reference, placed near power
+    # ================================================================
+    ic_rows = [
+        ['U5', 'U6', 'U7', 'U8'],       # Input buffers
+        ['U9', 'U10', 'U11', 'U12'],     # Gain stages
+        ['U1', 'U2', 'U3', 'U4'],        # Anti-alias filters
+    ]
+    x_positions = [40, 55, 70, 85]   # 15mm spacing, shifted right
+    y_positions = [20, 35, 50]       # 15mm spacing vertically
+
+    for row_idx, row_refs in enumerate(ic_rows):
+        for col_idx, ref in enumerate(row_refs):
+            if ref in fps:
+                layout[ref] = (x_positions[col_idx], y_positions[row_idx], 0)
+
+    # U13 (VGND) near power/output connector
+    if 'U13' in fps:
+        layout['U13'] = (55, 62, 0)
+
+    # ================================================================
+    # Trimpots (RV1-RV8) — right edge column
+    # ================================================================
+    trim_refs = sorted([r for r in fps if r.startswith('RV')])
     for i, ref in enumerate(trim_refs):
-        layout[ref] = (ox + 14 + i * channel_width, oy + bh - 6, 0)
+        layout[ref] = (ox + bw - 6, oy + 6 + i * 9, 0)
 
-    # Op-amps arranged in rows by function (13 ICs: 4 buf + 4 gain + 4 aaf + 1 vgnd)
-    # Row 0: Input buffers (y=14)
-    # Row 1: Gain stages (y=28)
-    # Row 2: Filter stages (y=42)
-    for i, ref in enumerate(opamp_refs):
-        if i < len(opamp_refs) - 1:  # All except VGND
-            row = i // 4
-            col = i % 4
-            # Place 4 ICs per row, each serving 2 channels
-            layout[ref] = (ox + 16 + col * 2 * channel_width, oy + 14 + row * 14, 0)
-        else:
-            # VGND opamp — near power input
-            layout[ref] = (ox + bw - 16, oy + 14, 0)
-
-    # Passive components near their associated channels
-    cap_refs = sorted([r for r in fps if r.startswith('C') and r not in layout])
-    for i, ref in enumerate(cap_refs):
-        ch = i % 8
-        row = i // 8
-        layout[ref] = (ox + 15 + ch * channel_width, oy + 10 + row * 4, 0)
-
-    res_refs = sorted([r for r in fps if r.startswith('R') and r not in layout])
-    for i, ref in enumerate(res_refs):
-        ch = i % 8
-        row = i // 8
-        layout[ref] = (ox + 16 + ch * channel_width, oy + 10 + row * 4, 0)
-
+    # ================================================================
     # Mounting holes (2 diagonal corners)
+    # ================================================================
     mh_refs = sorted([r for r in fps if r.startswith('H')])
     mh_positions = [(ox + 3, oy + 3), (ox + bw - 3, oy + bh - 3)]
     for i, ref in enumerate(mh_refs[:2]):
         layout[ref] = (mh_positions[i][0], mh_positions[i][1], 0)
 
-    # Remaining
+    # ================================================================
+    # Passive placement — same AABB strategy as main board right side
+    # ================================================================
+    anchor_positions = {ref: (x, y) for ref, (x, y, _) in layout.items()
+                        if ref.startswith(('U', 'J', 'RV'))}
+
+    assignments = assign_passives_to_anchors(fps, nets, anchor_positions)
+
+    print(f"  Passive assignments:")
+    for k, v in sorted(assignments.items()):
+        print(f"    {k}: {sorted(v)}")
+
+    # Place all passives using AABB collision strategy across full board
+    all_assignments = {}
+    for anchor_ref, passive_list in assignments.items():
+        if anchor_ref == 'UNASSIGNED' or anchor_ref not in layout:
+            continue
+        all_assignments[anchor_ref] = passive_list
+
+    if all_assignments:
+        total = sum(len(v) for v in all_assignments.values())
+        print(f"  Passives ({total}) across {len(all_assignments)} anchors")
+        place_passives_right_section(all_assignments, layout, ox, oy, bw, bh,
+                                     fps=fps, x_min_offset=3)
+
+    # Handle unassigned passives
+    unassigned = assignments.get('UNASSIGNED', [])
+    if unassigned:
+        print(f"  Unassigned passives: {sorted(unassigned)}")
+        for i, ref in enumerate(sorted(unassigned)):
+            col = i % 8
+            row = i // 8
+            layout[ref] = (ox + 20 + col * 4, oy + 65 + row * 3, 0)
+
+    # Remaining unplaced
     remaining = [r for r in fps if r not in layout]
-    for i, ref in enumerate(remaining):
-        layout[ref] = (ox + 12 + (i % 10) * 8, oy + bh - 12 + (i // 10) * 4, 0)
+    if remaining:
+        print(f"  Remaining unplaced: {remaining}")
+        for i, ref in enumerate(remaining):
+            layout[ref] = (ox + 5 + (i % 10) * 7, oy + bh - 10 + (i // 10) * 4, 0)
 
     place_components_grid(board, fps, layout)
     add_board_outline(board, ox, oy, bw, bh, corner_radius=2)
@@ -921,7 +989,6 @@ def layout_preamp():
     pcbnew.SaveBoard(out_path, board)
     hide_fab_layers(str(board_dir / "layout.kicad_pro"))
     print(f"  Saved: {out_path}")
-
 
 
 
