@@ -1,6 +1,0 @@
-(sym_lib_table
-  (lib (name "Connector_Generic")(type "KiCad")(uri "${KICAD7_SYMBOL_DIR}/Connector_Generic.kicad_sym")(options "")(descr ""))
-  (lib (name "Device")(type "KiCad")(uri "${KICAD7_SYMBOL_DIR}/Device.kicad_sym")(options "")(descr ""))
-  (lib (name "power")(type "KiCad")(uri "${KICAD7_SYMBOL_DIR}/power.kicad_sym")(options "")(descr ""))
-  (lib (name "Mounting_Holes")(type "KiCad")(uri "${KICAD7_SYMBOL_DIR}/Mechanical.kicad_sym")(options "")(descr ""))
-)
