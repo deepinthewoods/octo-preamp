@@ -1,8 +1,12 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.4 — 17 March 2026**
+**Version 2.5 — 17 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.5 changes (gain trimpot SMD):**
+- Gain trimpots changed from Bourns 3296W (THT) to Bourns 3314J-1-103E (SMD, top-adjust)
+- Trimpots now JLCPCB-assemblable — no longer require hand soldering
 
 **v2.4 changes (slave socket placement):**
 - Slave ESP32 sockets repositioned to board edges so DevKit boards hang over the edge
@@ -613,7 +617,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | 2 | Analog mux | CD4052B | Output routing matrix |
 | 13 | Dual op-amp (AFE) | NE5532 (SOIC-8) | Buffers, gain, filters, VGND |
 | 2 | Dual op-amp (MAIN) | NE5532 | Summing amp + output buffer |
-| 8 | Gain trimpot | 10k cermet | Per-channel gain trim |
+| 8 | Gain trimpot | Bourns 3314J-1-103E (SMD, 10k) | Per-channel gain trim |
 | 1 | Ferrite bead | 220 Ohm, 0805 | AGND/DGND bridge |
 | 2 | Audio pot | 10k audio taper | Headphone volume (dual ganged) |
 | 1 | USB-C connector | — | Charging only |
@@ -643,6 +647,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 - Mark all ESP32 header footprints DNF in BOM
 - Extended components (ES8388 C365736): $1.50 setup fee per unique part type
 - THT items for hand soldering: headers, TRS jacks, JST connector, USB-C
+- Gain trimpots (Bourns 3314J) are SMD — include in JLCPCB BOM/CPL
 
 ---
 
@@ -670,4 +675,4 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 ---
 
-*End of Definitive Specification — Version 2.4*
+*End of Definitive Specification — Version 2.5*

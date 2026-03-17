@@ -1,4 +1,4 @@
-"""10k Cermet Trimmer Potentiometer — Bourns 3296W or 3362P."""
+"""10k Cermet Trimmer Potentiometer — Bourns 3314J (SMD, top-adjust)."""
 
 load("@stdlib/units.zen", "Resistance")
 
@@ -16,9 +16,9 @@ CCW = io("CCW", Net)
 
 Component(
     name="RV",
-    part=builtin.Part(mpn="3296W-1-103LF", manufacturer="Bourns"),
+    part=builtin.Part(mpn="3314J-1-103E", manufacturer="Bourns"),
     symbol=Symbol(library="@kicad-symbols/Device.kicad_sym", name="R_Potentiometer_Trim"),
-    footprint=File("@kicad-footprints/Potentiometer_THT.pretty/Potentiometer_Bourns_3296W_Vertical.kicad_mod"),
+    footprint=File("@kicad-footprints/Potentiometer_SMD.pretty/Potentiometer_Bourns_3314J_Vertical.kicad_mod"),
     prefix="RV",
     pin_defs={
         "1": "1",
@@ -32,6 +32,6 @@ Component(
     },
     properties={
         "value": "10k",
-        "package": "Bourns_3296W",
+        "package": "Bourns_3314J",
     },
 )

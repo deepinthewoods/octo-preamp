@@ -303,14 +303,37 @@ def add_silkscreen_labels(board, components, placed_fps, layout):
 
         x, y, rot = layout[ref]
 
-        # Place label text below the component
+        # Position and rotation depend on zen_name category
+        if zen_name.startswith('J_DOUT'):
+            # Direct outputs: label to the right of pins
+            label_x, label_y = x + 3, y
+            label_rot = 0
+            h_justify = pcbnew.GR_TEXT_H_ALIGN_LEFT
+        elif zen_name.startswith('J_IN'):
+            # Pickup inputs: label above, rotated 90° CCW
+            label_x, label_y = x, y - 6
+            label_rot = 90
+            h_justify = pcbnew.GR_TEXT_H_ALIGN_CENTER
+        elif zen_name.startswith('RV_F'):
+            # Gain trimpots: label to the left
+            label_x, label_y = x - 5, y
+            label_rot = 0
+            h_justify = pcbnew.GR_TEXT_H_ALIGN_RIGHT
+        else:
+            # Default: below the component
+            label_x, label_y = x, y + 3
+            label_rot = 0
+            h_justify = pcbnew.GR_TEXT_H_ALIGN_CENTER
+
         text = pcbnew.PCB_TEXT(board)
         text.SetText(text_str)
         text.SetLayer(silk_layer)
-        text.SetPosition(mm_pos(x, y + 3))
+        text.SetPosition(mm_pos(label_x, label_y))
         text.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.0), pcbnew.FromMM(1.0)))
         text.SetTextThickness(pcbnew.FromMM(0.15))
-        text.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
+        text.SetHorizJustify(h_justify)
+        if label_rot != 0:
+            text.SetTextAngleDegrees(label_rot)
         board.Add(text)
         count += 1
 
@@ -495,7 +518,10 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
     native = None
 
     # Footprint-string-based detection first (board-independent)
-    if 'Bourns_3296' in fp_str:
+    if 'Bourns_3314J' in fp_str:
+        # Bourns 3314J Vertical SMD: F.CrtYd (-2.5,-3.25) to (2.5,3.25)
+        native = (-2.5, 2.5, -3.25, 3.25)
+    elif 'Bourns_3296' in fp_str:
         # Bourns 3296W Vertical: ~5x11mm courtyard
         native = (-2.5, 2.5, -5.5, 5.5)
     elif 'PinHeader_2x' in fp_str or 'PinSocket_2x' in fp_str:
