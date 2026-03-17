@@ -38,7 +38,7 @@ SIGNAL = [Net("SIG_CH" + str(i + 1)) for i in range(8)]
 SDA = Net("SDA")
 SCL = Net("SCL")
 
-I2cBus(name="I2C_PULLUP", VCC=DVDD, SDA=SDA, SCL=SCL)
+I2cBus(name="I2C_PULLUP", VCC=AVDD, SDA=SDA, SCL=SCL)
 
 # =============================================================================
 # I2S bus (shared clocks, separate data)
@@ -115,7 +115,7 @@ Decoupling(name="DC_DVDD1", VCC=DVDD, GND=DGND)
 # =============================================================================
 
 AD0_HIGH = Net("AD0_HIGH")
-Resistor(name="R_AD0", value=Resistance("10k"), package="0603", P1=DVDD, P2=AD0_HIGH)
+Resistor(name="R_AD0", value=Resistance("10k"), package="0603", P1=AVDD, P2=AD0_HIGH)
 
 VREF_A2 = Net("VREF_A2")
 VRP_A2 = Net("VRP_A2")

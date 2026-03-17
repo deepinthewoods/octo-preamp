@@ -1,9 +1,20 @@
 """
 AFE Board - 8-Channel Guitar Preamp
 
-8 per-string pickup channels with input coupling, buffer, gain stage,
-and anti-alias filtering. Powered from 3.3V analog rail with 1.65V
-virtual ground mid-rail reference.
+8 per-string pickup channels with input coupling, buffer, variable gain
+(trimpot), and anti-alias filtering. Plus 8 buffered direct outputs with
+6.5mm mono jacks. Powered from 3.3V analog rail with 1.65V virtual
+ground mid-rail reference.
+
+v2.1 changes (from v2.0):
+- R02: Upgraded anti-alias filter from passive RC to Sallen-Key 2nd-order
+       Butterworth (8x NE5532 voltage followers, 4x NE5532 dual ICs)
+- R06: Replaced TL072 VGND buffer with NE5532 (all op-amps now NE5532)
+- R06: Updated gain range docstring to 0-21dB (1 + 10k/1k = 11x = 20.8dB)
+
+Total op-amp ICs: 17x NE5532 dual
+  4x input buffers, 4x direct output buffers, 4x gain stages,
+  4x anti-alias filters, 1x virtual ground
 """
 
 load("@stdlib/interfaces.zen", "Opamp")
@@ -15,9 +26,9 @@ Capacitor = Module("@stdlib/generics/Capacitor.zen")
 PinHeader = Module("@stdlib/generics/PinHeader.zen")
 MountingHole = Module("@stdlib/generics/MountingHole.zen")
 
-OPA2134 = Module("../../components/opa2134/opa2134.zen")
 NE5532 = Module("../../components/ne5532/ne5532.zen")
-TL072 = Module("../../components/tl072/tl072.zen")
+Trimpot = Module("../../components/trimpot/trimpot.zen")
+MonoJack = Module("../../components/mono_jack/mono_jack.zen")
 Decoupling = Module("../../modules/decoupling/decoupling.zen")
 
 # =============================================================================
@@ -42,7 +53,7 @@ vgnd_opa = voltage_follower("VGND_BUF", IN=MID_NODE, OUT=VGND_NET)
 Capacitor(name="C_VGND_BULK", value=Capacitance("100uF"), package="1206", P1=VGND_NET, P2=GND)
 Capacitor(name="C_VGND_BYP", value=Capacitance("100nF"), package="0603", P1=VGND_NET, P2=GND)
 
-TL072(
+NE5532(
     name="U_VGND",
     VP=AVDD,
     VN=GND,
@@ -54,19 +65,25 @@ Decoupling(name="DC_VGND", VCC=AVDD, GND=GND)
 
 # =============================================================================
 # 8 preamp channels (inline circuit per channel)
-# Each channel: coupling -> bias -> buffer -> gain -> AA filter -> output
+# Each: coupling -> bias -> buffer -> [direct out tap] -> gain (trimpot) ->
+#        AA filter -> output coupling
 # =============================================================================
 
 PICKUP = [Net("PICKUP_" + str(i + 1)) for i in range(8)]
 SIGNAL = [Net("SIGNAL_" + str(i + 1)) for i in range(8)]
 
 buf_opas = []
+dout_opas = []
 gain_opas = []
+aaf_opas = []
 
 for i in range(8):
     ch = str(i + 1)
     COUPLED = Net("COUPLED_" + ch)
     BUFFERED = Net("BUFFERED_" + ch)
+    DIRECT_OUT = Net("DIRECT_OUT_" + ch)
+    DIRECT_AC = Net("DIRECT_AC_" + ch)
+    DIRECT_SER = Net("DIRECT_SER_" + ch)
     FB_NODE = Net("FB_" + ch)
     AMPLIFIED = Net("AMPLIFIED_" + ch)
     FILTERED = Net("FILTERED_" + ch)
@@ -81,24 +98,60 @@ for i in range(8):
     buf_opa = voltage_follower("BUF" + ch, IN=COUPLED, OUT=BUFFERED)
     buf_opas.append(buf_opa)
 
-    # Gain stage: non-inverting amp, gain = 1 + R_F/R_G = 1 + 10k/1k = 11
+    # =========================================================================
+    # Buffered direct output (tapped after input buffer, before gain)
+    # Unity gain follower -> 10uF coupling cap -> 600R series -> mono jack
+    # =========================================================================
+
+    dout_opa = voltage_follower("DOUT_BUF" + ch, IN=BUFFERED, OUT=DIRECT_OUT)
+    dout_opas.append(dout_opa)
+
+    # DC-blocking coupling cap
+    Capacitor(name="C_DOUT" + ch, value=Capacitance("10uF"), package="0805", P1=DIRECT_OUT, P2=DIRECT_AC)
+
+    # Series output resistor for cable driving and short-circuit protection
+    Resistor(name="R_DOUT" + ch, value=Resistance("600"), package="0603", P1=DIRECT_AC, P2=DIRECT_SER)
+
+    # 6.5mm mono jack
+    MonoJack(name="J_DOUT" + ch, TIP=DIRECT_SER, SLEEVE=GND)
+
+    # =========================================================================
+    # Gain stage: non-inverting, gain = 1 + Rf/Rg
+    # Rg = 1k fixed, Rf = 0-10k trimpot (gain range 1x to 11x, 0-20dB)
+    # Trimpot: CW -> output, WIPER -> feedback node, CCW -> GND side
+    # =========================================================================
+
     Resistor(name="R_G" + ch, value=Resistance("1k"), package="0603", P1=VGND_NET, P2=FB_NODE)
-    Resistor(name="R_F" + ch, value=Resistance("10k"), package="0603", P1=FB_NODE, P2=AMPLIFIED)
+
+    # Trimpot replaces fixed 10k R_F
+    Trimpot(name="RV_F" + ch, CW=AMPLIFIED, WIPER=FB_NODE, CCW=FB_NODE)
 
     gain_opa = Opamp(name="GAIN" + ch, IN_P=BUFFERED, IN_N=FB_NODE, OUT=AMPLIFIED)
     gain_opas.append(gain_opa)
 
-    # Anti-alias low-pass filter (fc ~ 1/(2*pi*22k*330pF) ≈ 22kHz)
-    Resistor(name="R_AA" + ch, value=Resistance("22k"), package="0603", P1=AMPLIFIED, P2=FILTERED)
-    Capacitor(name="C_AA" + ch, value=Capacitance("330pF"), package="0603", dielectric="NP0", P1=FILTERED, P2=GND)
+    # Sallen-Key 2nd-order Butterworth anti-alias filter
+    # fc = 1/(2*pi*R*C) = 1/(2*pi*7.5k*1nF) ~ 21.2kHz, Q=0.707
+    # Topology: AMPLIFIED -> R1 -> AAF_NODE -> R2 -> follower -> FILTERED
+    #           C1: AAF_NODE->GND, C2: FILTERED->AAF_NODE (positive feedback)
+    AAF_NODE = Net("AAF_NODE_" + ch)
+    AAF_OUT = Net("AAF_OUT_" + ch)
+    Resistor(name="R_AAF1_" + ch, value=Resistance("7.5k"), package="0603", P1=AMPLIFIED, P2=AAF_NODE)
+    Resistor(name="R_AAF2_" + ch, value=Resistance("7.5k"), package="0603", P1=AAF_NODE, P2=AAF_OUT)
+    Capacitor(name="C_AAF1_" + ch, value=Capacitance("1nF"), package="0603", dielectric="NP0", P1=AAF_NODE, P2=GND)
+    Capacitor(name="C_AAF2_" + ch, value=Capacitance("1nF"), package="0603", dielectric="NP0", P1=FILTERED, P2=AAF_NODE)
+    aaf_opa = voltage_follower("AAF" + ch, IN=AAF_OUT, OUT=FILTERED)
+    aaf_opas.append(aaf_opa)
 
     # Output coupling cap
     Capacitor(name="C_OUT" + ch, value=Capacitance("10uF"), package="0805", P1=FILTERED, P2=SIGNAL[i])
 
 # =============================================================================
-# Physical op-amp mapping
-# Buffer: 4x OPA2134 (channels paired 1+2, 3+4, 5+6, 7+8)
-# Gain:   4x NE5532  (channels paired 1+2, 3+4, 5+6, 7+8)
+# Physical op-amp mapping (17x NE5532 dual ICs total)
+# Input buffer:      4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
+# Direct out buffer: 4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
+# Gain:              4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
+# Anti-alias filter: 4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
+# Virtual ground:    1x NE5532 (U_VGND, one section unused)
 # =============================================================================
 
 for pair_idx in range(4):
@@ -106,7 +159,8 @@ for pair_idx in range(4):
     ch_b = pair_idx * 2 + 1
     pair_name = str(pair_idx + 1)
 
-    OPA2134(
+    # Input buffers (was OPA2134, now NE5532)
+    NE5532(
         name="U_BUF" + pair_name,
         VP=AVDD,
         VN=GND,
@@ -115,6 +169,17 @@ for pair_idx in range(4):
     )
     Decoupling(name="DC_BUF" + pair_name, VCC=AVDD, GND=GND)
 
+    # Direct output buffers (new, NE5532)
+    NE5532(
+        name="U_DOUT" + pair_name,
+        VP=AVDD,
+        VN=GND,
+        OPA_A=dout_opas[ch_a],
+        OPA_B=dout_opas[ch_b],
+    )
+    Decoupling(name="DC_DOUT" + pair_name, VCC=AVDD, GND=GND)
+
+    # Gain stage
     NE5532(
         name="U_GAIN" + pair_name,
         VP=AVDD,
@@ -123,6 +188,16 @@ for pair_idx in range(4):
         OPA_B=gain_opas[ch_b],
     )
     Decoupling(name="DC_GAIN" + pair_name, VCC=AVDD, GND=GND)
+
+    # Anti-alias filter (Sallen-Key)
+    NE5532(
+        name="U_AAF" + pair_name,
+        VP=AVDD,
+        VN=GND,
+        OPA_A=aaf_opas[ch_a],
+        OPA_B=aaf_opas[ch_b],
+    )
+    Decoupling(name="DC_AAF" + pair_name, VCC=AVDD, GND=GND)
 
 # =============================================================================
 # Connectors

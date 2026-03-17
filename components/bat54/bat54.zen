@@ -1,0 +1,33 @@
+"""BAT54 Schottky Barrier Diode — SOT-23 package."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+A = io("A", Net)
+K = io("K", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="BAT54",
+    part=builtin.Part(mpn="BAT54", manufacturer="Nexperia"),
+    symbol=Symbol(library="@kicad-symbols/Diode.kicad_sym", name="BAT54W"),
+    footprint=File("@kicad-footprints/Package_TO_SOT_SMD.pretty/SOT-23.kicad_mod"),
+    prefix="D",
+    pin_defs={
+        "A": "1",
+        "K": "2",
+    },
+    pins={
+        "A": A,
+        "K": K,
+    },
+    properties={
+        "value": "BAT54",
+        "package": "SOT-23",
+    },
+)

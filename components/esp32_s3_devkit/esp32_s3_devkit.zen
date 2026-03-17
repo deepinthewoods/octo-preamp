@@ -1,0 +1,178 @@
+"""
+ESP32-S3-DevKitC-1 Header Socket Component
+
+Represents the 2x 20-pin machined female header sockets soldered onto
+the PCB, into which the ESP32-S3-DevKitC-1 dev board is inserted.
+Pin numbering follows the DevKitC-1 board pinout (viewed from above).
+"""
+
+
+# -----------------------------------------------------------------------------
+# IO ports — Left header (J1, 20 pins)
+# -----------------------------------------------------------------------------
+
+P_3V3_1 = io("P_3V3_1", Net)
+P_3V3_2 = io("P_3V3_2", Net)
+RST = io("RST", Net)
+GPIO4 = io("GPIO4", Net)
+GPIO5 = io("GPIO5", Net)
+GPIO6 = io("GPIO6", Net)
+GPIO7 = io("GPIO7", Net)
+GPIO15 = io("GPIO15", Net)
+GPIO16 = io("GPIO16", Net)
+GPIO17 = io("GPIO17", Net)
+GPIO18 = io("GPIO18", Net)
+GPIO8 = io("GPIO8", Net)
+GPIO19 = io("GPIO19", Net)
+GPIO20 = io("GPIO20", Net)
+GPIO3 = io("GPIO3", Net)
+GPIO46 = io("GPIO46", Net)
+GPIO9 = io("GPIO9", Net)
+GPIO10 = io("GPIO10", Net)
+GPIO11 = io("GPIO11", Net)
+GPIO12 = io("GPIO12", Net)
+
+# -----------------------------------------------------------------------------
+# IO ports — Right header (J3, 20 pins)
+# -----------------------------------------------------------------------------
+
+GND = io("GND", Net)
+GPIO43 = io("GPIO43", Net)
+GPIO44 = io("GPIO44", Net)
+GPIO1 = io("GPIO1", Net)
+GPIO2 = io("GPIO2", Net)
+GPIO42 = io("GPIO42", Net)
+GPIO41 = io("GPIO41", Net)
+GPIO40 = io("GPIO40", Net)
+GPIO39 = io("GPIO39", Net)
+GPIO38 = io("GPIO38", Net)
+GPIO37 = io("GPIO37", Net)
+GPIO36 = io("GPIO36", Net)
+GPIO35 = io("GPIO35", Net)
+GPIO0 = io("GPIO0", Net)
+GPIO45 = io("GPIO45", Net)
+GPIO48 = io("GPIO48", Net)
+GPIO47 = io("GPIO47", Net)
+GPIO21 = io("GPIO21", Net)
+GPIO14 = io("GPIO14", Net)
+GPIO13 = io("GPIO13", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition — Left header socket (1x20)
+# -----------------------------------------------------------------------------
+
+Component(
+    name="J_LEFT",
+    part=builtin.Part(mpn="PPPC201LFBN-RC", manufacturer="Sullins"),
+    symbol=Symbol(library="@kicad-symbols/Connector.kicad_sym", name="Conn_01x20_Socket"),
+    footprint=File("@kicad-footprints/Connector_PinSocket_2.54mm.pretty/PinSocket_1x20_P2.54mm_Vertical.kicad_mod"),
+    prefix="J",
+    pin_defs={
+        "Pin_1": "1",
+        "Pin_2": "2",
+        "Pin_3": "3",
+        "Pin_4": "4",
+        "Pin_5": "5",
+        "Pin_6": "6",
+        "Pin_7": "7",
+        "Pin_8": "8",
+        "Pin_9": "9",
+        "Pin_10": "10",
+        "Pin_11": "11",
+        "Pin_12": "12",
+        "Pin_13": "13",
+        "Pin_14": "14",
+        "Pin_15": "15",
+        "Pin_16": "16",
+        "Pin_17": "17",
+        "Pin_18": "18",
+        "Pin_19": "19",
+        "Pin_20": "20",
+    },
+    pins={
+        "Pin_1": P_3V3_1,
+        "Pin_2": P_3V3_2,
+        "Pin_3": RST,
+        "Pin_4": GPIO4,
+        "Pin_5": GPIO5,
+        "Pin_6": GPIO6,
+        "Pin_7": GPIO7,
+        "Pin_8": GPIO15,
+        "Pin_9": GPIO16,
+        "Pin_10": GPIO17,
+        "Pin_11": GPIO18,
+        "Pin_12": GPIO8,
+        "Pin_13": GPIO19,
+        "Pin_14": GPIO20,
+        "Pin_15": GPIO3,
+        "Pin_16": GPIO46,
+        "Pin_17": GPIO9,
+        "Pin_18": GPIO10,
+        "Pin_19": GPIO11,
+        "Pin_20": GPIO12,
+    },
+    properties={
+        "value": "ESP32-S3-DevKit-Left",
+        "package": "PinSocket_1x20_P2.54mm",
+    },
+)
+
+# -----------------------------------------------------------------------------
+# Component definition — Right header socket (1x20)
+# -----------------------------------------------------------------------------
+
+Component(
+    name="J_RIGHT",
+    part=builtin.Part(mpn="PPPC201LFBN-RC", manufacturer="Sullins"),
+    symbol=Symbol(library="@kicad-symbols/Connector.kicad_sym", name="Conn_01x20_Socket"),
+    footprint=File("@kicad-footprints/Connector_PinSocket_2.54mm.pretty/PinSocket_1x20_P2.54mm_Vertical.kicad_mod"),
+    prefix="J",
+    pin_defs={
+        "Pin_1": "1",
+        "Pin_2": "2",
+        "Pin_3": "3",
+        "Pin_4": "4",
+        "Pin_5": "5",
+        "Pin_6": "6",
+        "Pin_7": "7",
+        "Pin_8": "8",
+        "Pin_9": "9",
+        "Pin_10": "10",
+        "Pin_11": "11",
+        "Pin_12": "12",
+        "Pin_13": "13",
+        "Pin_14": "14",
+        "Pin_15": "15",
+        "Pin_16": "16",
+        "Pin_17": "17",
+        "Pin_18": "18",
+        "Pin_19": "19",
+        "Pin_20": "20",
+    },
+    pins={
+        "Pin_1": GND,
+        "Pin_2": GPIO43,
+        "Pin_3": GPIO44,
+        "Pin_4": GPIO1,
+        "Pin_5": GPIO2,
+        "Pin_6": GPIO42,
+        "Pin_7": GPIO41,
+        "Pin_8": GPIO40,
+        "Pin_9": GPIO39,
+        "Pin_10": GPIO38,
+        "Pin_11": GPIO37,
+        "Pin_12": GPIO36,
+        "Pin_13": GPIO35,
+        "Pin_14": GPIO0,
+        "Pin_15": GPIO45,
+        "Pin_16": GPIO48,
+        "Pin_17": GPIO47,
+        "Pin_18": GPIO21,
+        "Pin_19": GPIO14,
+        "Pin_20": GPIO13,
+    },
+    properties={
+        "value": "ESP32-S3-DevKit-Right",
+        "package": "PinSocket_1x20_P2.54mm",
+    },
+)

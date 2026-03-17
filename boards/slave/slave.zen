@@ -1,19 +1,17 @@
 """
-Slave Board - ESP32-S3 DSP Node (Template x3)
+Slave Board - ESP32-S3 DevKit Breakout (Template x4)
 
-Minimal ESP32-S3 board receiving UART commands and I2S audio from the
-master, performing real-time DSP, and returning processed audio via
-I2S DOUT. Fabricate 3 copies (Slave A, B, C).
+Pure breakout board for the ESP32-S3-DevKitC-1 dev kit. Two 1x8
+machined pin header sockets accept the top portion of the DevKit.
+A single connector header carries I2S, UART, RST, and power to/from
+the master board. Fabricate 4 identical copies (Slave A, B, C, D).
+
+v2.1: Added 4th slave (R05). No circuit changes — identical design.
+No ICs on this board — the DevKit plugs directly into the sockets.
 """
 
-load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
-
-Resistor = Module("@stdlib/generics/Resistor.zen")
-Capacitor = Module("@stdlib/generics/Capacitor.zen")
 PinHeader = Module("@stdlib/generics/PinHeader.zen")
-
-ESP32S3 = Module("../../components/esp32_s3/esp32_s3.zen")
-Decoupling = Module("../../modules/decoupling/decoupling.zen")
+MountingHole = Module("@stdlib/generics/MountingHole.zen")
 
 # =============================================================================
 # Power nets
@@ -26,87 +24,88 @@ GND = Net("GND")
 # Signal nets
 # =============================================================================
 
-UART_RX = Net("UART_RX")
+RST = Net("RST")
 BCLK = Net("BCLK")
 LRCK = Net("LRCK")
 DOUT = Net("DOUT")
+UART_TX = Net("UART_TX")
+UART_RX = Net("UART_RX")
+
+# Spare / unconnected DevKit pins on the headers
+SPARE_GPIO4 = Net("NC_GPIO4")
+SPARE_GPIO15 = Net("NC_GPIO15")
+SPARE_GPIO43 = Net("NC_GPIO43")
+SPARE_GPIO44 = Net("NC_GPIO44")
+SPARE_GPIO1 = Net("NC_GPIO1")
+SPARE_GPIO2 = Net("NC_GPIO2")
+SPARE_GPIO42 = Net("NC_GPIO42")
 
 # =============================================================================
-# ESP32-S3-WROOM-1
+# DevKit header sockets (1x8 machined pin, 2.54mm pitch)
 # =============================================================================
 
-ESP_EN = Net("ESP_EN")
-
-U_ESP = ESP32S3(
-    name="U_ESP",
-    VCC=VCC,
-    GND=GND,
-    EN=ESP_EN,
-    # I2S slave: receive audio, send processed
-    IO5=BCLK,
-    IO6=LRCK,
-    IO8=DOUT,
-    # UART receive from master
-    IO16=UART_RX,
-    # All other GPIOs not connected
-    IO0=Net("NC_IO0"),
-    IO1=Net("NC_IO1"),
-    IO2=Net("NC_IO2"),
-    IO3=Net("NC_IO3"),
-    IO4=Net("NC_IO4"),
-    IO7=Net("NC_IO7"),
-    IO9=Net("NC_IO9"),
-    IO10=Net("NC_IO10"),
-    IO11=Net("NC_IO11"),
-    IO12=Net("NC_IO12"),
-    IO13=Net("NC_IO13"),
-    IO14=Net("NC_IO14"),
-    IO15=Net("NC_IO15"),
-    IO17=Net("NC_IO17"),
-    IO18=Net("NC_IO18"),
-    IO19=Net("NC_IO19"),
-    IO20=Net("NC_IO20"),
-    IO21=Net("NC_IO21"),
-    IO35=Net("NC_IO35"),
-    IO36=Net("NC_IO36"),
-    IO37=Net("NC_IO37"),
-    IO38=Net("NC_IO38"),
-    IO39=Net("NC_IO39"),
-    IO40=Net("NC_IO40"),
-    IO41=Net("NC_IO41"),
-    IO42=Net("NC_IO42"),
-    IO45=Net("NC_IO45"),
-    IO46=Net("NC_IO46"),
-    IO47=Net("NC_IO47"),
-    IO48=Net("NC_IO48"),
-    TXD0=Net("NC_TXD0"),
-    RXD0=Net("NC_RXD0"),
+# J_LEFT: Top-left header — power + I2S + reset
+# Pin order matches DevKitC-1 left header top 8 pins
+PinHeader(
+    name="J_LEFT",
+    pins=8,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=VCC,  # 3V3
+    P2=VCC,  # 3V3 (second pin for current)
+    P3=RST,  # RST (master can reboot slave)
+    P4=SPARE_GPIO4,  # GPIO4 — spare
+    P5=BCLK,  # GPIO5 — I2S BCLK
+    P6=LRCK,  # GPIO6 — I2S LRCK
+    P7=DOUT,  # GPIO7 — I2S DOUT (audio output)
+    P8=SPARE_GPIO15,  # GPIO15 — spare
 )
 
-# EN pin: 10k pull-up + 100nF RC reset delay
-Resistor(name="R_EN", value=Resistance("10k"), package="0603", P1=VCC, P2=ESP_EN)
-Capacitor(name="C_EN", value=Capacitance("100nF"), package="0603", P1=ESP_EN, P2=GND)
-
-# Power decoupling
-Decoupling(name="DC_VCC", VCC=VCC, GND=GND)
+# J_RIGHT: Top-right header — ground + UART
+# Pin order matches DevKitC-1 right header top 8 pins
+PinHeader(
+    name="J_RIGHT",
+    pins=8,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=GND,  # GND
+    P2=SPARE_GPIO43,  # GPIO43 (U0TXD) — leave unconnected
+    P3=SPARE_GPIO44,  # GPIO44 (U0RXD) — leave unconnected
+    P4=SPARE_GPIO1,  # GPIO1 — spare
+    P5=SPARE_GPIO2,  # GPIO2 — spare
+    P6=SPARE_GPIO42,  # GPIO42 — spare
+    P7=UART_TX,  # GPIO41 — UART TX to master
+    P8=UART_RX,  # GPIO40 — UART RX from master
+)
 
 # =============================================================================
-# Connector: J_MASTER 1x6 header
+# Connector to master board: 1x8 header
 # =============================================================================
 
 PinHeader(
     name="J_MASTER",
-    pins=6,
+    pins=8,
     rows=1,
     mount="THT",
     pitch="2.54mm",
-    P1=UART_RX,
-    P2=BCLK,
-    P3=LRCK,
-    P4=DOUT,
-    P5=VCC,
-    P6=GND,
+    P1=BCLK,
+    P2=LRCK,
+    P3=DOUT,
+    P4=UART_RX,
+    P5=UART_TX,
+    P6=RST,
+    P7=VCC,
+    P8=GND,
 )
+
+# =============================================================================
+# Mounting holes (M2, 4 corners — aligned with DevKit standoffs)
+# =============================================================================
+
+for i in range(4):
+    MountingHole(name="H" + str(i + 1), diameter="M2", P1=GND)
 
 # =============================================================================
 # Board definition
@@ -115,5 +114,5 @@ PinHeader(
 Board(
     name="slave",
     layout_path="layout",
-    layers=4,
+    layers=2,
 )

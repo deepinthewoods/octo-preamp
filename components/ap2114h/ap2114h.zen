@@ -1,0 +1,43 @@
+"""AP2114H-3.3 LDO Voltage Regulator - SOT-223 (1A max).
+
+Drop-in replacement for AMS1117-3.3 with improved transient response.
+Same SOT-223-3 footprint and pinout (no EN pin on this package).
+"""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+GND = io("GND", Net)
+VOUT = io("VOUT", Net)
+VIN = io("VIN", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="AP2114H_33",
+    part=builtin.Part(mpn="AP2114H-3.3TRG1", manufacturer="Diodes Incorporated"),
+    # AP2114H-3.3 not in KiCad 9.0.3 — AMS1117-3.3 has identical SOT-223 pinout
+    symbol=Symbol(library="@kicad-symbols/Regulator_Linear.kicad_sym", name="AMS1117-3.3"),
+    footprint=File("@kicad-footprints/Package_TO_SOT_SMD.pretty/SOT-223-3_TabPin2.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "GND": "1",
+        "VOUT": "2",
+        "VIN": "3",
+        "VOUT_TAB": "4",
+    },
+    pins={
+        "GND": GND,
+        "VOUT": VOUT,
+        "VIN": VIN,
+        "VOUT_TAB": VOUT,
+    },
+    properties={
+        "value": "AP2114H-3.3",
+        "package": "SOT-223",
+    },
+)

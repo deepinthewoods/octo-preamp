@@ -1,23 +1,33 @@
 """
-DAC + Router Board - PCM5102A DAC + Analog Mux + Summing Amp + Output
+DAC + Router Board - HT8988A CODEC + Analog Mux + Summing Amp + Output
 
-Receives I2S audio from master ESP32, converts to analog via PCM5102A,
-routes through CD4052B analog muxes for signal path selection, sums
-channels via OPA4134, and outputs to 6.35mm TRS jacks.
+Receives I2S audio from master ESP32, converts to analog via HT8988A
+(WM8988-compatible CODEC with built-in headphone amp), routes through
+CD4052B analog muxes for signal path selection, sums 8 dry analog
+channels via NE5532, and outputs to 6.35mm TRS jacks. Headphone and
+line outputs from HT8988A routed to 3.5mm TRS jacks.
+
+v2.1 changes (from v2.0):
+- R03: Replaced PCM5102A with HT8988A (I2C-controlled, headphone amp)
+- R03: Added 3.5mm headphone jack with volume pot
+- R03: Added 3.5mm line output jack
+- R04: Expanded J_MASTER from 2x5 to 2x6 (added I2C SDA/SCL)
+- R06: Replaced OPA4134 summing amp with 2x NE5532 dual ICs
 """
 
 load("@stdlib/interfaces.zen", "Opamp")
 load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
-load("@stdlib/amplifiers.zen", "inverting_sum")
 
 Resistor = Module("@stdlib/generics/Resistor.zen")
 Capacitor = Module("@stdlib/generics/Capacitor.zen")
 PinHeader = Module("@stdlib/generics/PinHeader.zen")
 MountingHole = Module("@stdlib/generics/MountingHole.zen")
 
-PCM5102A = Module("../../components/pcm5102a/pcm5102a.zen")
+HT8988A = Module("../../components/ht8988a/ht8988a.zen")
 CD4052B = Module("../../components/cd4052b/cd4052b.zen")
-OPA4134 = Module("../../components/opa4134/opa4134.zen")
+NE5532 = Module("../../components/ne5532/ne5532.zen")
+StereoJack = Module("../../components/stereo_jack/stereo_jack.zen")
+AudioPot = Module("../../components/audio_pot/audio_pot.zen")
 Decoupling = Module("../../modules/decoupling/decoupling.zen")
 
 # =============================================================================
@@ -26,168 +36,228 @@ Decoupling = Module("../../modules/decoupling/decoupling.zen")
 
 AVDD = Net("AVDD")
 DVDD = Net("DVDD")
-GND = Net("GND")
+AGND = Net("AGND")
+DGND = Net("DGND")
 
 # =============================================================================
 # I2S input from master
 # =============================================================================
 
-BCK_DAC = Net("BCK_DAC")
-LRCK_DAC = Net("LRCK_DAC")
 DOUT_DAC = Net("DOUT_DAC")
 
-# Mux control from master GPIO
+# I2C bus for HT8988A configuration
+SDA = Net("SDA")
+SCL = Net("SCL")
+
+# Mux control from master GPIO (single MUX_INH)
 MUX_A = Net("MUX_A")
 MUX_B = Net("MUX_B")
-MUX_INH1 = Net("MUX_INH1")
-MUX_INH2 = Net("MUX_INH2")
+MUX_INH = Net("MUX_INH")
 
 # =============================================================================
-# PCM5102A DAC
+# Dry analog signals from AFE board (8 channels)
+# =============================================================================
+
+DRY = [Net("DRY_CH" + str(i + 1)) for i in range(8)]
+
+# =============================================================================
+# HT8988A CODEC (WM8988 compatible, I2C address 0x1A with CSB=low)
 # =============================================================================
 
 DAC_OUTL = Net("DAC_OUTL")
 DAC_OUTR = Net("DAC_OUTR")
-CAPP = Net("DAC_CAPP")
-CAPM = Net("DAC_CAPM")
-VNEG = Net("DAC_VNEG")
-CPVDD = Net("DAC_CPVDD")
+HP_OUTL = Net("HP_OUTL")
+HP_OUTR = Net("HP_OUTR")
+HPCOM_NET = Net("HPCOM")
+LCOM_NET = Net("LCOM")
+VREF_NET = Net("VREF")
+VMID_NET = Net("VMID")
 
-U_DAC = PCM5102A(
+U_DAC = HT8988A(
     name="U_DAC",
-    # I2S input
-    BCK=BCK_DAC,
-    LRCK=LRCK_DAC,
-    DIN=DOUT_DAC,
-    SCK=GND,  # System clock: GND = use internal PLL
-    FLT=GND,  # Filter select: GND = normal latency
-    FMT=GND,  # Format: GND = I2S
-    DEMP=GND,  # De-emphasis: GND = disabled
-    XSMT=DVDD,  # Soft mute: high = not muted
-    # Analog outputs
-    OUTL=DAC_OUTL,
-    OUTR=DAC_OUTR,
-    AGND_L=GND,
-    AGND_R=GND,
+    # Master clock — from ESP32 MCLK via J_MASTER
+    MCLK=DVDD,  # TODO: route MCLK from master if needed; DVDD placeholder
+    # I2S audio interface
+    BCLK=DGND,  # Slave mode: driven by master
+    LRC=DGND,  # Slave mode: driven by master
+    DACDAT=DOUT_DAC,  # DAC data from master
+    ADCDAT=Net("NC_ADCDAT"),  # ADC not used
+    # I2C control (address 0x1A: CSB=low, MODE=low for I2C)
+    SCLK=SCL,
+    SDIN=SDA,
+    CSB=DGND,  # I2C address 0x1A
+    MODE=DGND,  # I2C mode (not SPI)
+    # Analog outputs — OUT1 pair for headphone, OUT2 pair for line
+    LOUT1=HP_OUTL,
+    ROUT1=HP_OUTR,
+    LOUT2=DAC_OUTL,
+    ROUT2=DAC_OUTR,
+    # Analog inputs — not used (tie to ground)
+    LINPUT1=AGND,
+    RINPUT1=AGND,
+    LINPUT2=AGND,
+    RINPUT2=AGND,
+    # Common mode feedback
+    HPCOM=HPCOM_NET,
+    LCOM=LCOM_NET,
+    # Reference
+    VREF=VREF_NET,
+    VMID=VMID_NET,
     # Power
     AVDD=AVDD,
-    DVDD=DVDD,
-    DGND=GND,
-    # Charge pump
-    CPVDD=CPVDD,
-    CPGND=GND,
-    CAPP=CAPP,
-    CAPM=CAPM,
-    VNEG=VNEG,
+    AGND=AGND,
+    HPVDD=AVDD,
+    HPGND=AGND,
+    DCVDD=DVDD,
+    DBVDD=DVDD,
+    DGND=DGND,
 )
 
-# Charge pump external caps (per datasheet)
-Capacitor(name="C_CP", value=Capacitance("2.2uF"), package="0603", P1=CAPP, P2=CAPM)
-Capacitor(name="C_VNEG", value=Capacitance("2.2uF"), package="0603", P1=VNEG, P2=GND)
+# Reference decoupling (per datasheet)
+Capacitor(name="C_VREF", value=Capacitance("10uF"), package="0805", P1=VREF_NET, P2=AGND)
+Capacitor(name="C_VMID", value=Capacitance("10uF"), package="0805", P1=VMID_NET, P2=AGND)
+
+# Common mode feedback caps
+Capacitor(name="C_HPCOM", value=Capacitance("1uF"), package="0603", P1=HPCOM_NET, P2=AGND)
+Capacitor(name="C_LCOM", value=Capacitance("1uF"), package="0603", P1=LCOM_NET, P2=AGND)
 
 # DAC decoupling
-Decoupling(name="DC_DAC_A", VCC=AVDD, GND=GND)
-Decoupling(name="DC_DAC_D", VCC=DVDD, GND=GND)
-Capacitor(name="C_CPVDD", value=Capacitance("100nF"), package="0603", P1=CPVDD, P2=GND)
+Decoupling(name="DC_DAC_A", VCC=AVDD, GND=AGND)
+Decoupling(name="DC_DAC_D", VCC=DVDD, GND=DGND)
 
-# DAC output coupling caps
+# DAC line output coupling caps
 DAC_L_AC = Net("DAC_L_AC")
 DAC_R_AC = Net("DAC_R_AC")
 Capacitor(name="C_DACL", value=Capacitance("10uF"), package="0805", P1=DAC_OUTL, P2=DAC_L_AC)
 Capacitor(name="C_DACR", value=Capacitance("10uF"), package="0805", P1=DAC_OUTR, P2=DAC_R_AC)
 
 # =============================================================================
-# Summing amplifier: OPA4134 quad op-amp
-# Two sections for L/R summing, two for output buffering
+# Headphone output stage (R03)
+# HT8988A LOUT1/ROUT1 -> volume pot -> 3.5mm TRS jack
+# =============================================================================
+
+HP_VOL_L = Net("HP_VOL_L")
+HP_VOL_R = Net("HP_VOL_R")
+HP_AC_L = Net("HP_AC_L")
+HP_AC_R = Net("HP_AC_R")
+
+# HP output coupling caps
+Capacitor(name="C_HPL", value=Capacitance("100uF"), package="1210", P1=HP_OUTL, P2=HP_AC_L)
+Capacitor(name="C_HPR", value=Capacitance("100uF"), package="1210", P1=HP_OUTR, P2=HP_AC_R)
+
+# Headphone volume pots (dual ganged modeled as two singles)
+AudioPot(name="RV_HPL", value=Resistance("10k"), CW=HP_AC_L, WIPER=HP_VOL_L, CCW=AGND)
+AudioPot(name="RV_HPR", value=Resistance("10k"), CW=HP_AC_R, WIPER=HP_VOL_R, CCW=AGND)
+
+# 3.5mm headphone jack
+StereoJack(name="J_HP", TIP=HP_VOL_L, RING=HP_VOL_R, SLEEVE=AGND)
+
+# =============================================================================
+# Line output jack (R03)
+# HT8988A LOUT2/ROUT2 (AC-coupled above) -> 3.5mm TRS jack
+# =============================================================================
+
+StereoJack(name="J_LINE", TIP=DAC_L_AC, RING=DAC_R_AC, SLEEVE=AGND)
+
+# =============================================================================
+# Summing amplifier: 2x NE5532 dual op-amp (R06: was OPA4134 quad)
+# 8x 10k input resistors + 1.2k feedback = unity-gain sum of 8 inputs
+# NE5532 #1: summing L/R, NE5532 #2: output buffer L/R
+# Strings 1-4 sum to left, strings 5-8 sum to right (stereo image)
 # =============================================================================
 
 SUM_L = Net("SUM_L")
 SUM_R = Net("SUM_R")
+FB_L = Net("SUM_FB_L")
+FB_R = Net("SUM_FB_R")
 OUT_L = Net("OUT_L")
 OUT_R = Net("OUT_R")
 
-# The inverting_sum function creates input resistors + feedback resistor
-# and returns an Opamp interface. We'll use 4 input channels per sum.
-# For this board, we sum the DAC stereo with dry-through signals.
-# Simplified: L sum and R sum with unity gain.
+# Left summing node: channels 1-4
+for i in range(4):
+    ch = str(i + 1)
+    Resistor(name="R_SUM_L" + ch, value=Resistance("10k"), package="0603", P1=DRY[i], P2=FB_L)
 
-# Use 10k input resistors, gain = 1 (Rf = Ri for unity per-channel)
-opa_sum_l = inverting_sum(
-    name="SUM_L",
-    INPUTS=[DAC_L_AC, Net("DRY_L1"), Net("DRY_L2"), Net("DRY_L3")],
-    OUT=SUM_L,
-    GND=Ground(),
-    gain=1.0,
-    resistance="10k Ohms 1%",
-)
+# Left feedback resistor (1.2k for unity gain of 8-input sum)
+Resistor(name="R_FB_L", value=Resistance("1.2k"), package="0603", P1=FB_L, P2=SUM_L)
 
-opa_sum_r = inverting_sum(
-    name="SUM_R",
-    INPUTS=[DAC_R_AC, Net("DRY_R1"), Net("DRY_R2"), Net("DRY_R3")],
-    OUT=SUM_R,
-    GND=Ground(),
-    gain=1.0,
-    resistance="10k Ohms 1%",
-)
+# Right summing node: channels 5-8
+for i in range(4, 8):
+    ch = str(i + 1)
+    Resistor(name="R_SUM_R" + ch, value=Resistance("10k"), package="0603", P1=DRY[i], P2=FB_R)
+
+# Right feedback resistor
+Resistor(name="R_FB_R", value=Resistance("1.2k"), package="0603", P1=FB_R, P2=SUM_R)
+
+# Summing amp sections (inverting)
+opa_sum_l = Opamp(name="SUM_L", IN_P=AGND, IN_N=FB_L, OUT=SUM_L)
+opa_sum_r = Opamp(name="SUM_R", IN_P=AGND, IN_N=FB_R, OUT=SUM_R)
 
 # Output buffer sections (voltage followers)
 opa_buf_l = Opamp(name="BUF_L", IN_P=SUM_L, IN_N=OUT_L, OUT=OUT_L)
 opa_buf_r = Opamp(name="BUF_R", IN_P=SUM_R, IN_N=OUT_R, OUT=OUT_R)
 
-# Map all 4 sections to physical OPA4134
-U_SUM = OPA4134(
+# Map to 2x NE5532 dual ICs (was 1x OPA4134 quad)
+NE5532(
     name="U_SUM",
     VP=AVDD,
-    VN=GND,
+    VN=AGND,
     OPA_A=opa_sum_l,
     OPA_B=opa_sum_r,
-    OPA_C=opa_buf_l,
-    OPA_D=opa_buf_r,
 )
+Decoupling(name="DC_SUM", VCC=AVDD, GND=AGND)
 
-Decoupling(name="DC_SUM", VCC=AVDD, GND=GND)
+NE5532(
+    name="U_OUTBUF",
+    VP=AVDD,
+    VN=AGND,
+    OPA_A=opa_buf_l,
+    OPA_B=opa_buf_r,
+)
+Decoupling(name="DC_OUTBUF", VCC=AVDD, GND=AGND)
 
 # =============================================================================
-# Analog muxes: 2x CD4052B
-# Select between: bypass/dry, synth only, hybrid, wet/dry split
+# Analog muxes: 2x CD4052B (shared control, single MUX_INH)
+# Truth table per spec: 00=dry, 10=synth, 01=hybrid, 11=wet/dry split
 # =============================================================================
 
-# Mux routing nets
 MUX1_X_OUT = Net("MUX1_X_OUT")
 MUX1_Y_OUT = Net("MUX1_Y_OUT")
 MUX2_X_OUT = Net("MUX2_X_OUT")
 MUX2_Y_OUT = Net("MUX2_Y_OUT")
 
+# MUX1: Primary stereo routing
 U_MUX1 = CD4052B(
     name="U_MUX1",
     VDD=AVDD,
-    VSS=GND,
-    VEE=GND,
+    VSS=AGND,
+    VEE=AGND,
     A=MUX_A,
     B=MUX_B,
-    INH=MUX_INH1,
-    # X channel inputs
+    INH=MUX_INH,
+    # X channel (Left output)
     X=MUX1_X_OUT,
-    X0=OUT_L,  # Position 0: buffered sum L
-    X1=DAC_L_AC,  # Position 1: synth only L
-    X2=OUT_L,  # Position 2: hybrid L
-    X3=Net("DRY_THRU_L"),  # Position 3: dry through L
-    # Y channel inputs
+    X0=OUT_L,  # 00: Dry summed L
+    X1=DAC_L_AC,  # 10: Synth only L
+    X2=OUT_L,  # 01: Hybrid L (dry+synth summed in firmware)
+    X3=OUT_L,  # 11: Dry only for wet/dry split L
+    # Y channel (Right output)
     Y=MUX1_Y_OUT,
-    Y0=OUT_R,  # Position 0: buffered sum R
-    Y1=DAC_R_AC,  # Position 1: synth only R
-    Y2=OUT_R,  # Position 2: hybrid R
-    Y3=Net("DRY_THRU_R"),  # Position 3: dry through R
+    Y0=OUT_R,  # 00: Dry summed R
+    Y1=DAC_R_AC,  # 10: Synth only R
+    Y2=OUT_R,  # 01: Hybrid R
+    Y3=DAC_R_AC,  # 11: Synth only for wet/dry split R
 )
 
+# MUX2: Secondary routing for wet/dry split mode
 U_MUX2 = CD4052B(
     name="U_MUX2",
     VDD=AVDD,
-    VSS=GND,
-    VEE=GND,
+    VSS=AGND,
+    VEE=AGND,
     A=MUX_A,
     B=MUX_B,
-    INH=MUX_INH2,
+    INH=MUX_INH,
     # Secondary routing (wet/dry split outputs)
     X=MUX2_X_OUT,
     X0=Net("NC_MUX2_X0"),
@@ -201,8 +271,22 @@ U_MUX2 = CD4052B(
     Y3=Net("NC_MUX2_Y3"),
 )
 
-Decoupling(name="DC_MUX1", VCC=AVDD, GND=GND)
-Decoupling(name="DC_MUX2", VCC=AVDD, GND=GND)
+Decoupling(name="DC_MUX1", VCC=AVDD, GND=AGND)
+Decoupling(name="DC_MUX2", VCC=AVDD, GND=AGND)
+
+# =============================================================================
+# RC click suppression after each mux output
+# 1k + 100nF RC low-pass before coupling caps
+# =============================================================================
+
+MUX1_X_FILT = Net("MUX1_X_FILT")
+MUX1_Y_FILT = Net("MUX1_Y_FILT")
+
+Resistor(name="R_RC_LX", value=Resistance("1k"), package="0603", P1=MUX1_X_OUT, P2=MUX1_X_FILT)
+Capacitor(name="C_RC_LX", value=Capacitance("100nF"), package="0603", P1=MUX1_X_FILT, P2=AGND)
+
+Resistor(name="R_RC_LY", value=Resistance("1k"), package="0603", P1=MUX1_Y_OUT, P2=MUX1_Y_FILT)
+Capacitor(name="C_RC_LY", value=Capacitance("100nF"), package="0603", P1=MUX1_Y_FILT, P2=AGND)
 
 # =============================================================================
 # Output stage (per channel): coupling cap + series resistor
@@ -215,12 +299,12 @@ JACK_R_RING = Net("JACK_R_RING")
 
 # Left output
 OUT_L_AC = Net("OUT_L_AC")
-Capacitor(name="C_OUTL", value=Capacitance("100uF"), package="1210", P1=MUX1_X_OUT, P2=OUT_L_AC)
+Capacitor(name="C_OUTL", value=Capacitance("100uF"), package="1210", P1=MUX1_X_FILT, P2=OUT_L_AC)
 Resistor(name="R_OUTL", value=Resistance("1k"), package="0603", P1=OUT_L_AC, P2=JACK_L_TIP)
 
 # Right output
 OUT_R_AC = Net("OUT_R_AC")
-Capacitor(name="C_OUTR", value=Capacitance("100uF"), package="1210", P1=MUX1_Y_OUT, P2=OUT_R_AC)
+Capacitor(name="C_OUTR", value=Capacitance("100uF"), package="1210", P1=MUX1_Y_FILT, P2=OUT_R_AC)
 Resistor(name="R_OUTR", value=Resistance("1k"), package="0603", P1=OUT_R_AC, P2=JACK_R_TIP)
 
 # 6.35mm TRS jacks (3-pin headers as placeholders: Tip, Ring, Sleeve)
@@ -232,7 +316,7 @@ PinHeader(
     pitch="2.54mm",
     P1=JACK_L_TIP,
     P2=JACK_L_RING,
-    P3=GND,
+    P3=AGND,
 )
 
 PinHeader(
@@ -243,7 +327,7 @@ PinHeader(
     pitch="2.54mm",
     P1=JACK_R_TIP,
     P2=JACK_R_RING,
-    P3=GND,
+    P3=AGND,
 )
 
 # Footswitch connectors
@@ -254,23 +338,44 @@ PinHeader(name="J_FS2", pins=2, rows=1, mount="THT", pitch="2.54mm", P1=Net("FS2
 # Connectors
 # =============================================================================
 
-# J_MASTER: 2x5 header from master board
+# J_MASTER: 2x6 header from master board (expanded for I2C to HT8988A)
 PinHeader(
     name="J_MASTER",
+    pins=6,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=DOUT_DAC,
+    P2=MUX_A,
+    P3=MUX_B,
+    P4=MUX_INH,
+    P5=AVDD,
+    P6=DVDD,
+    P7=AGND,
+    P8=DGND,
+    P9=SDA,
+    P10=SCL,
+    P11=Net("NC_J_MASTER_11"),
+    P12=Net("NC_J_MASTER_12"),
+)
+
+# J_AFE: 2x5 header for 8 dry analog signals from AFE board
+PinHeader(
+    name="J_AFE",
     pins=5,
     rows=2,
     mount="THT",
     pitch="2.54mm",
-    P1=BCK_DAC,
-    P2=LRCK_DAC,
-    P3=DOUT_DAC,
-    P4=MUX_A,
-    P5=MUX_B,
-    P6=MUX_INH1,
-    P7=MUX_INH2,
-    P8=AVDD,
-    P9=DVDD,
-    P10=GND,
+    P1=DRY[0],
+    P2=DRY[1],
+    P3=DRY[2],
+    P4=DRY[3],
+    P5=DRY[4],
+    P6=DRY[5],
+    P7=DRY[6],
+    P8=DRY[7],
+    P9=AVDD,
+    P10=AGND,
 )
 
 # =============================================================================
@@ -278,7 +383,7 @@ PinHeader(
 # =============================================================================
 
 for i in range(4):
-    MountingHole(name="H" + str(i + 1), diameter="M3", P1=GND)
+    MountingHole(name="H" + str(i + 1), diameter="M3", P1=AGND)
 
 # =============================================================================
 # Board definition

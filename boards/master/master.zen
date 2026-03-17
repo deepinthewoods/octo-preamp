@@ -1,10 +1,14 @@
 """
-Master Board - ESP32-S3 + Power Management + USB-C
+Master Board - ESP32-S3 DevKit + Power Management + USB-C
 
 Central controller with USB-C power/data, LiPo charging (MCP73831),
-dual LDO regulation (LP2985 analog, AMS1117 digital), and ESP32-S3
-running I2S/I2C master to ADC board, UART to 3 slave ESP32s, and
-I2S output to DAC-router board.
+dual LDO regulation (LP2985 analog, AP2114H digital), BAT54 reverse
+protection, and ESP32-S3-DevKitC-1 in 2x 20-pin machined header sockets.
+
+v2.1 changes (from v2.0):
+- R01: Replaced AMS1117 digital LDO with AP2114H-3.3 (1A, better transient)
+- R04: Expanded J_DAC from 2x5 to 2x6 (added I2C SDA/SCL for HT8988A)
+- R05: Added 4th slave connector J_SLAVE_D + GPIO14->DIN_D, GPIO37->EN_SLAVE5, GPIO47->BOOT_SLAVE5
 """
 
 load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
@@ -16,11 +20,12 @@ MountingHole = Module("@stdlib/generics/MountingHole.zen")
 FerriteBead = Module("@stdlib/generics/FerriteBead.zen")
 Led = Module("@stdlib/generics/Led.zen")
 
-ESP32S3 = Module("../../components/esp32_s3/esp32_s3.zen")
+ESP32DevKit = Module("../../components/esp32_s3_devkit/esp32_s3_devkit.zen")
 MCP73831 = Module("../../components/mcp73831/mcp73831.zen")
 LP2985 = Module("../../components/lp2985/lp2985.zen")
-AMS1117 = Module("../../components/ams1117/ams1117.zen")
+AP2114H = Module("../../components/ap2114h/ap2114h.zen")
 UsbC = Module("../../components/usb_c/usb_c.zen")
+BAT54 = Module("../../components/bat54/bat54.zen")
 Decoupling = Module("../../modules/decoupling/decoupling.zen")
 
 # =============================================================================
@@ -28,10 +33,12 @@ Decoupling = Module("../../modules/decoupling/decoupling.zen")
 # =============================================================================
 
 VBUS = Net("VBUS")
+VBAT_RAW = Net("VBAT_RAW")
 VBAT = Net("VBAT")
 AVDD = Net("AVDD_3V3")
 DVDD = Net("DVDD_3V3")
-GND = Net("GND")
+AGND = Net("AGND")
+DGND = Net("DGND")
 
 # =============================================================================
 # USB-C receptacle
@@ -45,21 +52,21 @@ CC2 = Net("CC2")
 J_USB = UsbC(
     name="J_USB",
     VBUS=VBUS,
-    GND=GND,
+    GND=DGND,
     CC1=CC1,
     CC2=CC2,
     DP=USB_DP,
     DN=USB_DN,
-    SHIELD=GND,
+    SHIELD=DGND,
 )
 
 # CC pull-downs for USB-C sink detection (5.1k per spec)
-Resistor(name="R_CC1", value=Resistance("5.1k"), package="0402", P1=CC1, P2=GND)
-Resistor(name="R_CC2", value=Resistance("5.1k"), package="0402", P1=CC2, P2=GND)
+Resistor(name="R_CC1", value=Resistance("5.1k"), package="0402", P1=CC1, P2=DGND)
+Resistor(name="R_CC2", value=Resistance("5.1k"), package="0402", P1=CC2, P2=DGND)
 
 # VBUS bulk decoupling
-Capacitor(name="C_VBUS_BULK", value=Capacitance("100uF"), package="1210", P1=VBUS, P2=GND)
-Capacitor(name="C_VBUS_BYP", value=Capacitance("100nF"), package="0603", P1=VBUS, P2=GND)
+Capacitor(name="C_VBUS_BULK", value=Capacitance("100uF"), package="1210", P1=VBUS, P2=DGND)
+Capacitor(name="C_VBUS_BYP", value=Capacitance("100nF"), package="0603", P1=VBUS, P2=DGND)
 
 # =============================================================================
 # LiPo charger (MCP73831)
@@ -71,33 +78,55 @@ PROG_PIN = Net("PROG_PIN")
 U_CHG = MCP73831(
     name="U_CHG",
     VDD=VBUS,
-    VSS=GND,
-    VBAT=VBAT,
+    VSS=DGND,
+    VBAT=VBAT_RAW,
     STAT=STAT_N,
     PROG=PROG_PIN,
 )
 
-# RPROG = 2k for 500mA charge current (IREG = 1000V / RPROG)
-Resistor(name="R_PROG", value=Resistance("2k"), package="0603", P1=PROG_PIN, P2=GND)
+# RPROG = 4.7k for ~210mA charge current (IREG = 1000V / RPROG)
+Resistor(name="R_PROG", value=Resistance("4.7k"), package="0603", P1=PROG_PIN, P2=DGND)
 
 # Charge status LED (active low open-drain)
 LED_STAT = Net("LED_STAT")
 Resistor(name="R_LED", value=Resistance("1k"), package="0603", P1=VBUS, P2=LED_STAT)
 Led(name="D_STAT", package="0603", color="green", A=LED_STAT, K=STAT_N)
 
-# Battery connector
+# =============================================================================
+# BAT54 Schottky reverse protection on VBAT
+# =============================================================================
+
+BAT54(name="D_BAT", A=VBAT_RAW, K=VBAT)
+
+# =============================================================================
+# Battery connector (JST-PH 2-pin)
+# =============================================================================
+
 PinHeader(
     name="J_BAT",
     pins=2,
     rows=1,
     mount="THT",
-    pitch="2.54mm",
-    P1=VBAT,
-    P2=GND,
+    pitch="2.00mm",
+    P1=VBAT_RAW,
+    P2=DGND,
 )
 
-# Battery decoupling
-Capacitor(name="C_BAT", value=Capacitance("10uF"), package="0805", P1=VBAT, P2=GND)
+# Battery decoupling (100uF + 100nF, upgraded from 10uF)
+Capacitor(name="C_BAT_BULK", value=Capacitance("100uF"), package="1210", P1=VBAT, P2=DGND)
+Capacitor(name="C_BAT_BYP", value=Capacitance("100nF"), package="0603", P1=VBAT, P2=DGND)
+
+# =============================================================================
+# VBAT voltage divider for battery monitoring -> GPIO36
+# 100k/100k divider: VBAT_MON = VBAT * 0.5
+# =============================================================================
+
+VBAT_DIV = Net("VBAT_DIV")
+VBAT_MON = Net("VBAT_MON")
+
+Resistor(name="R_VMON_TOP", value=Resistance("100k"), package="0603", P1=VBAT, P2=VBAT_DIV)
+Resistor(name="R_VMON_BOT", value=Resistance("100k"), package="0603", P1=VBAT_DIV, P2=DGND)
+Capacitor(name="C_VMON", value=Capacitance("100nF"), package="0603", P1=VBAT_DIV, P2=DGND)
 
 # =============================================================================
 # Analog LDO: LP2985-3.3 (ultra-low noise, 150mA max)
@@ -108,47 +137,47 @@ BYP_PIN = Net("LP2985_BYP")
 U_AVDD = LP2985(
     name="U_AVDD",
     VIN=VBAT,
-    GND=GND,
+    GND=AGND,
     EN=VBAT,  # Always enabled
     BYP=BYP_PIN,
     VOUT=AVDD,
 )
 
 # Bypass cap on BYP pin for noise reduction (datasheet: 10nF)
-Capacitor(name="C_BYP", value=Capacitance("10nF"), package="0402", dielectric="NP0", P1=BYP_PIN, P2=GND)
+Capacitor(name="C_BYP", value=Capacitance("10nF"), package="0402", dielectric="NP0", P1=BYP_PIN, P2=AGND)
 
-Decoupling(name="DC_AVDD", VCC=AVDD, GND=GND)
+Decoupling(name="DC_AVDD", VCC=AVDD, GND=AGND)
 
 # =============================================================================
-# Digital LDO: AMS1117-3.3 (1A max)
+# Digital LDO: AP2114H-3.3 (1A max, improved transient response)
 # =============================================================================
 
-U_DVDD = AMS1117(
+U_DVDD = AP2114H(
     name="U_DVDD",
     VIN=VBAT,
     VOUT=DVDD,
-    GND=GND,
+    GND=DGND,
 )
 
-Decoupling(name="DC_DVDD", VCC=DVDD, GND=GND)
+Decoupling(name="DC_DVDD", VCC=DVDD, GND=DGND)
 
 # Additional bulk cap for AMS1117 stability
-Capacitor(name="C_DVDD_BULK", value=Capacitance("22uF"), package="1206", P1=DVDD, P2=GND)
+Capacitor(name="C_DVDD_BULK", value=Capacitance("22uF"), package="1206", P1=DVDD, P2=DGND)
 
 # =============================================================================
-# Ferrite bead: AVDD/DVDD isolation
+# Ferrite bead: AGND <-> DGND bridge (single star point)
 # =============================================================================
 
 FerriteBead(
     name="FB1",
     package="0805",
     value="220Ohm",
-    P1=DVDD,
-    P2=AVDD,
+    P1=AGND,
+    P2=DGND,
 )
 
 # =============================================================================
-# ESP32-S3-WROOM-1
+# ESP32-S3-DevKitC-1 in 2x 20-pin machined header sockets
 # =============================================================================
 
 # I2S master to ADC board
@@ -162,10 +191,9 @@ ADCDAT_B = Net("ADCDAT_B")
 SDA = Net("SDA")
 SCL = Net("SCL")
 
-# UART TX to slave boards
-TX_SLAVE_A = Net("TX_SLAVE_A")
-TX_SLAVE_B = Net("TX_SLAVE_B")
-TX_SLAVE_C = Net("TX_SLAVE_C")
+# UART — single broadcast TX, wired-OR RX
+TX_SLAVE = Net("TX_SLAVE")
+RX_SLAVE = Net("RX_SLAVE")
 
 # I2S slave return bus (from slaves via DAC-router)
 BCLK_OUT = Net("BCLK_OUT")
@@ -173,81 +201,81 @@ LRCK_OUT = Net("LRCK_OUT")
 DIN_A = Net("DIN_A")
 DIN_B = Net("DIN_B")
 DIN_C = Net("DIN_C")
+DIN_D = Net("DIN_D")
 
 # I2S DAC output
-BCK_DAC = Net("BCK_DAC")
-LRCK_DAC = Net("LRCK_DAC")
 DOUT_DAC = Net("DOUT_DAC")
 
-# Mux control
+# Mux control (single MUX_INH)
 MUX_A = Net("MUX_A")
 MUX_B = Net("MUX_B")
-MUX_INH1 = Net("MUX_INH1")
-MUX_INH2 = Net("MUX_INH2")
+MUX_INH = Net("MUX_INH")
 
-# ESP32 enable with RC reset delay
-ESP_EN = Net("ESP_EN")
+# OTA flash control
+BOOT_SLAVE2 = Net("BOOT_SLAVE2")
+BOOT_SLAVE3 = Net("BOOT_SLAVE3")
+BOOT_SLAVE4 = Net("BOOT_SLAVE4")
+BOOT_SLAVE5 = Net("BOOT_SLAVE5")
+EN_SLAVE2 = Net("EN_SLAVE2")
+EN_SLAVE3 = Net("EN_SLAVE3")
+EN_SLAVE4 = Net("EN_SLAVE4")
+EN_SLAVE5 = Net("EN_SLAVE5")
 
-U_ESP = ESP32S3(
-    name="U_ESP",
-    VCC=DVDD,
-    GND=GND,
-    EN=ESP_EN,
-    # I2S master to ADC
-    IO0=MCLK,
-    IO1=BCLK,
-    IO2=LRCK,
-    IO3=ADCDAT_A,
-    IO4=ADCDAT_B,
-    # I2S slave return
-    IO5=BCLK_OUT,
-    IO6=LRCK_OUT,
-    IO7=DIN_A,
-    IO8=DIN_B,
-    IO9=DIN_C,
-    # I2S DAC output
-    IO10=BCK_DAC,
-    IO11=LRCK_DAC,
-    IO12=DOUT_DAC,
-    # Mux control
-    IO13=MUX_A,
-    IO14=MUX_B,
-    IO15=MUX_INH1,
-    IO16=MUX_INH2,
-    # UART TX to slaves
-    IO17=TX_SLAVE_A,
-    IO18=TX_SLAVE_B,
-    IO38=TX_SLAVE_C,
-    # USB native
-    IO19=USB_DN,
-    IO20=USB_DP,
-    # I2C
-    IO21=SDA,
-    IO47=SCL,
-    # Remaining GPIOs - not connected
-    IO35=Net("NC_IO35"),
-    IO36=Net("NC_IO36"),
-    IO37=Net("NC_IO37"),
-    IO39=Net("NC_IO39"),
-    IO40=Net("NC_IO40"),
-    IO41=Net("NC_IO41"),
-    IO42=Net("NC_IO42"),
-    IO45=Net("NC_IO45"),
-    IO46=Net("NC_IO46"),
-    IO48=Net("NC_IO48"),
-    TXD0=Net("NC_TXD0"),
-    RXD0=Net("NC_RXD0"),
+# Battery monitor
+VBAT_MON_PIN = Net("VBAT_MON")
+
+# Instantiate DevKit header sockets with full GPIO mapping per spec 6.2
+ESP32DevKit(
+    name="DEVKIT",
+    # Left header (1x20)
+    P_3V3_1=DVDD,
+    P_3V3_2=DVDD,
+    RST=Net("ESP_RST"),
+    GPIO4=Net("NC_GPIO4"),  # Reserved
+    GPIO5=MCLK,  # I2S ADC: MCLK
+    GPIO6=BCLK,  # I2S ADC: BCLK
+    GPIO7=LRCK,  # I2S ADC: LRCK
+    GPIO15=ADCDAT_A,  # I2S ADC: ADCDAT_A (ES8388 #1)
+    GPIO16=ADCDAT_B,  # I2S ADC: ADCDAT_B (ES8388 #2)
+    GPIO17=TX_SLAVE,  # UART TX broadcast to all slaves
+    GPIO18=RX_SLAVE,  # UART RX wired-OR from all slaves
+    GPIO8=BCLK_OUT,  # I2S slave return: BCLK_OUT
+    GPIO19=USB_DN,  # USB native D-
+    GPIO20=USB_DP,  # USB native D+
+    GPIO3=Net("NC_GPIO3"),  # LOG — reserved, do not connect
+    GPIO46=MUX_B,  # MUX address bit 1
+    GPIO9=LRCK_OUT,  # I2S slave return: LRCK_OUT
+    GPIO10=DIN_A,  # I2S slave return: DIN_A (slave #2)
+    GPIO11=DIN_B,  # I2S slave return: DIN_B (slave #3)
+    GPIO12=DIN_C,  # I2S slave return: DIN_C (slave #4)
+    # Right header (1x20)
+    GND=DGND,
+    GPIO43=Net("NC_GPIO43"),  # U0TXD — reserved for USB debug
+    GPIO44=Net("NC_GPIO44"),  # U0RXD — reserved for USB debug
+    GPIO1=BOOT_SLAVE3,  # OTA: BOOT #3
+    GPIO2=BOOT_SLAVE2,  # OTA: BOOT #2
+    GPIO42=BOOT_SLAVE4,  # OTA: BOOT #4
+    GPIO41=EN_SLAVE2,  # OTA: EN #2
+    GPIO40=EN_SLAVE3,  # OTA: EN #3
+    GPIO39=EN_SLAVE4,  # OTA: EN #4
+    GPIO38=SCL,  # I2C: SCL
+    GPIO37=EN_SLAVE5,  # OTA: EN #5
+    GPIO36=VBAT_MON_PIN,  # Battery voltage monitor
+    GPIO35=MUX_INH,  # MUX inhibit (single)
+    GPIO0=Net("NC_GPIO0"),  # BOOT — reserved
+    GPIO45=MUX_A,  # MUX address bit 0
+    GPIO48=Net("NC_GPIO48"),  # RGB LED — onboard
+    GPIO47=BOOT_SLAVE5,  # OTA: BOOT #5
+    GPIO21=SDA,  # I2C: SDA
+    GPIO14=DIN_D,  # I2S slave return: DIN_D (slave #5)
+    GPIO13=DOUT_DAC,  # I2S DAC output
 )
 
-# EN pin: 10k pull-up + 100nF to GND (RC delay for power-on reset)
-Resistor(name="R_EN", value=Resistance("10k"), package="0603", P1=DVDD, P2=ESP_EN)
-Capacitor(name="C_EN", value=Capacitance("100nF"), package="0603", P1=ESP_EN, P2=GND)
-
-# GPIO0 (BOOT): 10k pull-up (boot from flash by default)
-Resistor(name="R_BOOT", value=Resistance("10k"), package="0603", P1=DVDD, P2=MCLK)
+# UART RX pull-up (wired-OR bus, 10k to DVDD)
+Resistor(name="R_UART_PU", value=Resistance("10k"), package="0603", P1=DVDD, P2=RX_SLAVE)
 
 # ESP32 decoupling
-Decoupling(name="DC_ESP", VCC=DVDD, GND=GND)
+Decoupling(name="DC_ESP", VCC=DVDD, GND=DGND)
 
 # =============================================================================
 # Connectors
@@ -269,73 +297,98 @@ PinHeader(
     P7=SCL,
     P8=AVDD,
     P9=DVDD,
-    P10=GND,
-    P11=GND,
+    P10=AGND,
+    P11=DGND,
     P12=Net("NC_J_ADC"),
 )
 
-# J_SLAVE_A: 1x6 header to slave A
+# J_SLAVE_A: 1x8 header to slave A (ESP32 #2)
 PinHeader(
     name="J_SLAVE_A",
-    pins=6,
+    pins=8,
     rows=1,
     mount="THT",
     pitch="2.54mm",
-    P1=TX_SLAVE_A,
-    P2=BCLK_OUT,
-    P3=LRCK_OUT,
-    P4=DIN_A,
-    P5=DVDD,
-    P6=GND,
+    P1=BCLK_OUT,
+    P2=LRCK_OUT,
+    P3=DIN_A,
+    P4=TX_SLAVE,
+    P5=RX_SLAVE,
+    P6=EN_SLAVE2,
+    P7=DVDD,
+    P8=DGND,
 )
 
-# J_SLAVE_B: 1x6 header to slave B
+# J_SLAVE_B: 1x8 header to slave B (ESP32 #3)
 PinHeader(
     name="J_SLAVE_B",
-    pins=6,
+    pins=8,
     rows=1,
     mount="THT",
     pitch="2.54mm",
-    P1=TX_SLAVE_B,
-    P2=BCLK_OUT,
-    P3=LRCK_OUT,
-    P4=DIN_B,
-    P5=DVDD,
-    P6=GND,
+    P1=BCLK_OUT,
+    P2=LRCK_OUT,
+    P3=DIN_B,
+    P4=TX_SLAVE,
+    P5=RX_SLAVE,
+    P6=EN_SLAVE3,
+    P7=DVDD,
+    P8=DGND,
 )
 
-# J_SLAVE_C: 1x6 header to slave C
+# J_SLAVE_C: 1x8 header to slave C (ESP32 #4)
 PinHeader(
     name="J_SLAVE_C",
-    pins=6,
+    pins=8,
     rows=1,
     mount="THT",
     pitch="2.54mm",
-    P1=TX_SLAVE_C,
-    P2=BCLK_OUT,
-    P3=LRCK_OUT,
-    P4=DIN_C,
-    P5=DVDD,
-    P6=GND,
+    P1=BCLK_OUT,
+    P2=LRCK_OUT,
+    P3=DIN_C,
+    P4=TX_SLAVE,
+    P5=RX_SLAVE,
+    P6=EN_SLAVE4,
+    P7=DVDD,
+    P8=DGND,
 )
 
-# J_DAC: 2x5 header to DAC-router board
+# J_SLAVE_D: 1x8 header to slave D (ESP32 #5)
+PinHeader(
+    name="J_SLAVE_D",
+    pins=8,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=BCLK_OUT,
+    P2=LRCK_OUT,
+    P3=DIN_D,
+    P4=TX_SLAVE,
+    P5=RX_SLAVE,
+    P6=EN_SLAVE5,
+    P7=DVDD,
+    P8=DGND,
+)
+
+# J_DAC: 2x6 header to DAC-router board (expanded for I2C to HT8988A)
 PinHeader(
     name="J_DAC",
-    pins=5,
+    pins=6,
     rows=2,
     mount="THT",
     pitch="2.54mm",
-    P1=BCK_DAC,
-    P2=LRCK_DAC,
-    P3=DOUT_DAC,
-    P4=MUX_A,
-    P5=MUX_B,
-    P6=MUX_INH1,
-    P7=MUX_INH2,
-    P8=AVDD,
-    P9=DVDD,
-    P10=GND,
+    P1=DOUT_DAC,
+    P2=MUX_A,
+    P3=MUX_B,
+    P4=MUX_INH,
+    P5=AVDD,
+    P6=DVDD,
+    P7=AGND,
+    P8=DGND,
+    P9=SDA,
+    P10=SCL,
+    P11=Net("NC_J_DAC_11"),
+    P12=Net("NC_J_DAC_12"),
 )
 
 # =============================================================================
@@ -343,7 +396,7 @@ PinHeader(
 # =============================================================================
 
 for i in range(4):
-    MountingHole(name="H" + str(i + 1), diameter="M3", P1=GND)
+    MountingHole(name="H" + str(i + 1), diameter="M3", P1=DGND)
 
 # =============================================================================
 # Board definition

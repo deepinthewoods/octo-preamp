@@ -1,0 +1,42 @@
+"""Audio Taper Potentiometer - THT, 9mm vertical."""
+
+load("@stdlib/units.zen", "Resistance")
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+CW = io("CW", Net)
+WIPER = io("WIPER", Net)
+CCW = io("CCW", Net)
+
+# -----------------------------------------------------------------------------
+# Component parameters
+# -----------------------------------------------------------------------------
+
+value = config("value", Resistance, default=Resistance("10k"), help="Total resistance")
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="RV",
+    part=builtin.Part(mpn="RV09AF-40-20K-B10K", manufacturer="Alpha"),
+    symbol=Symbol(library="@kicad-symbols/Device.kicad_sym", name="R_Potentiometer"),
+    footprint=File("@kicad-footprints/Potentiometer_THT.pretty/Potentiometer_Alps_RK09K_Single_Vertical.kicad_mod"),
+    prefix="RV",
+    pin_defs={
+        "1": "1",
+        "2": "2",
+        "3": "3",
+    },
+    pins={
+        "1": CW,
+        "2": WIPER,
+        "3": CCW,
+    },
+    properties={
+        "value": str(value) + " Audio",
+    },
+)

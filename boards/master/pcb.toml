@@ -3,8 +3,10 @@ name = "master"
 path = "master.zen"
 
 [dependencies]
-"github.com/deepinthewoods/octo-preamp/components/ams1117" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/ap2114h" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/bat54" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/esp32_s3" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/esp32_s3_devkit" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/lp2985" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/mcp73831" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/usb_c" = "0.1.0"

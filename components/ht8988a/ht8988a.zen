@@ -1,0 +1,148 @@
+"""
+HT8988A - Stereo Audio CODEC (WM8988 compatible)
+QFN-28 (4x4mm), I2C/SPI control, I2S audio, DAC + ADC + headphone amp.
+
+Two stereo output pairs (LOUT1/ROUT1 for headphones, LOUT2/ROUT2 for line),
+two stereo input pairs, built-in PGA, ALC, and 3D enhancement.
+I2C address: 0x1A (CSB=low) or 0x1B (CSB=high).
+
+NOTE: Uses ES8388 KiCad symbol as placeholder (WM8988 not in KiCad 9.0.3).
+The pin_defs map ES8388 symbol names to HT8988A physical pad numbers.
+Schematic labels will show ES8388 names; PCB pads are physically correct.
+TODO: Create custom HT8988A symbol via KiCad MCP for accurate schematics.
+"""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+# Digital audio interface
+MCLK = io("MCLK", Net)
+BCLK = io("BCLK", Net)
+DACDAT = io("DACDAT", Net)
+ADCDAT = io("ADCDAT", Net)
+LRC = io("LRC", Net)
+
+# Control interface (I2C mode: MODE=low)
+SCLK = io("SCLK", Net)
+SDIN = io("SDIN", Net)
+CSB = io("CSB", Net)
+MODE = io("MODE", Net)
+
+# Analog outputs (two stereo pairs)
+LOUT1 = io("LOUT1", Net)
+ROUT1 = io("ROUT1", Net)
+LOUT2 = io("LOUT2", Net)
+ROUT2 = io("ROUT2", Net)
+
+# Analog inputs (two stereo pairs)
+LINPUT1 = io("LINPUT1", Net)
+RINPUT1 = io("RINPUT1", Net)
+LINPUT2 = io("LINPUT2", Net)
+RINPUT2 = io("RINPUT2", Net)
+
+# Common mode feedback
+HPCOM = io("HPCOM", Net)
+LCOM = io("LCOM", Net)
+
+# Reference
+VREF = io("VREF", Net)
+VMID = io("VMID", Net)
+
+# Power
+AVDD = io("AVDD", Net)
+AGND = io("AGND", Net)
+HPVDD = io("HPVDD", Net)
+HPGND = io("HPGND", Net)
+DCVDD = io("DCVDD", Net)
+DBVDD = io("DBVDD", Net)
+DGND = io("DGND", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# Uses ES8388 symbol as placeholder — pin_defs map ES8388 pin names to
+# HT8988A physical pad numbers for correct PCB layout.
+#
+# HT8988A physical pinout:
+#   1=MCLK, 2=DCVDD, 3=DBVDD, 4=DGND, 5=BCLK, 6=DACDAT, 7=LRC,
+#   8=ADCDAT, 9=HPCOM, 10=LCOM, 11=ROUT1, 12=LOUT1, 13=HPGND,
+#   14=ROUT2, 15=LOUT2, 16=HPVDD, 17=AVDD, 18=AGND, 19=VREF,
+#   20=VMID, 21=RINPUT2, 22=LINPUT2, 23=RINPUT1, 24=LINPUT1,
+#   25=MODE, 26=CSB, 27=SDIN, 28=SCLK, 29=EP(GND)
+# -----------------------------------------------------------------------------
+
+Component(
+    name="HT8988A",
+    part=builtin.Part(mpn="HT8988A", manufacturer="HTCSEMI"),
+    symbol=Symbol(library="@kicad-symbols/Audio.kicad_sym", name="ES8388"),
+    footprint=File("@kicad-footprints/Package_DFN_QFN.pretty/QFN-28-1EP_4x4mm_P0.4mm_EP2.4x2.4mm.kicad_mod"),
+    prefix="U",
+    # ES8388 symbol pin names -> HT8988A physical pad numbers
+    pin_defs={
+        "SVDD": "1",  # HT8988A: MCLK
+        "LOUT1": "12",  # HT8988A: LOUT1 (matches)
+        "ROUT1": "11",  # HT8988A: ROUT1 (matches)
+        "AVDD": "17",  # HT8988A: AVDD (matches)
+        "AVSS": "18",  # HT8988A: AGND
+        "ROUT2": "14",  # HT8988A: ROUT2 (matches)
+        "LOUT2": "15",  # HT8988A: LOUT2 (matches)
+        "DVDD": "2",  # HT8988A: DCVDD
+        "DVSS": "4",  # HT8988A: DGND
+        "DACVREF": "19",  # HT8988A: VREF
+        "DACVRP": "20",  # HT8988A: VMID
+        "MONOOUT": "9",  # HT8988A: HPCOM
+        "ADCVRP": "10",  # HT8988A: LCOM
+        "ADCVREF": "3",  # HT8988A: DBVDD
+        "MICVDD": "16",  # HT8988A: HPVDD
+        "LIN2": "22",  # HT8988A: LINPUT2 (matches)
+        "RIN2": "21",  # HT8988A: RINPUT2 (matches)
+        "LIN1": "24",  # HT8988A: LINPUT1 (matches)
+        "RIN1": "23",  # HT8988A: RINPUT1 (matches)
+        "MCLK": "5",  # HT8988A: BCLK
+        "SCLK": "7",  # HT8988A: LRC
+        "LRCK": "6",  # HT8988A: DACDAT
+        "DSDIN": "8",  # HT8988A: ADCDAT
+        "ASDOUT": "13",  # HT8988A: HPGND
+        "SDA": "27",  # HT8988A: SDIN (matches)
+        "SCL": "28",  # HT8988A: SCLK
+        "AD0": "26",  # HT8988A: CSB
+        "RESET_N": "25",  # HT8988A: MODE
+        "EP": "29",  # HT8988A: EP (matches)
+    },
+    pins={
+        "SVDD": MCLK,
+        "LOUT1": LOUT1,
+        "ROUT1": ROUT1,
+        "AVDD": AVDD,
+        "AVSS": AGND,
+        "ROUT2": ROUT2,
+        "LOUT2": LOUT2,
+        "DVDD": DCVDD,
+        "DVSS": DGND,
+        "DACVREF": VREF,
+        "DACVRP": VMID,
+        "MONOOUT": HPCOM,
+        "ADCVRP": LCOM,
+        "ADCVREF": DBVDD,
+        "MICVDD": HPVDD,
+        "LIN2": LINPUT2,
+        "RIN2": RINPUT2,
+        "LIN1": LINPUT1,
+        "RIN1": RINPUT1,
+        "MCLK": BCLK,
+        "SCLK": LRC,
+        "LRCK": DACDAT,
+        "DSDIN": ADCDAT,
+        "ASDOUT": HPGND,
+        "SDA": SDIN,
+        "SCL": SCLK,
+        "AD0": CSB,
+        "RESET_N": MODE,
+        "EP": AGND,
+    },
+    properties={
+        "value": "HT8988A",
+        "package": "QFN-28",
+    },
+)

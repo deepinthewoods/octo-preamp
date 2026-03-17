@@ -1,0 +1,36 @@
+"""3.5mm Stereo Jack (TRS) - THT."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+TIP = io("TIP", Net)
+RING = io("RING", Net)
+SLEEVE = io("SLEEVE", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="J",
+    part=builtin.Part(mpn="SJ1-3523N", manufacturer="CUI Devices"),
+    symbol=Symbol(library="@kicad-symbols/Connector_Audio.kicad_sym", name="AudioJack3"),
+    footprint=File("@kicad-footprints/Connector_Audio.pretty/Jack_3.5mm_CUI_SJ1-3523N_Horizontal.kicad_mod"),
+    prefix="J",
+    pin_defs={
+        "T": "1",
+        "R": "2",
+        "S": "3",
+    },
+    pins={
+        "T": TIP,
+        "R": RING,
+        "S": SLEEVE,
+    },
+    properties={
+        "value": "3.5mm TRS",
+        "package": "CUI_SJ1-3523N",
+    },
+)

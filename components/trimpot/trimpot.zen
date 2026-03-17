@@ -1,0 +1,37 @@
+"""10k Cermet Trimmer Potentiometer — Bourns 3296W or 3362P."""
+
+load("@stdlib/units.zen", "Resistance")
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+CW = io("CW", Net)
+WIPER = io("WIPER", Net)
+CCW = io("CCW", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="RV",
+    part=builtin.Part(mpn="3296W-1-103LF", manufacturer="Bourns"),
+    symbol=Symbol(library="@kicad-symbols/Device.kicad_sym", name="R_Potentiometer_Trim"),
+    footprint=File("@kicad-footprints/Potentiometer_THT.pretty/Potentiometer_Bourns_3296W_Vertical.kicad_mod"),
+    prefix="RV",
+    pin_defs={
+        "1": "1",
+        "2": "2",
+        "3": "3",
+    },
+    pins={
+        "1": CW,
+        "2": WIPER,
+        "3": CCW,
+    },
+    properties={
+        "value": "10k",
+        "package": "Bourns_3296W",
+    },
+)

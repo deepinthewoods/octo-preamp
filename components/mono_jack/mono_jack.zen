@@ -1,0 +1,33 @@
+"""6.5mm (1/4 inch) Mono Jack (TS) — THT."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+TIP = io("TIP", Net)
+SLEEVE = io("SLEEVE", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="J",
+    part=builtin.Part(mpn="NMJ6HF2", manufacturer="Neutrik"),
+    symbol=Symbol(library="@kicad-symbols/Connector_Audio.kicad_sym", name="AudioJack2"),
+    footprint=File("@kicad-footprints/Connector_Audio.pretty/Jack_6.35mm_Neutrik_NMJ6HFD2_Horizontal.kicad_mod"),
+    prefix="J",
+    pin_defs={
+        "T": "1",
+        "S": "2",
+    },
+    pins={
+        "T": TIP,
+        "S": SLEEVE,
+    },
+    properties={
+        "value": "6.5mm Mono",
+        "package": "Neutrik_NMJ6HF2",
+    },
+)
