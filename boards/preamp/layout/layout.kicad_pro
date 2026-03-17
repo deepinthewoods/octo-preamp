@@ -219,7 +219,8 @@
     },
     "layer_pairs": [],
     "layer_presets": [],
-    "viewports": []
+    "viewports": [],
+    "visible_layers": "0x00000000_00000000_fffffff5_ffffffff"
   },
   "boards": [],
   "cvpcb": {
