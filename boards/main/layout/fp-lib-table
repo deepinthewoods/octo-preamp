@@ -3,8 +3,6 @@
   (lib (name "C_0402_1005Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
   (lib (name "C_0603_1608Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
   (lib (name "C_0805_2012Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
-  (lib (name "C_1206_3216Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
-  (lib (name "C_1210_3225Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
   (lib (name "Jack_3.5mm_CUI_SJ1-3523N_Horizontal") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_Audio.pretty/") (options "") (descr ""))
   (lib (name "LED_0603_1608Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/LED_SMD.pretty/") (options "") (descr ""))
   (lib (name "MountingHole_3.2mm_M3_DIN965_Pad_TopBottom") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/MountingHole.pretty/") (options "") (descr ""))

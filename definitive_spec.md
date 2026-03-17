@@ -1,8 +1,24 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.2 — 17 March 2026**
+**Version 2.4 — 17 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.4 changes (slave socket placement):**
+- Slave ESP32 sockets repositioned to board edges so DevKit boards hang over the edge
+- Slaves C+D (strings 5-8): bottom edge, boards hang below
+- Slaves A+B (strings 1-4): top edge, boards hang above (sockets rotated 180°)
+
+**v2.3 changes (size optimization):**
+- All 0603 passives downsized to 0402 across both boards
+- Decoupling module: bulk 0805→0603, bypass 0603→0402
+- Bulk coupling caps: 100uF 1210→47uF 0805 (VBUS, battery, headphone, main output)
+- DVDD bulk: 22uF 1206→0805, VGND bulk: 100uF 1206→47uF 0805
+- Preamp: 8x 6.35mm mono jacks replaced with 2-pin solder pad headers
+- Preamp: removed 4x dedicated direct output buffer NE5532s (input buffer drives both paths via 600R series protection)
+- Mounting holes reduced from 4→2 per board
+- Preamp op-amp count: 17→13 NE5532 dual ICs
+- Preamp component count: 165→151
 
 ---
 
@@ -10,7 +26,7 @@ Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_br
 
 An electronic system for an 8-string guitar with independent per-string pickup processing. Each string's signal is captured, buffered, and made available simultaneously on three paths:
 
-1. **Buffered direct output** — unity gain, uncoloured, per-string 6.35mm mono jack
+1. **Direct output** — unbuffered tap from input buffer, per-string solder pads for wire soldering
 2. **8-channel ADC path** — feeding the digital DSP system (pitch detection, oscillator synthesis, filtering, or per-string effects)
 3. **Analog summing path** — stereo summed dry signal for traditional amplifier use
 
@@ -20,8 +36,8 @@ The system uses 2x ES8388 codec ICs for ADC, 5x ESP32-S3 microcontrollers (1 mas
 
 | Board | Source | Components | Layers | Size | Description |
 |-------|--------|------------|--------|------|-------------|
-| **MAIN** | `boards/main/main.zen` | ~120 | 4 | 200x100mm | Merged master + ADC + DAC-router + 4x slave sockets |
-| **Preamp/AFE** | `boards/preamp/preamp.zen` | ~165 | 4 | 160x80mm | Pure analog front-end, 17x NE5532 dual op-amps |
+| **MAIN** | `boards/main/main.zen` | ~113 | 4 | ~160x80mm | Merged master + ADC + DAC-router + 4x slave sockets |
+| **Preamp/AFE** | `boards/preamp/preamp.zen` | ~151 | 4 | ~100x60mm | Pure analog front-end, 13x NE5532 dual op-amps |
 
 Single cable between boards: Preamp `J_OUT` -> MAIN `J_AFE` (2x5 header: 8 signals + AVDD + AGND).
 
@@ -98,7 +114,7 @@ LiPo Cell (single cell, 3.7V nom, 4.2V full, 3.5V cutoff)
 - RPROG = 4.7k -> ~210mA charge current
 - STAT pin -> charge status LED (active-low open-drain)
 - BAT54 Schottky reverse protection on VBAT line
-- Decoupling: 100uF + 100nF on VBAT output
+- Decoupling: 47uF + 100nF on VBAT output
 
 ### Analog Rail — LP2985-33DBVR (AVDD)
 
@@ -145,7 +161,7 @@ The AFE board handles all 8 pickup inputs. Each channel is identical. The board 
 
 - 10k/10k divider from AVDD to GND -> 1.65V mid-rail
 - Buffered by NE5532 voltage follower (U_VGND)
-- Decoupled with 100uF + 100nF to GND
+- Decoupled with 47uF + 100nF to GND
 - AC reference for all audio coupling on the AFE board
 
 ### Per-Channel Signal Chain (x8)
@@ -162,7 +178,7 @@ Pickup input
   v
 NE5532 voltage follower (input buffer)
   |
-  +---> Direct output tap: NE5532 follower -> 10uF coupling -> 600R series -> 6.35mm mono jack
+  +---> Direct output tap: 10uF coupling -> 600R series -> 2-pin solder pads
   |
   v
 Non-inverting gain stage: NE5532, gain = 1 + Rf/Rg
@@ -183,21 +199,22 @@ Sallen-Key 2nd-order Butterworth anti-alias filter
 | Stage | Qty (NE5532 dual ICs) | Sections Used |
 |-------|----------------------|---------------|
 | Input buffers | 4 | 8 (paired 1+2, 3+4, 5+6, 7+8) |
-| Direct output buffers | 4 | 8 |
 | Variable gain preamp | 4 | 8 |
 | Anti-alias filter (Sallen-Key) | 4 | 8 |
 | Virtual ground buffer | 1 | 1 (1 spare) |
-| **Total** | **17x NE5532** | **33 used, 1 spare** |
+| **Total** | **13x NE5532** | **25 used, 1 spare** |
+
+Direct outputs tap directly from the input buffer output (no dedicated buffer ICs). The NE5532 input buffer drives both the gain stage (high-Z input) and the direct output path (600R series protection). This is safe because the combined load is well within the NE5532's drive capability.
 
 ### Connectors (AFE Board)
 
 | Ref | Type | Function |
 |-----|------|----------|
 | J_IN1-J_IN8 | 2-pin headers (2.54mm THT) | Pickup inputs |
-| J_DOUT1-J_DOUT8 | 6.35mm mono jacks | Buffered direct outputs |
+| J_DOUT1-J_DOUT8 | 2-pin solder pad headers (2.54mm THT) | Direct outputs (wire soldering) |
 | J_OUT | 2x5 header (2.54mm THT) | 8 signals + AVDD + GND to MAIN board |
 | J_PWR | 2-pin header | AVDD + GND power input |
-| H1-H4 | M3 mounting holes | Board mounting |
+| H1-H2 | M3 mounting holes | Board mounting |
 
 ---
 
@@ -290,7 +307,10 @@ Board: ESP32-S3 DevKit N16R8 (16MB flash, 8MB PSRAM), mounted in 2x 20-pin machi
 
 ### Slave ESP32 Sockets (x4)
 
-Four ESP32-S3 DevKitC-1 modules (N16R8), each mounted in 2x 1x8 machined pin header sockets directly on the MAIN board. Direct on-board traces — no cables.
+Four ESP32-S3 DevKitC-1 modules (N16R8), each mounted in 2x 1x8 machined pin header sockets positioned at the board edges so the DevKit boards hang over the edge. Direct on-board traces — no cables.
+
+- **Slaves A+B** (strings 1-4): sockets at top edge, DevKits hang over the top (headers rotated 180°)
+- **Slaves C+D** (strings 5-8): sockets at bottom edge, DevKits hang over the bottom
 
 #### String Assignment
 
@@ -402,7 +422,7 @@ Replaces PCM5102A from v2.0. Provides DAC output with built-in Class G headphone
 
 ### Headphone Output
 
-- HT8988A HP outputs -> 100uF AC coupling caps -> 10k audio taper dual pot -> 3.5mm TRS stereo jack (J_HP)
+- HT8988A HP outputs -> 47uF AC coupling caps -> 10k audio taper dual pot -> 3.5mm TRS stereo jack (J_HP)
 
 ### Line Output
 
@@ -434,7 +454,7 @@ MUX_INH asserted briefly during switching to prevent clicks. RC click suppressio
 
 ### Main Output Stage
 
-- Mux output -> 1k RC filter -> 100uF coupling cap -> 1k series resistor -> 6.35mm TRS jack
+- Mux output -> 1k RC filter -> 47uF coupling cap -> 1k series resistor -> 6.35mm TRS jack
 - Two outputs: J_OUT_L and J_OUT_R (3-pin headers as TRS placeholders)
 - Two footswitch connectors: J_FS1, J_FS2 (2-pin headers)
 
@@ -570,7 +590,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 | Output | Qty | Type | Board | Signal |
 |--------|-----|------|-------|--------|
-| Direct outs | 8 | 6.35mm TS mono | Preamp | Per-string buffered pickup |
+| Direct outs | 8 | 2-pin solder pads | Preamp | Per-string pickup tap |
 | Main L | 1 | 6.35mm TRS | MAIN | Routing matrix output L |
 | Main R | 1 | 6.35mm TRS | MAIN | Routing matrix output R |
 | Line out | 1 | 3.5mm TRS stereo | MAIN | HT8988A line output |
@@ -591,14 +611,14 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | 1 | Digital LDO | AP2114H-3.3 (SOT-223) | 3.3V DVDD, 1A max |
 | 1 | Reverse protection | BAT54 Schottky | VBAT protection |
 | 2 | Analog mux | CD4052B | Output routing matrix |
-| 17 | Dual op-amp (AFE) | NE5532 (DIP-8/SOIC-8) | Buffers, gain, filters, VGND |
+| 13 | Dual op-amp (AFE) | NE5532 (SOIC-8) | Buffers, gain, filters, VGND |
 | 2 | Dual op-amp (MAIN) | NE5532 | Summing amp + output buffer |
 | 8 | Gain trimpot | 10k cermet | Per-channel gain trim |
 | 1 | Ferrite bead | 220 Ohm, 0805 | AGND/DGND bridge |
 | 2 | Audio pot | 10k audio taper | Headphone volume (dual ganged) |
 | 1 | USB-C connector | — | Charging only |
 | 1 | Battery connector | JST-PH 2.0mm 2-pin | LiPo connection |
-| 8 | Mono jack | 6.35mm TS | Direct outputs (Preamp) |
+| 8 | Solder pad header | 2-pin 2.54mm THT | Direct outputs (Preamp) |
 | 2 | Stereo jack | 3.5mm TRS | Line + headphone out (MAIN) |
 | 1 | LiPo cell | 103450, ~2000mAh | Main power |
 
@@ -610,6 +630,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 - Separate AGND and DGND pours, star connection via ferrite bead
 - No digital traces cross AGND pour
 - No copper pour under ESP32-S3 antenna clearance zone (3mm min)
+- Slave ESP32 sockets placed at board edges — DevKits overhang top (slaves A+B) and bottom (slaves C+D)
 - ESP32-S3 USB-C ports must remain accessible after assembly (initial flash)
 - I2S clock lines (BCLK, LRCK, MCLK) routed short, matched length
 - ES8388 power pins: 100nF ceramic + 10uF as close as possible
@@ -631,7 +652,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 |---|------|--------|
 | 1 | Confirm HT8988A JLCPCB/LCSC part number and assembly availability | OPEN |
 | 2 | Confirm HT8988A I2C address (0x1A) does not conflict with ES8388s (0x10, 0x11) | OPEN |
-| 3 | Review AFE board dimensions with 17x NE5532 + passives — may exceed 100x100mm | OPEN |
+| 3 | Review AFE board dimensions with 13x NE5532 + passives — target ~100x60mm | OPEN |
 | 4 | Determine latency impact of pin-muxing GPIO17/18 between I2S and UART for mode switch | LOW RISK |
 
 ### Resolved Items
@@ -644,9 +665,9 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 - Footswitch pinouts — **DECIDED** (one per mode, user wires as appropriate)
 - AP2112K 600mA limit — **RESOLVED** (upgraded to AP2114H-3.3, 1A max)
 - Op-amp consolidation — **RESOLVED** (all NE5532 on AFE board)
-- Output connector type — **RESOLVED** (6.35mm mono for direct outs, 6.35mm TRS for main, 3.5mm TRS for line/HP)
+- Output connector type — **RESOLVED** (2-pin solder pads for direct outs, 6.35mm TRS for main, 3.5mm TRS for line/HP)
 - UART replaced by I2S TDM for real-time data — **RESOLVED** (v2.2)
 
 ---
 
-*End of Definitive Specification — Version 2.2*
+*End of Definitive Specification — Version 2.4*

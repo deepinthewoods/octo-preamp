@@ -64,19 +64,41 @@ def parse_netlist(net_path):
         content = f.read()
 
     components = []
-    # Extract component entries
-    comp_pattern = re.compile(
-        r'\(comp \(ref "([^"]+)"\)\s*'
-        r'\(value "([^"]+)"\)\s*'
-        r'\(footprint "([^"]+)"\)',
-        re.DOTALL
-    )
-    for m in comp_pattern.finditer(content):
-        ref, value, footprint = m.groups()
+    # Extract component entries — find each (comp ...) block
+    comp_start = re.compile(r'\(comp \(ref "([^"]+)"\)')
+    for m in comp_start.finditer(content):
+        ref = m.group(1)
+        # Find balanced closing paren for this comp block
+        start_pos = m.start()
+        depth = 0
+        end_pos = start_pos
+        for i in range(start_pos, len(content)):
+            if content[i] == '(':
+                depth += 1
+            elif content[i] == ')':
+                depth -= 1
+                if depth == 0:
+                    end_pos = i + 1
+                    break
+        comp_block = content[start_pos:end_pos]
+
+        # Extract value and footprint
+        val_m = re.search(r'\(value "([^"]+)"\)', comp_block)
+        fp_m = re.search(r'\(footprint "([^"]+)"\)', comp_block)
+        value = val_m.group(1) if val_m else ""
+        footprint = fp_m.group(1) if fp_m else ""
+
+        # Extract zen name from sheetpath (preserves .zen name= parameter)
+        sheet_m = re.search(r'\(sheetpath \(names "([^"]+)"\)', comp_block)
+        zen_name = ""
+        if sheet_m:
+            zen_name = sheet_m.group(1).split('.')[0]  # Strip component suffix
+
         components.append({
             'ref': ref,
             'value': value,
             'footprint': footprint,
+            'zen_name': zen_name,
         })
 
     # Extract nets — use paren-balanced extraction for multi-node nets
@@ -205,6 +227,92 @@ def add_board_outline(board, x, y, w, h, corner_radius=0):
         line.SetLayer(edge_layer)
         line.SetWidth(pcbnew.FromMM(0.1))
         board.Add(line)
+
+
+def add_silkscreen_labels(board, components, placed_fps, layout):
+    """Add descriptive silkscreen text labels near labeled components.
+
+    Maps zen names (from .zen name= parameter, preserved in netlist sheetpath)
+    to human-readable silkscreen labels. Small passives are skipped.
+    """
+    silk_layer = board.GetLayerID("F.Silkscreen")
+
+    # Zen name -> silkscreen label mapping
+    # Defined here but derived from .zen name= parameters
+    ZEN_LABELS = {
+        # MAIN board connectors
+        'J_USB': 'USB',
+        'J_BAT': 'BATTERY',
+        'J_AFE': 'PREAMP CABLE',
+        'J_HP': 'HEADPHONE',
+        'J_LINE': 'LINE OUT',
+        'J_OUT_L': 'MAIN OUT L',
+        'J_OUT_R': 'MAIN OUT R',
+        'J_FS1': 'FOOTSWITCH 1',
+        'J_FS2': 'FOOTSWITCH 2',
+        # MAIN board slave sockets
+        'J_LEFT_A': 'SLAVE A L',
+        'J_RIGHT_A': 'SLAVE A R',
+        'J_LEFT_B': 'SLAVE B L',
+        'J_RIGHT_B': 'SLAVE B R',
+        'J_LEFT_C': 'SLAVE C L',
+        'J_RIGHT_C': 'SLAVE C R',
+        'J_LEFT_D': 'SLAVE D L',
+        'J_RIGHT_D': 'SLAVE D R',
+        # MAIN board master ESP32 (DevKit creates J_LEFT and J_RIGHT sub-components)
+        'DEVKIT_MASTER': 'MASTER ESP32',
+        # MAIN board volume pots
+        'RV_HPL': 'HP VOL L',
+        'RV_HPR': 'HP VOL R',
+        # MAIN board ICs
+        'U_CHG': 'CHARGER',
+        'U_AVDD': 'AVDD LDO',
+        'U_DVDD': 'DVDD LDO',
+        'U_ADC1': 'ADC CH1-4',
+        'U_ADC2': 'ADC CH5-8',
+        'U_DAC': 'DAC',
+        'U_SUM': 'SUMMING AMP',
+        'U_OUTBUF': 'OUT BUFFER',
+        'U_MUX1': 'MUX 1',
+        'U_MUX2': 'MUX 2',
+        # Preamp board connectors
+        'J_OUT': 'TO MAIN',
+        'J_PWR': 'POWER IN',
+        'U_VGND': 'VGND',
+    }
+    # Preamp pickup inputs and direct outputs (generated in loop)
+    for i in range(1, 9):
+        ZEN_LABELS[f'J_IN{i}'] = f'PICKUP {i}'
+        ZEN_LABELS[f'J_DOUT{i}'] = f'DIR OUT {i}'
+        ZEN_LABELS[f'RV_F{i}'] = f'GAIN {i}'
+
+    count = 0
+    for comp in components:
+        ref = comp['ref']
+        zen_name = comp.get('zen_name', '')
+
+        if ref not in placed_fps or ref not in layout:
+            continue
+
+        # Look up label from zen name
+        text_str = ZEN_LABELS.get(zen_name, '')
+        if not text_str:
+            continue
+
+        x, y, rot = layout[ref]
+
+        # Place label text below the component
+        text = pcbnew.PCB_TEXT(board)
+        text.SetText(text_str)
+        text.SetLayer(silk_layer)
+        text.SetPosition(mm_pos(x, y + 3))
+        text.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.0), pcbnew.FromMM(1.0)))
+        text.SetTextThickness(pcbnew.FromMM(0.15))
+        text.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
+        board.Add(text)
+        count += 1
+
+    print(f"  Added {count} silkscreen labels")
 
 
 def add_ground_pour(board, net_name, layer_name, x, y, w, h):
@@ -351,6 +459,61 @@ def place_passives_near_anchor(anchor_x, anchor_y, passive_refs, layout, x_dir=1
         layout[ref] = (x, y, 0)
 
 
+def place_passives_right_section(all_passives, layout, ox, oy, bw, bh):
+    """Place right-section passives in available gaps between ICs and connectors.
+
+    Right section absolute coords (ox=10, bw=100): x=80..110, y=10..90.
+    Occupied: IC column x=84, muxes x=98, jacks x=102, output headers x=107.
+
+    Passive strips (2.5mm x-spacing, 3mm y-spacing for 0402/0603):
+      A: x=80..82     — left of IC column (y=20..82)
+      B: x=89..95     — between IC column and muxes/jacks (y=20..58)
+      C: x=89..94     — between ICs and muxes, lower (y=68..82)
+      D: x=103..108   — right of jacks, gap areas (y=48..58, y=78..86)
+    """
+    slots = []
+
+    # Strip A: left of IC column (3 cols)
+    for col_x in [80, 82]:
+        for row_y in range(20, 82, 3):
+            slots.append((col_x, row_y))
+
+    # Strip B: between IC column and jacks/muxes, upper region (3 cols)
+    for col_x in [89, 91.5, 94]:
+        for row_y in range(20, 58, 3):
+            slots.append((col_x, row_y))
+
+    # Strip C: between ICs and muxes, lower region (2 cols)
+    for col_x in [89, 91.5]:
+        for row_y in range(68, 82, 3):
+            slots.append((col_x, row_y))
+
+    # Strip D: right of jacks, in gaps (2 cols)
+    for col_x in [103, 105.5]:
+        for row_y in range(48, 58, 3):
+            slots.append((col_x, row_y))
+    for col_x in [103, 105.5]:
+        for row_y in range(78, 86, 3):
+            slots.append((col_x, row_y))
+
+    # Filter out slots that are too close to placed components
+    def is_clear(sx, sy, min_dist=2.5):
+        for ref, (lx, ly, _) in layout.items():
+            if abs(sx - lx) < min_dist and abs(sy - ly) < min_dist:
+                return False
+        return True
+
+    free_slots = [s for s in slots if is_clear(s[0], s[1])]
+
+    for i, ref in enumerate(sorted(all_passives)):
+        if i < len(free_slots):
+            layout[ref] = (free_slots[i][0], free_slots[i][1], 0)
+        else:
+            # Overflow: pack in a grid at bottom of right section
+            overflow_i = i - len(free_slots)
+            layout[ref] = (80 + (overflow_i % 8) * 2.5, 82 + (overflow_i // 8) * 3, 0)
+
+
 # ============================================================
 # Board-specific layout configurations
 # ============================================================
@@ -370,8 +533,8 @@ def layout_main():
 
     board, fps = create_board("main", components, nets, {'layers': 4})
 
-    # Board dimensions: 200x100mm, 4-layer, three zones
-    bw, bh = 200, 100
+    # Board dimensions: 100x80mm, 4-layer, three zones
+    bw, bh = 100, 80
     ox, oy = 10, 10  # board origin
 
     layout = {}
@@ -397,96 +560,89 @@ def layout_main():
     #   FB1 = Ferrite bead (AGND-DGND bridge)
 
     # ================================================================
-    # ZONE A — DIGITAL (left ~95mm, x: ox to ox+90)
+    # ZONE A — DIGITAL (left ~70mm, x: ox to ox+70)
     # ================================================================
 
-    # --- Power supply section (top-left corner) ---
-    layout['J19'] = (ox + 8,  oy + 6, 270)      # USB-C on left edge, rotated
-    layout['U4']  = (ox + 24, oy + 6, 0)        # MCP73831 charger near USB-C
-    layout['D1']  = (ox + 38, oy + 6, 0)        # BAT54 reverse protection
-    layout['D2']  = (ox + 20, oy + 3, 0)        # Charge status LED
-    layout['J4']  = (ox + 8,  oy + 22, 0)       # Battery connector on left edge
+    # --- Master ESP32 DevKit sockets (centered in Y, at left edge, USB side left) ---
+    master_cx = ox + 4         # near left edge, dev board hangs over left
+    master_cy = oy + bh / 2    # centered in board Y
+    layout['J1'] = (master_cx, master_cy - 12.7, 90)  # Top row (1x20)
+    layout['J2'] = (master_cx, master_cy + 12.7, 90)  # Bottom row (1x20)
 
-    layout['U3']  = (ox + 28, oy + 20, 0)       # LP2985 analog LDO
-    layout['U6']  = (ox + 55, oy + 8, 0)        # AP2114H digital LDO (SOT-223, wider gap from U4)
+    # --- Power supply section (centered Y, spread across X right of headers) ---
+    # Headers J1/J2 are at x=ox+4; start power components at ox+18 to clear them
+    # Two tight rows centered on master_cy, spread wide in X
+    pwr_row1 = master_cy - 3     # upper row
+    pwr_row2 = master_cy + 3     # lower row
+    layout['J19'] = (ox + 18, pwr_row1, 270)     # USB-C
+    layout['U4']  = (ox + 28, pwr_row1, 0)       # MCP73831 charger
+    layout['D2']  = (ox + 38, pwr_row1, 0)       # Charge status LED
+    layout['D1']  = (ox + 44, pwr_row1, 0)       # BAT54 reverse protection
+    layout['J4']  = (ox + 18, pwr_row2, 0)       # Battery connector
+    layout['U3']  = (42, 53, 0)                   # LP2985 analog LDO
+    layout['U6']  = (ox + 48, pwr_row2, 0)       # AP2114H digital LDO
 
     # Ferrite bead at analog/digital zone boundary
-    layout['FB1'] = (ox + 92, oy + 40, 0)
+    layout['FB1'] = (ox + 69, oy + 32, 0)
 
-    # --- Master ESP32 DevKit sockets (center-left) ---
-    # DevKitC-1: 2x 1x20 header sockets, 25.4mm apart
-    master_cx = ox + 55
-    master_y = oy + 34
-    layout['J1'] = (master_cx - 12.7, master_y, 0)  # Left 1x20
-    layout['J2'] = (master_cx + 12.7, master_y, 0)  # Right 1x20
-
-    # --- Slave DevKit sockets (2x2 grid, bottom-left) ---
-    # Each slave: pair of 1x8 headers, ~24mm apart
-    # 1x8 headers span 7*2.54 = 17.78mm. Need 22mm+ between rows.
+    # --- Slave DevKit sockets (2x2 grid, devboards hang over top/bottom edges) ---
+    # 30mm X spacing between adjacent pairs; 25.4mm between LEFT/RIGHT within each pair
+    # Top row: pairs A+B near top edge; Bottom row: pairs C+D near bottom edge
+    slave_x0 = ox + 4          # first pair LEFT socket X
+    slave_y_top = oy + 4       # top row Y (devboards hang over top)
+    slave_y_bot = oy + bh - 20 # bottom row Y (devboards hang over bottom)
     slave_pairs = [
-        ('J8',  'J15', ox + 5,  oy + 54),   # Slave A (top-left)
-        ('J9',  'J16', ox + 48, oy + 54),   # Slave B (top-right)
-        ('J10', 'J17', ox + 5,  oy + 78),   # Slave C (bottom-left)
-        ('J11', 'J18', ox + 48, oy + 78),   # Slave D (bottom-right)
+        ('J8',  'J15', slave_x0,      slave_y_top),   # Slave A (top-left)
+        ('J9',  'J16', slave_x0 + 30, slave_y_top),   # Slave B (top-right)
+        ('J10', 'J17', slave_x0,      slave_y_bot),   # Slave C (bottom-left)
+        ('J11', 'J18', slave_x0 + 30, slave_y_bot),   # Slave D (bottom-right)
     ]
     for left, right, sx, sy in slave_pairs:
-        layout[left]  = (sx,      sy, 0)
-        layout[right] = (sx + 24, sy, 0)
+        layout[left]  = (sx, sy, 0)                # LEFT (3V3)
+        layout[right] = (sx + 25.4, sy, 0)         # RIGHT (GND) 25.4mm to the right
 
     # ================================================================
-    # ZONE B — ADC ANALOG (right half, top, x: ox+95 to ox+200, y: oy to oy+42)
+    # RIGHT SECTION — ANALOG (x: ox+70 to ox+100, 30mm wide)
+    # Connectors/jacks on edges, ICs in interior
     # ================================================================
 
-    # J_AFE on right edge (cable from preamp board)
-    layout['J3'] = (ox + bw - 5, oy + 20, 90)  # Rotated vertical on right edge
+    # --- Right edge connectors (inset for footprint clearance) ---
+    layout['J7']  = (104.5, 35.5, 90)              # Headphone jack (90° CCW)
+    layout['J12'] = (104.5, 49.5, 90)              # Line output jack (90° CCW)
+    layout['J13'] = (107, 63, 0)                   # J_OUT_L
+    layout['J14'] = (107, 73.92, 0)               # J_OUT_R
 
-    # ES8388 #1 (channels 1-4)
-    layout['U1'] = (ox + 120, oy + 16, 0)
-    # ES8388 #2 (channels 5-8)
-    layout['U2'] = (ox + 150, oy + 16, 0)
+    # --- Bottom of right section: AFE preamp cable (2x5) ---
+    layout['J3']  = (79.46, 87.54, 90)            # J_AFE preamp cable
 
-    # ================================================================
-    # ZONE C — DAC / OUTPUT ANALOG (right half, bottom, y: oy+45 to oy+100)
-    # ================================================================
+    # --- Top edge: volume pots (inset from edge) ---
+    layout['RV1'] = (ox + 76, oy + 6, 0)         # HP VOL L
+    layout['RV2'] = (ox + 86, oy + 6, 0)         # HP VOL R
 
-    # HT8988A DAC codec
-    layout['U5'] = (ox + 100, oy + 52, 0)
+    # --- Bottom edge: footswitch connectors (right side) ---
+    layout['J5'] = (ox + 86, oy + bh - 6, 0)     # Footswitch 1
+    layout['J6'] = (ox + bw - 8, oy + bh - 6, 0) # Footswitch 2
 
-    # NE5532 summing amps — spread more
-    layout['U9']  = (ox + 100, oy + 70, 0)      # Summing amp (L+R inverting)
-    layout['U10'] = (ox + 100, oy + 84, 0)      # Output buffer (L+R follower)
+    # --- Interior ICs — single column at x=84, ~10mm spacing ---
+    layout['U1']  = (84, 34, 0)                   # ES8388 ADC #1
+    layout['U2']  = (84, 43.94, 0)                # ES8388 ADC #2
+    layout['U5']  = (84, 54.4, 0)                 # HT8988A DAC
+    layout['U9']  = (84, 63.9, 0)                 # NE5532 summing amp
+    layout['U10'] = (84, 74, 0)                   # NE5532 output buffer
 
-    # CD4052B analog muxes — more space between
-    layout['U7'] = (ox + 138, oy + 55, 0)       # Mux #1 (primary routing)
-    layout['U8'] = (ox + 138, oy + 75, 0)       # Mux #2 (wet/dry split)
-
-    # Audio jacks on right edge — more vertical spread
-    layout['J7']  = (ox + bw - 4, oy + 50, 0)   # Headphone 3.5mm jack
-    layout['J12'] = (ox + bw - 4, oy + 68, 0)   # Line output 3.5mm jack
-
-    # Volume pots near headphone jack — move left to avoid jack overlap
-    layout['RV1'] = (ox + bw - 26, oy + 48, 0)  # HP volume L
-    layout['RV2'] = (ox + bw - 26, oy + 64, 0)  # HP volume R
-
-    # Output headers (6.35mm jack placeholders) on bottom-right
-    layout['J13'] = (ox + bw - 6, oy + 78, 0)   # J_OUT_L
-    layout['J14'] = (ox + bw - 6, oy + 86, 0)   # J_OUT_R
-
-    # Footswitch connectors on bottom edge of analog zone
-    layout['J5'] = (ox + 108, oy + bh - 5, 0)   # FS1
-    layout['J6'] = (ox + 125, oy + bh - 5, 0)   # FS2
+    # Muxes — right of IC column
+    layout['U7']  = (98, 63.5, 0)                  # CD4052B mux #1
+    layout['U8']  = (98, 75.5, 0)                  # CD4052B mux #2
 
     # ================================================================
-    # Mounting holes at 4 corners
+    # Mounting holes (2 diagonal corners)
     # ================================================================
     mh_refs = sorted([r for r in fps if r.startswith('H')])
     mh_positions = [
-        (ox + 4, oy + 4),
-        (ox + bw - 4, oy + 4),
-        (ox + 40, oy + bh - 4),      # H3: between slave A/B columns (clear of pins)
-        (ox + bw - 4, oy + bh - 4),  # H4: right side (clear of headers)
+        (ox + 3, oy + 3),
+        (ox + bw - 3, oy + bh - 3),
     ]
-    for i, ref in enumerate(mh_refs[:4]):
+    for i, ref in enumerate(mh_refs[:2]):
         layout[ref] = (mh_positions[i][0], mh_positions[i][1], 0)
 
     # ================================================================
@@ -501,41 +657,49 @@ def layout_main():
     for k, v in sorted(assignments.items()):
         print(f"    {k}: {sorted(v)}")
 
+    # Separate right-section passives from left-section passives
+    right_section_x = ox + 70  # boundary between left and right sections
+    right_passives = []
     for anchor_ref, passive_list in assignments.items():
         if anchor_ref == 'UNASSIGNED' or anchor_ref not in layout:
             continue
         ax, ay, _ = layout[anchor_ref]
-        # Place passives to the right of anchor, or left if near right edge
-        if ax > ox + bw - 35:
-            place_passives_near_anchor(ax, ay, passive_list, layout, x_dir=-1)
+        if ax >= right_section_x:
+            right_passives.extend(passive_list)
         else:
             place_passives_near_anchor(ax, ay, passive_list, layout, x_dir=1)
 
-    # Handle unassigned passives — place in available space
+    # Place all right-section passives using dedicated gap-filling placer
+    if right_passives:
+        print(f"  Right-section passives ({len(right_passives)}): {sorted(right_passives)}")
+        place_passives_right_section(right_passives, layout, ox, oy, bw, bh)
+
+    # Handle unassigned passives — place in left section available space
     unassigned = assignments.get('UNASSIGNED', [])
     if unassigned:
         print(f"  Unassigned passives: {sorted(unassigned)}")
         for i, ref in enumerate(sorted(unassigned)):
             col = i % 8
             row = i // 8
-            layout[ref] = (ox + 95 + col * 4, oy + 38 + row * 3, 0)
+            layout[ref] = (ox + 71 + col * 4, oy + 30 + row * 3, 0)
 
     # Any remaining unplaced components
     remaining = [r for r in fps if r not in layout]
     if remaining:
         print(f"  Remaining unplaced: {remaining}")
         for i, ref in enumerate(remaining):
-            layout[ref] = (ox + 5 + (i % 10) * 8, oy + bh - 12 + (i // 10) * 5, 0)
+            layout[ref] = (ox + 5 + (i % 10) * 7, oy + bh - 10 + (i // 10) * 4, 0)
 
     place_components_grid(board, fps, layout)
     add_board_outline(board, ox, oy, bw, bh, corner_radius=2)
+    add_silkscreen_labels(board, components, fps, layout)
 
     # Ground copper pours
     # DGND on F.Cu and B.Cu (full board — connects through ferrite to AGND)
     add_ground_pour(board, "DGND", "F.Cu", ox, oy, bw, bh)
     add_ground_pour(board, "DGND", "B.Cu", ox, oy, bw, bh)
     # AGND pour on inner layer In2.Cu for analog right half
-    add_ground_pour(board, "AGND", "In2.Cu", ox + 90, oy, bw - 90, bh)
+    add_ground_pour(board, "AGND", "In2.Cu", ox + 67, oy, bw - 67, bh)  # covers right 33mm
 
     out_path = str(board_dir / "layout.kicad_pcb")
     pcbnew.SaveBoard(out_path, board)
@@ -557,16 +721,13 @@ def layout_preamp():
 
     board, fps = create_board("preamp", components, nets, {'layers': 4})
 
-    # Preamp board: ~160x80mm (large, 165 components, 8 channels + VGND)
-    bw, bh = 160, 80
+    # Preamp board: ~100x60mm (size-optimized v2.3, 151 components, 13x NE5532)
+    bw, bh = 100, 60
     ox, oy = 10, 10
 
     layout = {}
 
-    # Group components by channel (1-8)
-    # Each channel has: input coupling cap, buffer opamp, gain opamp, filter opamp,
-    # trimpot, various R/C, mono jack
-    channel_width = 18  # mm per channel
+    channel_width = 11  # mm per channel (tighter with 0402 passives)
 
     # Op-amps (NE5532): arrange by function
     opamp_refs = sorted([r for r in fps if r.startswith('U')])
@@ -574,63 +735,67 @@ def layout_preamp():
     # Input headers along left edge
     input_refs = sorted([r for r in fps if 'J_IN' in fps[r].GetValue()])
     for i, ref in enumerate(input_refs):
-        layout[ref] = (ox + 3, oy + 8 + i * 8, 0)
+        layout[ref] = (ox + 2, oy + 6 + i * 6.5, 0)
 
-    # Mono jacks along top edge (buffered direct outputs)
-    jack_refs = sorted([r for r in fps if 'mono' in fps[r].GetFPIDAsString().lower() or 'JACK' in fps[r].GetValue().upper()])
-    for i, ref in enumerate(jack_refs):
-        layout[ref] = (ox + 20 + i * channel_width, oy + 3, 0)
+    # Direct output solder pads along top edge (2-pin headers)
+    dout_refs = sorted([r for r in fps if 'J_DOUT' in fps[r].GetValue()])
+    for i, ref in enumerate(dout_refs):
+        layout[ref] = (ox + 14 + i * channel_width, oy + 2, 0)
 
     # Output connector on right
     for ref in fps:
         val = fps[ref].GetValue()
         if 'J_OUT' in val:
-            layout[ref] = (ox + bw - 5, oy + bh/2, 0)
+            layout[ref] = (ox + bw - 4, oy + bh / 2, 0)
         elif 'J_PWR' in val:
-            layout[ref] = (ox + bw - 5, oy + 8, 0)
+            layout[ref] = (ox + bw - 4, oy + 6, 0)
 
-    # Trimpots in a row
+    # Trimpots in a row along bottom
     trim_refs = sorted([r for r in fps if 'trim' in fps[r].GetFPIDAsString().lower() or 'TRIM' in fps[r].GetValue().upper()])
     for i, ref in enumerate(trim_refs):
-        layout[ref] = (ox + 20 + i * channel_width, oy + bh - 8, 0)
+        layout[ref] = (ox + 14 + i * channel_width, oy + bh - 6, 0)
 
-    # Op-amps arranged in rows by function
-    # Row 1: Input buffers (y=20)
-    # Row 2: Gain stages (y=35)
-    # Row 3: Filter stages (y=50)
-    # Row 4: Direct output buffers (y=65)
+    # Op-amps arranged in rows by function (13 ICs: 4 buf + 4 gain + 4 aaf + 1 vgnd)
+    # Row 0: Input buffers (y=14)
+    # Row 1: Gain stages (y=28)
+    # Row 2: Filter stages (y=42)
     for i, ref in enumerate(opamp_refs):
-        row = i // 8 if len(opamp_refs) > 8 else 0
-        col = i % 8
-        y_base = oy + 20 + row * 15
-        layout[ref] = (ox + 20 + col * channel_width, y_base, 0)
+        if i < len(opamp_refs) - 1:  # All except VGND
+            row = i // 4
+            col = i % 4
+            # Place 4 ICs per row, each serving 2 channels
+            layout[ref] = (ox + 16 + col * 2 * channel_width, oy + 14 + row * 14, 0)
+        else:
+            # VGND opamp — near power input
+            layout[ref] = (ox + bw - 16, oy + 14, 0)
 
     # Passive components near their associated channels
     cap_refs = sorted([r for r in fps if r.startswith('C') and r not in layout])
     for i, ref in enumerate(cap_refs):
         ch = i % 8
         row = i // 8
-        layout[ref] = (ox + 22 + ch * channel_width, oy + 15 + row * 5, 0)
+        layout[ref] = (ox + 15 + ch * channel_width, oy + 10 + row * 4, 0)
 
     res_refs = sorted([r for r in fps if r.startswith('R') and r not in layout])
     for i, ref in enumerate(res_refs):
         ch = i % 8
         row = i // 8
-        layout[ref] = (ox + 24 + ch * channel_width, oy + 15 + row * 5, 0)
+        layout[ref] = (ox + 16 + ch * channel_width, oy + 10 + row * 4, 0)
 
-    # Mounting holes
+    # Mounting holes (2 diagonal corners)
     mh_refs = sorted([r for r in fps if r.startswith('H')])
-    mh_positions = [(ox + 3, oy + 3), (ox + bw - 3, oy + 3), (ox + 3, oy + bh - 3), (ox + bw - 3, oy + bh - 3)]
-    for i, ref in enumerate(mh_refs[:4]):
+    mh_positions = [(ox + 3, oy + 3), (ox + bw - 3, oy + bh - 3)]
+    for i, ref in enumerate(mh_refs[:2]):
         layout[ref] = (mh_positions[i][0], mh_positions[i][1], 0)
 
     # Remaining
     remaining = [r for r in fps if r not in layout]
     for i, ref in enumerate(remaining):
-        layout[ref] = (ox + 15 + (i % 12) * 12, oy + bh - 15 + (i // 12) * 5, 0)
+        layout[ref] = (ox + 12 + (i % 10) * 8, oy + bh - 12 + (i // 10) * 4, 0)
 
     place_components_grid(board, fps, layout)
     add_board_outline(board, ox, oy, bw, bh, corner_radius=2)
+    add_silkscreen_labels(board, components, fps, layout)
     add_ground_pour(board, "GND", "F.Cu", ox, oy, bw, bh)
     add_ground_pour(board, "GND", "B.Cu", ox, oy, bw, bh)
 

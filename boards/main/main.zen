@@ -96,8 +96,8 @@ Resistor(name="R_CC1", value=Resistance("5.1k"), package="0402", P1=CC1, P2=DGND
 Resistor(name="R_CC2", value=Resistance("5.1k"), package="0402", P1=CC2, P2=DGND)
 
 # VBUS bulk decoupling
-Capacitor(name="C_VBUS_BULK", value=Capacitance("100uF"), package="1210", P1=VBUS, P2=DGND)
-Capacitor(name="C_VBUS_BYP", value=Capacitance("100nF"), package="0603", P1=VBUS, P2=DGND)
+Capacitor(name="C_VBUS_BULK", value=Capacitance("47uF"), package="0805", P1=VBUS, P2=DGND)
+Capacitor(name="C_VBUS_BYP", value=Capacitance("100nF"), package="0402", P1=VBUS, P2=DGND)
 
 # =============================================================================
 # LiPo charger (MCP73831)
@@ -116,11 +116,11 @@ U_CHG = MCP73831(
 )
 
 # RPROG = 4.7k for ~210mA charge current (IREG = 1000V / RPROG)
-Resistor(name="R_PROG", value=Resistance("4.7k"), package="0603", P1=PROG_PIN, P2=DGND)
+Resistor(name="R_PROG", value=Resistance("4.7k"), package="0402", P1=PROG_PIN, P2=DGND)
 
 # Charge status LED (active low open-drain)
 LED_STAT = Net("LED_STAT")
-Resistor(name="R_LED", value=Resistance("1k"), package="0603", P1=VBUS, P2=LED_STAT)
+Resistor(name="R_LED", value=Resistance("1k"), package="0402", P1=VBUS, P2=LED_STAT)
 Led(name="D_STAT", package="0603", color="green", A=LED_STAT, K=STAT_N)
 
 # =============================================================================
@@ -143,9 +143,9 @@ PinHeader(
     P2=DGND,
 )
 
-# Battery decoupling (100uF + 100nF)
-Capacitor(name="C_BAT_BULK", value=Capacitance("100uF"), package="1210", P1=VBAT, P2=DGND)
-Capacitor(name="C_BAT_BYP", value=Capacitance("100nF"), package="0603", P1=VBAT, P2=DGND)
+# Battery decoupling (47uF + 100nF)
+Capacitor(name="C_BAT_BULK", value=Capacitance("47uF"), package="0805", P1=VBAT, P2=DGND)
+Capacitor(name="C_BAT_BYP", value=Capacitance("100nF"), package="0402", P1=VBAT, P2=DGND)
 
 # =============================================================================
 # VBAT voltage divider for battery monitoring -> GPIO36
@@ -155,9 +155,9 @@ Capacitor(name="C_BAT_BYP", value=Capacitance("100nF"), package="0603", P1=VBAT,
 VBAT_DIV = Net("VBAT_DIV")
 VBAT_MON = Net("VBAT_MON")
 
-Resistor(name="R_VMON_TOP", value=Resistance("100k"), package="0603", P1=VBAT, P2=VBAT_DIV)
-Resistor(name="R_VMON_BOT", value=Resistance("100k"), package="0603", P1=VBAT_DIV, P2=DGND)
-Capacitor(name="C_VMON", value=Capacitance("100nF"), package="0603", P1=VBAT_DIV, P2=DGND)
+Resistor(name="R_VMON_TOP", value=Resistance("100k"), package="0402", P1=VBAT, P2=VBAT_DIV)
+Resistor(name="R_VMON_BOT", value=Resistance("100k"), package="0402", P1=VBAT_DIV, P2=DGND)
+Capacitor(name="C_VMON", value=Capacitance("100nF"), package="0402", P1=VBAT_DIV, P2=DGND)
 
 # =============================================================================
 # Analog LDO: LP2985-3.3 (ultra-low noise, 150mA max)
@@ -193,7 +193,7 @@ U_DVDD = AP2114H(
 Decoupling(name="DC_DVDD", VCC=DVDD, GND=DGND)
 
 # Additional bulk cap for stability
-Capacitor(name="C_DVDD_BULK", value=Capacitance("22uF"), package="1206", P1=DVDD, P2=DGND)
+Capacitor(name="C_DVDD_BULK", value=Capacitance("22uF"), package="0805", P1=DVDD, P2=DGND)
 
 # =============================================================================
 # Ferrite bead: AGND <-> DGND bridge (single star point)
@@ -301,7 +301,7 @@ ESP32DevKit(
 )
 
 # UART TX pull-up (wired-OR debug bus from slave GPIO41, 10k to DVDD)
-Resistor(name="R_UART_PU", value=Resistance("10k"), package="0603", P1=DVDD, P2=UART_SLAVE_TX)
+Resistor(name="R_UART_PU", value=Resistance("10k"), package="0402", P1=DVDD, P2=UART_SLAVE_TX)
 
 # ESP32 decoupling
 Decoupling(name="DC_ESP", VCC=DVDD, GND=DGND)
@@ -492,7 +492,7 @@ Decoupling(name="DC_DVDD1", VCC=DVDD, GND=DGND)
 # =============================================================================
 
 AD0_HIGH = Net("AD0_HIGH")
-Resistor(name="R_AD0", value=Resistance("10k"), package="0603", P1=AVDD, P2=AD0_HIGH)
+Resistor(name="R_AD0", value=Resistance("10k"), package="0402", P1=AVDD, P2=AD0_HIGH)
 
 VREF_A2 = Net("VREF_A2")
 VRP_A2 = Net("VRP_A2")
@@ -660,8 +660,8 @@ HP_AC_L = Net("HP_AC_L")
 HP_AC_R = Net("HP_AC_R")
 
 # HP output coupling caps
-Capacitor(name="C_HPL", value=Capacitance("100uF"), package="1210", P1=HP_OUTL, P2=HP_AC_L)
-Capacitor(name="C_HPR", value=Capacitance("100uF"), package="1210", P1=HP_OUTR, P2=HP_AC_R)
+Capacitor(name="C_HPL", value=Capacitance("47uF"), package="0805", P1=HP_OUTL, P2=HP_AC_L)
+Capacitor(name="C_HPR", value=Capacitance("47uF"), package="0805", P1=HP_OUTR, P2=HP_AC_R)
 
 # Headphone volume pots (dual ganged modeled as two singles)
 AudioPot(name="RV_HPL", value=Resistance("10k"), CW=HP_AC_L, WIPER=HP_VOL_L, CCW=AGND)
@@ -697,18 +697,18 @@ OUT_R = Net("OUT_R")
 # Left summing node: channels 1-4 (from preamp SIGNAL lines)
 for i in range(4):
     ch = str(i + 1)
-    Resistor(name="R_SUM_L" + ch, value=Resistance("10k"), package="0603", P1=SIGNAL[i], P2=FB_L)
+    Resistor(name="R_SUM_L" + ch, value=Resistance("10k"), package="0402", P1=SIGNAL[i], P2=FB_L)
 
 # Left feedback resistor (1.2k for unity gain of 8-input sum)
-Resistor(name="R_FB_L", value=Resistance("1.2k"), package="0603", P1=FB_L, P2=SUM_L)
+Resistor(name="R_FB_L", value=Resistance("1.2k"), package="0402", P1=FB_L, P2=SUM_L)
 
 # Right summing node: channels 5-8 (from preamp SIGNAL lines)
 for i in range(4, 8):
     ch = str(i + 1)
-    Resistor(name="R_SUM_R" + ch, value=Resistance("10k"), package="0603", P1=SIGNAL[i], P2=FB_R)
+    Resistor(name="R_SUM_R" + ch, value=Resistance("10k"), package="0402", P1=SIGNAL[i], P2=FB_R)
 
 # Right feedback resistor
-Resistor(name="R_FB_R", value=Resistance("1.2k"), package="0603", P1=FB_R, P2=SUM_R)
+Resistor(name="R_FB_R", value=Resistance("1.2k"), package="0402", P1=FB_R, P2=SUM_R)
 
 # Summing amp sections (inverting)
 opa_sum_l = Opamp(name="SUM_L", IN_P=AGND, IN_N=FB_L, OUT=SUM_L)
@@ -803,11 +803,11 @@ Decoupling(name="DC_MUX2", VCC=AVDD, GND=AGND)
 MUX1_X_FILT = Net("MUX1_X_FILT")
 MUX1_Y_FILT = Net("MUX1_Y_FILT")
 
-Resistor(name="R_RC_LX", value=Resistance("1k"), package="0603", P1=MUX1_X_OUT, P2=MUX1_X_FILT)
-Capacitor(name="C_RC_LX", value=Capacitance("100nF"), package="0603", P1=MUX1_X_FILT, P2=AGND)
+Resistor(name="R_RC_LX", value=Resistance("1k"), package="0402", P1=MUX1_X_OUT, P2=MUX1_X_FILT)
+Capacitor(name="C_RC_LX", value=Capacitance("100nF"), package="0402", P1=MUX1_X_FILT, P2=AGND)
 
-Resistor(name="R_RC_LY", value=Resistance("1k"), package="0603", P1=MUX1_Y_OUT, P2=MUX1_Y_FILT)
-Capacitor(name="C_RC_LY", value=Capacitance("100nF"), package="0603", P1=MUX1_Y_FILT, P2=AGND)
+Resistor(name="R_RC_LY", value=Resistance("1k"), package="0402", P1=MUX1_Y_OUT, P2=MUX1_Y_FILT)
+Capacitor(name="C_RC_LY", value=Capacitance("100nF"), package="0402", P1=MUX1_Y_FILT, P2=AGND)
 
 # =============================================================================
 # Output stage (per channel): coupling cap + series resistor
@@ -820,13 +820,13 @@ JACK_R_RING = Net("JACK_R_RING")
 
 # Left output
 OUT_L_AC = Net("OUT_L_AC")
-Capacitor(name="C_OUTL", value=Capacitance("100uF"), package="1210", P1=MUX1_X_FILT, P2=OUT_L_AC)
-Resistor(name="R_OUTL", value=Resistance("1k"), package="0603", P1=OUT_L_AC, P2=JACK_L_TIP)
+Capacitor(name="C_OUTL", value=Capacitance("47uF"), package="0805", P1=MUX1_X_FILT, P2=OUT_L_AC)
+Resistor(name="R_OUTL", value=Resistance("1k"), package="0402", P1=OUT_L_AC, P2=JACK_L_TIP)
 
 # Right output
 OUT_R_AC = Net("OUT_R_AC")
-Capacitor(name="C_OUTR", value=Capacitance("100uF"), package="1210", P1=MUX1_Y_FILT, P2=OUT_R_AC)
-Resistor(name="R_OUTR", value=Resistance("1k"), package="0603", P1=OUT_R_AC, P2=JACK_R_TIP)
+Capacitor(name="C_OUTR", value=Capacitance("47uF"), package="0805", P1=MUX1_Y_FILT, P2=OUT_R_AC)
+Resistor(name="R_OUTR", value=Resistance("1k"), package="0402", P1=OUT_R_AC, P2=JACK_R_TIP)
 
 # 6.35mm TRS jacks (3-pin headers as placeholders: Tip, Ring, Sleeve)
 PinHeader(
@@ -855,8 +855,8 @@ PinHeader(name="J_FS2", pins=2, rows=1, mount="THT", pitch="2.54mm", P1=Net("FS2
 #                                                                             #
 ###############################################################################
 
-# Mounting holes (4 corners)
-for i in range(4):
+# Mounting holes (2 diagonal corners)
+for i in range(2):
     MountingHole(name="H" + str(i + 1), diameter="M3", P1=DGND)
 
 Board(

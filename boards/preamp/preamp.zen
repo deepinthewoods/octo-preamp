@@ -1,19 +1,21 @@
 """
-AFE Board - 8-Channel Guitar Preamp
+AFE Board - 8-Channel Guitar Preamp (size-optimized)
 
 8 per-string pickup channels with input coupling, buffer, variable gain
 (trimpot), and anti-alias filtering. Plus 8 buffered direct outputs with
-6.5mm mono jacks. Powered from 3.3V analog rail with 1.65V virtual
-ground mid-rail reference.
+2-pin solder pads for wire soldering. Powered from 3.3V analog rail with
+1.65V virtual ground mid-rail reference.
 
-v2.1 changes (from v2.0):
-- R02: Upgraded anti-alias filter from passive RC to Sallen-Key 2nd-order
-       Butterworth (8x NE5532 voltage followers, 4x NE5532 dual ICs)
-- R06: Replaced TL072 VGND buffer with NE5532 (all op-amps now NE5532)
-- R06: Updated gain range docstring to 0-21dB (1 + 10k/1k = 11x = 20.8dB)
+v2.2 changes (from v2.1):
+- All 0603 passives downsized to 0402
+- Decoupling bulk 0805->0603, bypass 0603->0402
+- VGND bulk cap 100uF 1206 -> 47uF 0805
+- 8x mono jacks replaced with 2-pin solder pad headers
+- Removed 4x dedicated direct output buffer NE5532s (input buffer drives both paths)
+- Mounting holes reduced from 4 to 2
 
-Total op-amp ICs: 17x NE5532 dual
-  4x input buffers, 4x direct output buffers, 4x gain stages,
+Total op-amp ICs: 13x NE5532 dual
+  4x input buffers, 4x gain stages,
   4x anti-alias filters, 1x virtual ground
 """
 
@@ -28,7 +30,6 @@ MountingHole = Module("@stdlib/generics/MountingHole.zen")
 
 NE5532 = Module("../../components/ne5532/ne5532.zen")
 Trimpot = Module("../../components/trimpot/trimpot.zen")
-MonoJack = Module("../../components/mono_jack/mono_jack.zen")
 Decoupling = Module("../../modules/decoupling/decoupling.zen")
 
 # =============================================================================
@@ -45,13 +46,13 @@ VGND_NET = Net("VGND")
 # =============================================================================
 
 MID_NODE = Net("VGND_MID")
-Resistor(name="R_DIV_TOP", value=Resistance("10k"), package="0603", P1=AVDD, P2=MID_NODE)
-Resistor(name="R_DIV_BOT", value=Resistance("10k"), package="0603", P1=MID_NODE, P2=GND)
+Resistor(name="R_DIV_TOP", value=Resistance("10k"), package="0402", P1=AVDD, P2=MID_NODE)
+Resistor(name="R_DIV_BOT", value=Resistance("10k"), package="0402", P1=MID_NODE, P2=GND)
 
 vgnd_opa = voltage_follower("VGND_BUF", IN=MID_NODE, OUT=VGND_NET)
 
-Capacitor(name="C_VGND_BULK", value=Capacitance("100uF"), package="1206", P1=VGND_NET, P2=GND)
-Capacitor(name="C_VGND_BYP", value=Capacitance("100nF"), package="0603", P1=VGND_NET, P2=GND)
+Capacitor(name="C_VGND_BULK", value=Capacitance("47uF"), package="0805", P1=VGND_NET, P2=GND)
+Capacitor(name="C_VGND_BYP", value=Capacitance("100nF"), package="0402", P1=VGND_NET, P2=GND)
 
 NE5532(
     name="U_VGND",
@@ -73,7 +74,6 @@ PICKUP = [Net("PICKUP_" + str(i + 1)) for i in range(8)]
 SIGNAL = [Net("SIGNAL_" + str(i + 1)) for i in range(8)]
 
 buf_opas = []
-dout_opas = []
 gain_opas = []
 aaf_opas = []
 
@@ -81,7 +81,6 @@ for i in range(8):
     ch = str(i + 1)
     COUPLED = Net("COUPLED_" + ch)
     BUFFERED = Net("BUFFERED_" + ch)
-    DIRECT_OUT = Net("DIRECT_OUT_" + ch)
     DIRECT_AC = Net("DIRECT_AC_" + ch)
     DIRECT_SER = Net("DIRECT_SER_" + ch)
     FB_NODE = Net("FB_" + ch)
@@ -89,31 +88,33 @@ for i in range(8):
     FILTERED = Net("FILTERED_" + ch)
 
     # Input coupling cap
-    Capacitor(name="C_IN" + ch, value=Capacitance("10nF"), package="0603", P1=PICKUP[i], P2=COUPLED)
+    Capacitor(name="C_IN" + ch, value=Capacitance("10nF"), package="0402", P1=PICKUP[i], P2=COUPLED)
 
     # Input bias to virtual ground (1M sets input impedance)
-    Resistor(name="R_BIAS" + ch, value=Resistance("1M"), package="0603", P1=COUPLED, P2=VGND_NET)
+    Resistor(name="R_BIAS" + ch, value=Resistance("1M"), package="0402", P1=COUPLED, P2=VGND_NET)
 
     # Buffer: voltage follower
     buf_opa = voltage_follower("BUF" + ch, IN=COUPLED, OUT=BUFFERED)
     buf_opas.append(buf_opa)
 
     # =========================================================================
-    # Buffered direct output (tapped after input buffer, before gain)
-    # Unity gain follower -> 10uF coupling cap -> 600R series -> mono jack
+    # Direct output (tapped after input buffer, before gain)
+    # No dedicated buffer — NE5532 input buffer drives both gain stage
+    # and direct out (600R series provides short-circuit protection)
     # =========================================================================
 
-    dout_opa = voltage_follower("DOUT_BUF" + ch, IN=BUFFERED, OUT=DIRECT_OUT)
-    dout_opas.append(dout_opa)
-
     # DC-blocking coupling cap
-    Capacitor(name="C_DOUT" + ch, value=Capacitance("10uF"), package="0805", P1=DIRECT_OUT, P2=DIRECT_AC)
+    Capacitor(name="C_DOUT" + ch, value=Capacitance("10uF"), package="0805", P1=BUFFERED, P2=DIRECT_AC)
 
     # Series output resistor for cable driving and short-circuit protection
-    Resistor(name="R_DOUT" + ch, value=Resistance("600"), package="0603", P1=DIRECT_AC, P2=DIRECT_SER)
+    Resistor(name="R_DOUT" + ch, value=Resistance("600"), package="0402", P1=DIRECT_AC, P2=DIRECT_SER)
 
-    # 6.5mm mono jack
-    MonoJack(name="J_DOUT" + ch, TIP=DIRECT_SER, SLEEVE=GND)
+    # Direct output solder pads (2-pin THT for wire soldering)
+    PinHeader(
+        name="J_DOUT" + ch,
+        pins=2, rows=1, mount="THT", pitch="2.54mm",
+        P1=DIRECT_SER, P2=GND,
+    )
 
     # =========================================================================
     # Gain stage: non-inverting, gain = 1 + Rf/Rg
@@ -121,7 +122,7 @@ for i in range(8):
     # Trimpot: CW -> output, WIPER -> feedback node, CCW -> GND side
     # =========================================================================
 
-    Resistor(name="R_G" + ch, value=Resistance("1k"), package="0603", P1=VGND_NET, P2=FB_NODE)
+    Resistor(name="R_G" + ch, value=Resistance("1k"), package="0402", P1=VGND_NET, P2=FB_NODE)
 
     # Trimpot replaces fixed 10k R_F
     Trimpot(name="RV_F" + ch, CW=AMPLIFIED, WIPER=FB_NODE, CCW=FB_NODE)
@@ -135,10 +136,10 @@ for i in range(8):
     #           C1: AAF_NODE->GND, C2: FILTERED->AAF_NODE (positive feedback)
     AAF_NODE = Net("AAF_NODE_" + ch)
     AAF_OUT = Net("AAF_OUT_" + ch)
-    Resistor(name="R_AAF1_" + ch, value=Resistance("7.5k"), package="0603", P1=AMPLIFIED, P2=AAF_NODE)
-    Resistor(name="R_AAF2_" + ch, value=Resistance("7.5k"), package="0603", P1=AAF_NODE, P2=AAF_OUT)
-    Capacitor(name="C_AAF1_" + ch, value=Capacitance("1nF"), package="0603", dielectric="NP0", P1=AAF_NODE, P2=GND)
-    Capacitor(name="C_AAF2_" + ch, value=Capacitance("1nF"), package="0603", dielectric="NP0", P1=FILTERED, P2=AAF_NODE)
+    Resistor(name="R_AAF1_" + ch, value=Resistance("7.5k"), package="0402", P1=AMPLIFIED, P2=AAF_NODE)
+    Resistor(name="R_AAF2_" + ch, value=Resistance("7.5k"), package="0402", P1=AAF_NODE, P2=AAF_OUT)
+    Capacitor(name="C_AAF1_" + ch, value=Capacitance("1nF"), package="0402", dielectric="NP0", P1=AAF_NODE, P2=GND)
+    Capacitor(name="C_AAF2_" + ch, value=Capacitance("1nF"), package="0402", dielectric="NP0", P1=FILTERED, P2=AAF_NODE)
     aaf_opa = voltage_follower("AAF" + ch, IN=AAF_OUT, OUT=FILTERED)
     aaf_opas.append(aaf_opa)
 
@@ -146,9 +147,8 @@ for i in range(8):
     Capacitor(name="C_OUT" + ch, value=Capacitance("10uF"), package="0805", P1=FILTERED, P2=SIGNAL[i])
 
 # =============================================================================
-# Physical op-amp mapping (17x NE5532 dual ICs total)
+# Physical op-amp mapping (13x NE5532 dual ICs total)
 # Input buffer:      4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
-# Direct out buffer: 4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
 # Gain:              4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
 # Anti-alias filter: 4x NE5532 (channels paired 1+2, 3+4, 5+6, 7+8)
 # Virtual ground:    1x NE5532 (U_VGND, one section unused)
@@ -168,16 +168,6 @@ for pair_idx in range(4):
         OPA_B=buf_opas[ch_b],
     )
     Decoupling(name="DC_BUF" + pair_name, VCC=AVDD, GND=GND)
-
-    # Direct output buffers (new, NE5532)
-    NE5532(
-        name="U_DOUT" + pair_name,
-        VP=AVDD,
-        VN=GND,
-        OPA_A=dout_opas[ch_a],
-        OPA_B=dout_opas[ch_b],
-    )
-    Decoupling(name="DC_DOUT" + pair_name, VCC=AVDD, GND=GND)
 
     # Gain stage
     NE5532(
@@ -249,7 +239,7 @@ PinHeader(
 # Mounting holes (M3, 4 corners)
 # =============================================================================
 
-for i in range(4):
+for i in range(2):
     MountingHole(name="H" + str(i + 1), diameter="M3", P1=GND)
 
 # =============================================================================

@@ -11,7 +11,7 @@ bypass_value = config("bypass_value", Capacitance, default=Capacitance("100nF"))
 Capacitor(
     name="C_BULK",
     value=bulk_value,
-    package="0805",
+    package="0603",
     dielectric="X5R",
     P1=VCC,
     P2=GND,
@@ -20,7 +20,7 @@ Capacitor(
 Capacitor(
     name="C_BYPASS",
     value=bypass_value,
-    package="0603",
+    package="0402",
     dielectric="X7R",
     P1=VCC,
     P2=GND,

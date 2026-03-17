@@ -58,17 +58,60 @@ Manual or assisted routing is needed for traces.
 ### 5. Export for manufacturing
 
 ```bash
-kicad-cli pcb export gerbers --output ./gerbers/ boards/<board>/layout/layout.kicad_pcb
-kicad-cli pcb export drill --output ./gerbers/ boards/<board>/layout/layout.kicad_pcb
-kicad-cli pcb export pdf --layers "F.Cu,Edge.Cuts,F.SilkS" --output board.pdf boards/<board>/layout/layout.kicad_pcb
+# Gerbers (use kicad-cli, not the MCP tool which fails to write layer files)
+kicad-cli pcb export gerbers \
+  -l "F.Cu,B.Cu,In1.Cu,In2.Cu,F.Mask,B.Mask,F.Silkscreen,B.Silkscreen,F.Paste,B.Paste,Edge.Cuts" \
+  -o boards/<board>/layout/gerber/ \
+  boards/<board>/layout/layout.kicad_pcb
+
+# Drill files
+kicad-cli pcb export drill --format excellon \
+  -o boards/<board>/layout/gerber/ \
+  boards/<board>/layout/layout.kicad_pcb
+
+# Position/CPL file (for JLCPCB assembly)
+kicad-cli pcb export pos --format csv --units mm \
+  -o boards/<board>/layout/<board>-cpl.csv \
+  boards/<board>/layout/layout.kicad_pcb
+
+# PDF (optional)
+kicad-cli pcb export pdf --layers "F.Cu,Edge.Cuts,F.SilkS" \
+  --output board.pdf boards/<board>/layout/layout.kicad_pcb
 ```
+
+### 6. JLCPCB assembly files (BOM + CPL)
+
+JLCPCB requires a **BOM** and **CPL** uploaded separately from the gerber zip. Both files must have matching designators (one row per component, not grouped).
+
+**BOM format** (`<board>-bom.csv`):
+```csv
+Comment,Designator,Footprint,LCSC
+NE5532DR,U1,SOIC-8_3.9x4.9mm_P1.27mm,C7426
+```
+- `Comment`: MPN or description
+- `Designator`: single reference (e.g. `U1`, not `U1,U2,U3`)
+- `Footprint`: KiCad footprint name
+- `LCSC`: JLCPCB/LCSC part number (e.g. `C7426`)
+
+**CPL format** (`<board>-cpl.csv`):
+```csv
+Designator,Mid X,Mid Y,Rotation,Layer
+U1,30.000000mm,-30.000000mm,0.000000,Top
+```
+- Coordinates must include `mm` suffix
+- Layer must be `Top` or `Bottom` (not `T`/`B` or `top`/`bottom`)
+- KiCad's `pos` export uses `Ref,Val,Package,PosX,PosY,Rot,Side` — must be reformatted
+
+**Critical**: BOM and CPL designators must match exactly. Only include SMD parts that JLCPCB can assemble — exclude through-hole connectors, trimpots, jacks, mounting holes. Filter the CPL to only contain designators present in the BOM.
+
+**LCSC part lookup**: Use `https://jlcsearch.tscircuit.com/components/list.json?search=<MPN>&limit=3` (public API, no auth). The `search=` param matches by MPN. For generic passives not stocked by exact MPN, use common JLCPCB basic parts (e.g. UniOhm `0603WAF` resistors, Samsung `CL` capacitors).
 
 ## Boards
 
 | Board | .zen source | Components | Layers | Size | Notes |
 |-------|------------|------------|--------|------|-------|
-| **MAIN** | `boards/main/main.zen` | ~120 | 4 | 200x100mm | Merged master+ADC+DAC-router+slaves |
-| **Preamp/AFE** | `boards/preamp/preamp.zen` | 165 | 4 | 160x80mm | Pure analog, unchanged |
+| **MAIN** | `boards/main/main.zen` | ~113 | 4 | ~160x80mm | Merged master+ADC+DAC-router+slaves |
+| **Preamp/AFE** | `boards/preamp/preamp.zen` | ~151 | 4 | ~100x60mm | Pure analog, 13x NE5532 |
 
 Single cable between boards: Preamp J_OUT -> MAIN J_AFE (2x5, 8 signals + AVDD + AGND).
 
