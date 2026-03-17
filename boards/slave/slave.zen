@@ -1,0 +1,119 @@
+"""
+Slave Board - ESP32-S3 DSP Node (Template x3)
+
+Minimal ESP32-S3 board receiving UART commands and I2S audio from the
+master, performing real-time DSP, and returning processed audio via
+I2S DOUT. Fabricate 3 copies (Slave A, B, C).
+"""
+
+load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+PinHeader = Module("@stdlib/generics/PinHeader.zen")
+
+ESP32S3 = Module("../../components/esp32_s3/esp32_s3.zen")
+Decoupling = Module("../../modules/decoupling/decoupling.zen")
+
+# =============================================================================
+# Power nets
+# =============================================================================
+
+VCC = Net("VCC_3V3")
+GND = Net("GND")
+
+# =============================================================================
+# Signal nets
+# =============================================================================
+
+UART_RX = Net("UART_RX")
+BCLK = Net("BCLK")
+LRCK = Net("LRCK")
+DOUT = Net("DOUT")
+
+# =============================================================================
+# ESP32-S3-WROOM-1
+# =============================================================================
+
+ESP_EN = Net("ESP_EN")
+
+U_ESP = ESP32S3(
+    name="U_ESP",
+    VCC=VCC,
+    GND=GND,
+    EN=ESP_EN,
+    # I2S slave: receive audio, send processed
+    IO5=BCLK,
+    IO6=LRCK,
+    IO8=DOUT,
+    # UART receive from master
+    IO16=UART_RX,
+    # All other GPIOs not connected
+    IO0=Net("NC_IO0"),
+    IO1=Net("NC_IO1"),
+    IO2=Net("NC_IO2"),
+    IO3=Net("NC_IO3"),
+    IO4=Net("NC_IO4"),
+    IO7=Net("NC_IO7"),
+    IO9=Net("NC_IO9"),
+    IO10=Net("NC_IO10"),
+    IO11=Net("NC_IO11"),
+    IO12=Net("NC_IO12"),
+    IO13=Net("NC_IO13"),
+    IO14=Net("NC_IO14"),
+    IO15=Net("NC_IO15"),
+    IO17=Net("NC_IO17"),
+    IO18=Net("NC_IO18"),
+    IO19=Net("NC_IO19"),
+    IO20=Net("NC_IO20"),
+    IO21=Net("NC_IO21"),
+    IO35=Net("NC_IO35"),
+    IO36=Net("NC_IO36"),
+    IO37=Net("NC_IO37"),
+    IO38=Net("NC_IO38"),
+    IO39=Net("NC_IO39"),
+    IO40=Net("NC_IO40"),
+    IO41=Net("NC_IO41"),
+    IO42=Net("NC_IO42"),
+    IO45=Net("NC_IO45"),
+    IO46=Net("NC_IO46"),
+    IO47=Net("NC_IO47"),
+    IO48=Net("NC_IO48"),
+    TXD0=Net("NC_TXD0"),
+    RXD0=Net("NC_RXD0"),
+)
+
+# EN pin: 10k pull-up + 100nF RC reset delay
+Resistor(name="R_EN", value=Resistance("10k"), package="0603", P1=VCC, P2=ESP_EN)
+Capacitor(name="C_EN", value=Capacitance("100nF"), package="0603", P1=ESP_EN, P2=GND)
+
+# Power decoupling
+Decoupling(name="DC_VCC", VCC=VCC, GND=GND)
+
+# =============================================================================
+# Connector: J_MASTER 1x6 header
+# =============================================================================
+
+PinHeader(
+    name="J_MASTER",
+    pins=6,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=UART_RX,
+    P2=BCLK,
+    P3=LRCK,
+    P4=DOUT,
+    P5=VCC,
+    P6=GND,
+)
+
+# =============================================================================
+# Board definition
+# =============================================================================
+
+Board(
+    name="slave",
+    layout_path="layout",
+    layers=4,
+)

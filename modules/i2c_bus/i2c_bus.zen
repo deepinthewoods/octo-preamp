@@ -1,0 +1,23 @@
+load("@stdlib/units.zen", "Resistance")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+
+VCC = io("VCC", Net)
+SDA = io("SDA", Net)
+SCL = io("SCL", Net)
+
+Resistor(
+    name="R_SDA",
+    value=Resistance("4.7k"),
+    package="0603",
+    P1=VCC,
+    P2=SDA,
+)
+
+Resistor(
+    name="R_SCL",
+    value=Resistance("4.7k"),
+    package="0603",
+    P1=VCC,
+    P2=SCL,
+)

@@ -1,0 +1,27 @@
+load("@stdlib/units.zen", "Capacitance")
+
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+
+VCC = io("VCC", Net)
+GND = io("GND", Net)
+
+bulk_value = config("bulk_value", Capacitance, default=Capacitance("10uF"))
+bypass_value = config("bypass_value", Capacitance, default=Capacitance("100nF"))
+
+Capacitor(
+    name="C_BULK",
+    value=bulk_value,
+    package="0805",
+    dielectric="X5R",
+    P1=VCC,
+    P2=GND,
+)
+
+Capacitor(
+    name="C_BYPASS",
+    value=bypass_value,
+    package="0603",
+    dielectric="X7R",
+    P1=VCC,
+    P2=GND,
+)

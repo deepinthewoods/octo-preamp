@@ -1,0 +1,98 @@
+"""PCM5102A DAC - 20-pin TSSOP."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+# Control pins
+DEMP = io("DEMP", Net)
+FLT = io("FLT", Net)
+SCK = io("SCK", Net)
+FMT = io("FMT", Net)
+XSMT = io("XSMT", Net)
+
+# I2S audio interface
+BCK = io("BCK", Net)
+DIN = io("DIN", Net)
+LRCK = io("LRCK", Net)
+
+# Analog outputs
+OUTL = io("OUTL", Net)
+OUTR = io("OUTR", Net)
+
+# Analog ground
+AGND_L = io("AGND_L", Net)
+AGND_R = io("AGND_R", Net)
+
+# Power
+DVDD = io("DVDD", Net)
+DGND = io("DGND", Net)
+AVDD = io("AVDD", Net)
+
+# Charge pump
+CPVDD = io("CPVDD", Net)
+CPGND = io("CPGND", Net)
+CAPP = io("CAPP", Net)
+CAPM = io("CAPM", Net)
+VNEG = io("VNEG", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="PCM5102A",
+    part=builtin.Part(mpn="PCM5102APWR", manufacturer="Texas Instruments"),
+    symbol=Symbol(library="@kicad-symbols/Audio.kicad_sym", name="PCM5102A"),
+    footprint=File("@kicad-footprints/Package_SO.pretty/TSSOP-20_4.4x6.5mm_P0.65mm.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "DEMP": "1",
+        "FLT": "2",
+        "SCK": "3",
+        "BCK": "4",
+        "DIN": "5",
+        "LRCK": "6",
+        "FMT": "7",
+        "XSMT": "8",
+        "AGND_L": "9",
+        "OUTL": "10",
+        "AGND_R": "11",
+        "OUTR": "12",
+        "DVDD": "13",
+        "DGND": "14",
+        "CPVDD": "15",
+        "CPGND": "16",
+        "CAPP": "17",
+        "CAPM": "18",
+        "VNEG": "19",
+        "AVDD": "20",
+    },
+    pins={
+        "DEMP": DEMP,
+        "FLT": FLT,
+        "SCK": SCK,
+        "BCK": BCK,
+        "DIN": DIN,
+        "LRCK": LRCK,
+        "FMT": FMT,
+        "XSMT": XSMT,
+        "AGND_L": AGND_L,
+        "OUTL": OUTL,
+        "AGND_R": AGND_R,
+        "OUTR": OUTR,
+        "DVDD": DVDD,
+        "DGND": DGND,
+        "CPVDD": CPVDD,
+        "CPGND": CPGND,
+        "CAPP": CAPP,
+        "CAPM": CAPM,
+        "VNEG": VNEG,
+        "AVDD": AVDD,
+    },
+    properties={
+        "value": "PCM5102A",
+        "package": "TSSOP-20",
+    },
+)

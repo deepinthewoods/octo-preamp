@@ -1,0 +1,155 @@
+"""ESP32-S3-WROOM-1 WiFi/BLE Module."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+# Power
+GND = io("GND", Net)
+VCC = io("VCC", Net)
+
+# Enable
+EN = io("EN", Net)
+
+# GPIO pins
+IO0 = io("IO0", Net)
+IO1 = io("IO1", Net)
+IO2 = io("IO2", Net)
+IO3 = io("IO3", Net)
+IO4 = io("IO4", Net)
+IO5 = io("IO5", Net)
+IO6 = io("IO6", Net)
+IO7 = io("IO7", Net)
+IO8 = io("IO8", Net)
+IO9 = io("IO9", Net)
+IO10 = io("IO10", Net)
+IO11 = io("IO11", Net)
+IO12 = io("IO12", Net)
+IO13 = io("IO13", Net)
+IO14 = io("IO14", Net)
+IO15 = io("IO15", Net)
+IO16 = io("IO16", Net)
+IO17 = io("IO17", Net)
+IO18 = io("IO18", Net)
+IO19 = io("IO19", Net)
+IO20 = io("IO20", Net)
+IO21 = io("IO21", Net)
+IO35 = io("IO35", Net)
+IO36 = io("IO36", Net)
+IO37 = io("IO37", Net)
+IO38 = io("IO38", Net)
+IO39 = io("IO39", Net)
+IO40 = io("IO40", Net)
+IO41 = io("IO41", Net)
+IO42 = io("IO42", Net)
+IO45 = io("IO45", Net)
+IO46 = io("IO46", Net)
+IO47 = io("IO47", Net)
+IO48 = io("IO48", Net)
+
+# UART
+TXD0 = io("TXD0", Net)
+RXD0 = io("RXD0", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="ESP32-S3-WROOM-1",
+    part=builtin.Part(mpn="ESP32-S3-WROOM-1-N16R8", manufacturer="Espressif"),
+    symbol=Symbol(library="@kicad-symbols/RF_Module.kicad_sym", name="ESP32-S3-WROOM-1"),
+    footprint=File("@kicad-footprints/RF_Module.pretty/ESP32-S3-WROOM-1.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "GND_1": "1",
+        "VCC": "2",
+        "EN": "3",
+        "IO4": "4",
+        "IO5": "5",
+        "IO6": "6",
+        "IO7": "7",
+        "IO15": "8",
+        "IO16": "9",
+        "IO17": "10",
+        "IO18": "11",
+        "IO8": "12",
+        "IO19": "13",
+        "IO20": "14",
+        "IO3": "15",
+        "IO46": "16",
+        "IO9": "17",
+        "IO10": "18",
+        "IO11": "19",
+        "IO12": "20",
+        "IO13": "21",
+        "IO14": "22",
+        "IO21": "23",
+        "IO47": "24",
+        "IO48": "25",
+        "IO45": "26",
+        "IO0": "27",
+        "IO35": "28",
+        "IO36": "29",
+        "IO37": "30",
+        "IO38": "31",
+        "IO39": "32",
+        "IO40": "33",
+        "IO41": "34",
+        "IO42": "35",
+        "RXD0": "36",
+        "TXD0": "37",
+        "IO2": "38",
+        "IO1": "39",
+        "GND_40": "40",
+        "GND_41": "41",
+    },
+    pins={
+        "GND_1": GND,
+        "VCC": VCC,
+        "EN": EN,
+        "IO4": IO4,
+        "IO5": IO5,
+        "IO6": IO6,
+        "IO7": IO7,
+        "IO15": IO15,
+        "IO16": IO16,
+        "IO17": IO17,
+        "IO18": IO18,
+        "IO8": IO8,
+        "IO19": IO19,
+        "IO20": IO20,
+        "IO3": IO3,
+        "IO46": IO46,
+        "IO9": IO9,
+        "IO10": IO10,
+        "IO11": IO11,
+        "IO12": IO12,
+        "IO13": IO13,
+        "IO14": IO14,
+        "IO21": IO21,
+        "IO47": IO47,
+        "IO48": IO48,
+        "IO45": IO45,
+        "IO0": IO0,
+        "IO35": IO35,
+        "IO36": IO36,
+        "IO37": IO37,
+        "IO38": IO38,
+        "IO39": IO39,
+        "IO40": IO40,
+        "IO41": IO41,
+        "IO42": IO42,
+        "RXD0": RXD0,
+        "TXD0": TXD0,
+        "IO2": IO2,
+        "IO1": IO1,
+        "GND_40": GND,
+        "GND_41": GND,
+    },
+    properties={
+        "value": "ESP32-S3-WROOM-1-N16R8",
+        "package": "ESP32-S3-WROOM-1",
+    },
+)

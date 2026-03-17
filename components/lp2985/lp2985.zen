@@ -1,0 +1,42 @@
+"""LP2985-3.3 LDO Voltage Regulator - 5-pin SOT-23."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+VIN = io("VIN", Net)
+GND = io("GND", Net)
+EN = io("EN", Net)
+BYP = io("BYP", Net)
+VOUT = io("VOUT", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="LP2985_33",
+    part=builtin.Part(mpn="LP2985-33DBVR", manufacturer="Texas Instruments"),
+    symbol=Symbol(library="@kicad-symbols/Regulator_Linear.kicad_sym", name="LP2985-3.3"),
+    footprint=File("@kicad-footprints/Package_TO_SOT_SMD.pretty/SOT-23-5.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "VIN": "1",
+        "GND": "2",
+        "EN": "3",
+        "BYP": "4",
+        "VOUT": "5",
+    },
+    pins={
+        "VIN": VIN,
+        "GND": GND,
+        "EN": EN,
+        "BYP": BYP,
+        "VOUT": VOUT,
+    },
+    properties={
+        "value": "LP2985-33",
+        "package": "SOT-23-5",
+    },
+)

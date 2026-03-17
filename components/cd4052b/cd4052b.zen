@@ -1,0 +1,82 @@
+"""CD4052B Dual 4-Channel Analog Multiplexer - 16-pin SOIC."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+# Channel Y
+Y0 = io("Y0", Net)
+Y1 = io("Y1", Net)
+Y2 = io("Y2", Net)
+Y3 = io("Y3", Net)
+Y = io("Y", Net)
+
+# Channel X
+X0 = io("X0", Net)
+X1 = io("X1", Net)
+X2 = io("X2", Net)
+X3 = io("X3", Net)
+X = io("X", Net)
+
+# Control
+A = io("A", Net)
+B = io("B", Net)
+INH = io("INH", Net)
+
+# Power
+VDD = io("VDD", Net)
+VSS = io("VSS", Net)
+VEE = io("VEE", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="CD4052B",
+    part=builtin.Part(mpn="CD4052BM96", manufacturer="Texas Instruments"),
+    symbol=Symbol(library="@kicad-symbols/Analog_Switch.kicad_sym", name="CD4052B"),
+    footprint=File("@kicad-footprints/Package_SO.pretty/SOIC-16_3.9x9.9mm_P1.27mm.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "Y1": "1",
+        "Y0": "2",
+        "Y": "3",
+        "Y2": "4",
+        "Y3": "5",
+        "INH": "6",
+        "VEE": "7",
+        "VSS": "8",
+        "B": "9",
+        "A": "10",
+        "X3": "11",
+        "X": "12",
+        "X0": "13",
+        "X1": "14",
+        "X2": "15",
+        "VDD": "16",
+    },
+    pins={
+        "Y1": Y1,
+        "Y0": Y0,
+        "Y": Y,
+        "Y2": Y2,
+        "Y3": Y3,
+        "INH": INH,
+        "VEE": VEE,
+        "VSS": VSS,
+        "B": B,
+        "A": A,
+        "X3": X3,
+        "X": X,
+        "X0": X0,
+        "X1": X1,
+        "X2": X2,
+        "VDD": VDD,
+    },
+    properties={
+        "value": "CD4052B",
+        "package": "SOIC-16",
+    },
+)

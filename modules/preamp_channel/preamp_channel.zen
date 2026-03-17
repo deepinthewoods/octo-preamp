@@ -1,0 +1,92 @@
+load("@stdlib/interfaces.zen", "Opamp")
+load("@stdlib/units.zen", "Resistance", "Capacitance")
+load("@stdlib/amplifiers.zen", "voltage_follower")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+
+PICKUP_IN = io("PICKUP_IN", Net)
+SIGNAL_OUT = io("SIGNAL_OUT", Net)
+AVDD = io("AVDD", Net)
+GND = io("GND", Net)
+VGND = io("VGND", Net)
+BUF_OPA = io("BUF_OPA", Opamp)
+GAIN_OPA = io("GAIN_OPA", Opamp)
+
+COUPLED = Net()
+BUFFERED = Net()
+FB_NODE = Net()
+AMPLIFIED = Net()
+FILTERED_NODE = Net()
+
+# Input coupling capacitor
+Capacitor(
+    name="C_IN",
+    value=Capacitance("10nF"),
+    package="0603",
+    P1=PICKUP_IN,
+    P2=COUPLED,
+)
+
+# Input bias resistor to virtual ground
+Resistor(
+    name="R_BIAS",
+    value=Resistance("1M"),
+    package="0603",
+    P1=COUPLED,
+    P2=VGND,
+)
+
+# Buffer stage
+BUF_OPA = voltage_follower("BUF", IN=COUPLED, OUT=BUFFERED)
+
+# Gain stage (non-inverting, gain = 1 + R_F/R_G = 11)
+Resistor(
+    name="R_G",
+    value=Resistance("1k"),
+    package="0603",
+    P1=VGND,
+    P2=FB_NODE,
+)
+
+Resistor(
+    name="R_F",
+    value=Resistance("10k"),
+    package="0603",
+    P1=FB_NODE,
+    P2=AMPLIFIED,
+)
+
+GAIN_OPA = Opamp(
+    name="GAIN",
+    IN_P=BUFFERED,
+    IN_N=FB_NODE,
+    OUT=AMPLIFIED,
+)
+
+# Anti-alias low-pass filter (fc ~ 22kHz)
+Resistor(
+    name="R_AA",
+    value=Resistance("22k"),
+    package="0603",
+    P1=AMPLIFIED,
+    P2=FILTERED_NODE,
+)
+
+Capacitor(
+    name="C_AA",
+    value=Capacitance("330pF"),
+    package="0603",
+    dielectric="NP0",
+    P1=FILTERED_NODE,
+    P2=GND,
+)
+
+# Output coupling capacitor
+Capacitor(
+    name="C_OUT",
+    value=Capacitance("10uF"),
+    package="0805",
+    P1=FILTERED_NODE,
+    P2=SIGNAL_OUT,
+)

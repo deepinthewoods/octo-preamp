@@ -1,0 +1,56 @@
+"""USB-C Receptacle (USB 2.0)."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+VBUS = io("VBUS", Net)
+GND = io("GND", Net)
+CC1 = io("CC1", Net)
+CC2 = io("CC2", Net)
+DP = io("DP", Net)
+DN = io("DN", Net)
+SHIELD = io("SHIELD", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="USB_C_Receptacle",
+    part=builtin.Part(mpn="USB4085-GF-A", manufacturer="GCT"),
+    symbol=Symbol(library="@kicad-symbols/Connector.kicad_sym", name="USB_C_Receptacle_USB2.0_16P"),
+    footprint=File("@kicad-footprints/Connector_USB.pretty/USB_C_Receptacle_GCT_USB4085.kicad_mod"),
+    prefix="J",
+    pin_defs={
+        "VBUS_A": "A4",
+        "VBUS_B": "B9",
+        "GND_A": "A1",
+        "GND_B": "B12",
+        "CC1": "A5",
+        "CC2": "B5",
+        "DP1": "A6",
+        "DP2": "B6",
+        "DN1": "A7",
+        "DN2": "B7",
+        "SHIELD": "S1",
+    },
+    pins={
+        "VBUS_A": VBUS,
+        "VBUS_B": VBUS,
+        "GND_A": GND,
+        "GND_B": GND,
+        "CC1": CC1,
+        "CC2": CC2,
+        "DP1": DP,
+        "DP2": DP,
+        "DN1": DN,
+        "DN2": DN,
+        "SHIELD": SHIELD,
+    },
+    properties={
+        "value": "USB-C",
+        "package": "USB_C_Receptacle_GCT_USB4085",
+    },
+)

@@ -1,0 +1,7 @@
+[board]
+name = "slave"
+path = "slave.zen"
+
+[dependencies]
+"github.com/deepinthewoods/octo-preamp/components/esp32_s3" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/decoupling" = "0.1.0"

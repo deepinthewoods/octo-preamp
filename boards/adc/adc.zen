@@ -1,0 +1,227 @@
+"""
+ADC Board - Dual ES8388 Audio Codec
+
+Two ES8388 codecs capture 8 analog channels (4 per codec) with
+shared I2C control and I2S clock bus. Separate ASDOUT lines carry
+digitized audio to the master ESP32.
+"""
+
+load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+PinHeader = Module("@stdlib/generics/PinHeader.zen")
+
+ES8388 = Module("../../components/es8388/es8388.zen")
+Decoupling = Module("../../modules/decoupling/decoupling.zen")
+I2cBus = Module("../../modules/i2c_bus/i2c_bus.zen")
+
+# =============================================================================
+# Power nets
+# =============================================================================
+
+AVDD = Net("AVDD")
+DVDD = Net("DVDD")
+AGND = Net("AGND")
+DGND = Net("DGND")
+
+# =============================================================================
+# Signal nets from AFE board
+# =============================================================================
+
+SIGNAL = [Net("SIG_CH" + str(i + 1)) for i in range(8)]
+
+# =============================================================================
+# I2C bus (shared between both codecs)
+# =============================================================================
+
+SDA = Net("SDA")
+SCL = Net("SCL")
+
+I2cBus(name="I2C_PULLUP", VCC=DVDD, SDA=SDA, SCL=SCL)
+
+# =============================================================================
+# I2S bus (shared clocks, separate data)
+# =============================================================================
+
+MCLK = Net("MCLK")
+BCLK = Net("BCLK")
+LRCK = Net("LRCK")
+ADCDAT_A = Net("ADCDAT_A")
+ADCDAT_B = Net("ADCDAT_B")
+
+# =============================================================================
+# ES8388 #1 - Channels 1-4 (I2C address 0x10: AD0 -> GND)
+# =============================================================================
+
+# ADC reference decoupling
+VREF_A1 = Net("VREF_A1")
+VRP_A1 = Net("VRP_A1")
+DVREF_A1 = Net("DVREF_A1")
+DVRP_A1 = Net("DVRP_A1")
+
+U_ADC1 = ES8388(
+    name="U_ADC1",
+    # Power
+    AVDD=AVDD,
+    DVDD=DVDD,
+    SVDD=DVDD,
+    MICVDD=AVDD,
+    AVSS=AGND,
+    DVSS=DGND,
+    # Analog inputs (CH1-4 on LIN1/RIN1/LIN2/RIN2)
+    LIN1=SIGNAL[0],
+    RIN1=SIGNAL[1],
+    LIN2=SIGNAL[2],
+    RIN2=SIGNAL[3],
+    # DAC outputs unused (powered down via register)
+    LOUT1=Net("NC_LOUT1_A"),
+    ROUT1=Net("NC_ROUT1_A"),
+    LOUT2=Net("NC_LOUT2_A"),
+    ROUT2=Net("NC_ROUT2_A"),
+    MONOOUT=Net("NC_MONO_A"),
+    # References
+    ADCVREF=VREF_A1,
+    ADCVRP=VRP_A1,
+    DACVREF=DVREF_A1,
+    DACVRP=DVRP_A1,
+    # I2S
+    MCLK=MCLK,
+    SCLK=BCLK,
+    LRCK=LRCK,
+    DSDIN=Net("NC_DSDIN_A"),
+    ASDOUT=ADCDAT_A,
+    # I2C
+    SDA=SDA,
+    SCL=SCL,
+    # Control
+    AD0=AGND,  # Address 0x10
+    RESET_N=DVDD,  # Not reset (tied high)
+    EP=AGND,  # Exposed pad to analog ground
+)
+
+# Reference decoupling for codec 1
+Capacitor(name="C_AVREF1", value=Capacitance("10uF"), package="0805", P1=VREF_A1, P2=AGND)
+Capacitor(name="C_AVRP1", value=Capacitance("10uF"), package="0805", P1=VRP_A1, P2=AGND)
+Capacitor(name="C_DVREF1", value=Capacitance("10uF"), package="0805", P1=DVREF_A1, P2=AGND)
+Capacitor(name="C_DVRP1", value=Capacitance("10uF"), package="0805", P1=DVRP_A1, P2=AGND)
+
+# Power decoupling for codec 1
+Decoupling(name="DC_AVDD1", VCC=AVDD, GND=AGND)
+Decoupling(name="DC_DVDD1", VCC=DVDD, GND=DGND)
+
+# =============================================================================
+# ES8388 #2 - Channels 5-8 (I2C address 0x11: AD0 -> 3.3V via 10k)
+# =============================================================================
+
+AD0_HIGH = Net("AD0_HIGH")
+Resistor(name="R_AD0", value=Resistance("10k"), package="0603", P1=DVDD, P2=AD0_HIGH)
+
+VREF_A2 = Net("VREF_A2")
+VRP_A2 = Net("VRP_A2")
+DVREF_A2 = Net("DVREF_A2")
+DVRP_A2 = Net("DVRP_A2")
+
+U_ADC2 = ES8388(
+    name="U_ADC2",
+    # Power
+    AVDD=AVDD,
+    DVDD=DVDD,
+    SVDD=DVDD,
+    MICVDD=AVDD,
+    AVSS=AGND,
+    DVSS=DGND,
+    # Analog inputs (CH5-8)
+    LIN1=SIGNAL[4],
+    RIN1=SIGNAL[5],
+    LIN2=SIGNAL[6],
+    RIN2=SIGNAL[7],
+    # DAC outputs unused
+    LOUT1=Net("NC_LOUT1_B"),
+    ROUT1=Net("NC_ROUT1_B"),
+    LOUT2=Net("NC_LOUT2_B"),
+    ROUT2=Net("NC_ROUT2_B"),
+    MONOOUT=Net("NC_MONO_B"),
+    # References
+    ADCVREF=VREF_A2,
+    ADCVRP=VRP_A2,
+    DACVREF=DVREF_A2,
+    DACVRP=DVRP_A2,
+    # I2S (shared clocks, separate data out)
+    MCLK=MCLK,
+    SCLK=BCLK,
+    LRCK=LRCK,
+    DSDIN=Net("NC_DSDIN_B"),
+    ASDOUT=ADCDAT_B,
+    # I2C
+    SDA=SDA,
+    SCL=SCL,
+    # Control
+    AD0=AD0_HIGH,  # Address 0x11
+    RESET_N=DVDD,
+    EP=AGND,  # Exposed pad to analog ground
+)
+
+# Reference decoupling for codec 2
+Capacitor(name="C_AVREF2", value=Capacitance("10uF"), package="0805", P1=VREF_A2, P2=AGND)
+Capacitor(name="C_AVRP2", value=Capacitance("10uF"), package="0805", P1=VRP_A2, P2=AGND)
+Capacitor(name="C_DVREF2", value=Capacitance("10uF"), package="0805", P1=DVREF_A2, P2=AGND)
+Capacitor(name="C_DVRP2", value=Capacitance("10uF"), package="0805", P1=DVRP_A2, P2=AGND)
+
+# Power decoupling for codec 2
+Decoupling(name="DC_AVDD2", VCC=AVDD, GND=AGND)
+Decoupling(name="DC_DVDD2", VCC=DVDD, GND=DGND)
+
+# =============================================================================
+# Connectors
+# =============================================================================
+
+# J_AFE: 2x5 header from AFE board (8 analog signals + AVDD + GND)
+PinHeader(
+    name="J_AFE",
+    pins=5,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=SIGNAL[0],
+    P2=SIGNAL[1],
+    P3=SIGNAL[2],
+    P4=SIGNAL[3],
+    P5=SIGNAL[4],
+    P6=SIGNAL[5],
+    P7=SIGNAL[6],
+    P8=SIGNAL[7],
+    P9=AVDD,
+    P10=AGND,
+)
+
+# J_MASTER: 2x6 header to master ESP32
+PinHeader(
+    name="J_MASTER",
+    pins=6,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=MCLK,
+    P2=BCLK,
+    P3=LRCK,
+    P4=ADCDAT_A,
+    P5=ADCDAT_B,
+    P6=SDA,
+    P7=SCL,
+    P8=AVDD,
+    P9=DVDD,
+    P10=AGND,
+    P11=DGND,
+    P12=Net("NC_J_MASTER"),
+)
+
+# =============================================================================
+# Board definition
+# =============================================================================
+
+Board(
+    name="adc",
+    layout_path="layout",
+    layers=4,
+)

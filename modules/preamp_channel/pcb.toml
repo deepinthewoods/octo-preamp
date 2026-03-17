@@ -1,0 +1,3 @@
+[package]
+name = "preamp_channel"
+path = "preamp_channel.zen"

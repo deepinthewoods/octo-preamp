@@ -1,0 +1,76 @@
+"""
+OPA4134 - High Performance Audio Quad Operational Amplifier
+Texas Instruments, SOIC-14 package
+"""
+
+load("@stdlib/interfaces.zen", "Opamp")
+load("@stdlib/utils.zen", "format_value")
+
+# -----------------------------------------------------------------------------
+# Component parameters
+# -----------------------------------------------------------------------------
+
+mpn = config("mpn", str, default="OPA4134PA", optional=True, help="Manufacturer Part Number")
+manufacturer = config("manufacturer", str, default="Texas Instruments", optional=True, help="Manufacturer")
+
+# Properties
+properties = {
+    "value": "OPA4134",
+}
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+VP = io("VP", Net)
+VN = io("VN", Net)
+OPA_A = io("OPA_A", Opamp)
+OPA_B = io("OPA_B", Opamp)
+OPA_C = io("OPA_C", Opamp)
+OPA_D = io("OPA_D", Opamp)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="U",
+    part=builtin.Part(mpn=mpn, manufacturer=manufacturer) if mpn and manufacturer else None,
+    symbol=Symbol(library="@kicad-symbols/Amplifier_Operational.kicad_sym", name="OPA4134"),
+    footprint=File("@kicad-footprints/Package_SO.pretty/SOIC-14_3.9x8.7mm_P1.27mm.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "OUT_A": "1",
+        "IN_N_A": "2",
+        "IN_P_A": "3",
+        "VCC_P": "4",
+        "IN_P_B": "5",
+        "IN_N_B": "6",
+        "OUT_B": "7",
+        "OUT_C": "8",
+        "IN_N_C": "9",
+        "IN_P_C": "10",
+        "VCC_N": "11",
+        "IN_P_D": "12",
+        "IN_N_D": "13",
+        "OUT_D": "14",
+    },
+    pins={
+        "OUT_A": OPA_A.OUT,
+        "IN_N_A": OPA_A.IN_N,
+        "IN_P_A": OPA_A.IN_P,
+        "VCC_P": VP,
+        "IN_P_B": OPA_B.IN_P,
+        "IN_N_B": OPA_B.IN_N,
+        "OUT_B": OPA_B.OUT,
+        "OUT_C": OPA_C.OUT,
+        "IN_N_C": OPA_C.IN_N,
+        "IN_P_C": OPA_C.IN_P,
+        "VCC_N": VN,
+        "IN_P_D": OPA_D.IN_P,
+        "IN_N_D": OPA_D.IN_N,
+        "OUT_D": OPA_D.OUT,
+    },
+    properties=properties,
+    type="opamp",
+)

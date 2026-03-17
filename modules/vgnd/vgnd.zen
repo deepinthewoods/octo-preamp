@@ -1,0 +1,47 @@
+load("@stdlib/interfaces.zen", "Opamp")
+load("@stdlib/units.zen", "Resistance", "Capacitance")
+load("@stdlib/amplifiers.zen", "voltage_follower")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+
+VCC = io("VCC", Net)
+GND = io("GND", Net)
+VGND = io("VGND", Net)
+OPA = io("OPA", Opamp)
+
+MID_NODE = Net()
+
+Resistor(
+    name="R_DIV_TOP",
+    value=Resistance("10k"),
+    package="0603",
+    P1=VCC,
+    P2=MID_NODE,
+)
+
+Resistor(
+    name="R_DIV_BOT",
+    value=Resistance("10k"),
+    package="0603",
+    P1=MID_NODE,
+    P2=GND,
+)
+
+OPA = voltage_follower("VGND_BUF", IN=MID_NODE, OUT=VGND)
+
+Capacitor(
+    name="C_VGND_BULK",
+    value=Capacitance("100uF"),
+    package="1206",
+    P1=VGND,
+    P2=GND,
+)
+
+Capacitor(
+    name="C_VGND_BYPASS",
+    value=Capacitance("100nF"),
+    package="0603",
+    P1=VGND,
+    P2=GND,
+)

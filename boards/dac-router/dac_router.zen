@@ -1,0 +1,291 @@
+"""
+DAC + Router Board - PCM5102A DAC + Analog Mux + Summing Amp + Output
+
+Receives I2S audio from master ESP32, converts to analog via PCM5102A,
+routes through CD4052B analog muxes for signal path selection, sums
+channels via OPA4134, and outputs to 6.35mm TRS jacks.
+"""
+
+load("@stdlib/interfaces.zen", "Opamp")
+load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
+load("@stdlib/amplifiers.zen", "inverting_sum")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+PinHeader = Module("@stdlib/generics/PinHeader.zen")
+MountingHole = Module("@stdlib/generics/MountingHole.zen")
+
+PCM5102A = Module("../../components/pcm5102a/pcm5102a.zen")
+CD4052B = Module("../../components/cd4052b/cd4052b.zen")
+OPA4134 = Module("../../components/opa4134/opa4134.zen")
+Decoupling = Module("../../modules/decoupling/decoupling.zen")
+
+# =============================================================================
+# Power nets
+# =============================================================================
+
+AVDD = Net("AVDD")
+DVDD = Net("DVDD")
+GND = Net("GND")
+
+# =============================================================================
+# I2S input from master
+# =============================================================================
+
+BCK_DAC = Net("BCK_DAC")
+LRCK_DAC = Net("LRCK_DAC")
+DOUT_DAC = Net("DOUT_DAC")
+
+# Mux control from master GPIO
+MUX_A = Net("MUX_A")
+MUX_B = Net("MUX_B")
+MUX_INH1 = Net("MUX_INH1")
+MUX_INH2 = Net("MUX_INH2")
+
+# =============================================================================
+# PCM5102A DAC
+# =============================================================================
+
+DAC_OUTL = Net("DAC_OUTL")
+DAC_OUTR = Net("DAC_OUTR")
+CAPP = Net("DAC_CAPP")
+CAPM = Net("DAC_CAPM")
+VNEG = Net("DAC_VNEG")
+CPVDD = Net("DAC_CPVDD")
+
+U_DAC = PCM5102A(
+    name="U_DAC",
+    # I2S input
+    BCK=BCK_DAC,
+    LRCK=LRCK_DAC,
+    DIN=DOUT_DAC,
+    SCK=GND,  # System clock: GND = use internal PLL
+    FLT=GND,  # Filter select: GND = normal latency
+    FMT=GND,  # Format: GND = I2S
+    DEMP=GND,  # De-emphasis: GND = disabled
+    XSMT=DVDD,  # Soft mute: high = not muted
+    # Analog outputs
+    OUTL=DAC_OUTL,
+    OUTR=DAC_OUTR,
+    AGND_L=GND,
+    AGND_R=GND,
+    # Power
+    AVDD=AVDD,
+    DVDD=DVDD,
+    DGND=GND,
+    # Charge pump
+    CPVDD=CPVDD,
+    CPGND=GND,
+    CAPP=CAPP,
+    CAPM=CAPM,
+    VNEG=VNEG,
+)
+
+# Charge pump external caps (per datasheet)
+Capacitor(name="C_CP", value=Capacitance("2.2uF"), package="0603", P1=CAPP, P2=CAPM)
+Capacitor(name="C_VNEG", value=Capacitance("2.2uF"), package="0603", P1=VNEG, P2=GND)
+
+# DAC decoupling
+Decoupling(name="DC_DAC_A", VCC=AVDD, GND=GND)
+Decoupling(name="DC_DAC_D", VCC=DVDD, GND=GND)
+Capacitor(name="C_CPVDD", value=Capacitance("100nF"), package="0603", P1=CPVDD, P2=GND)
+
+# DAC output coupling caps
+DAC_L_AC = Net("DAC_L_AC")
+DAC_R_AC = Net("DAC_R_AC")
+Capacitor(name="C_DACL", value=Capacitance("10uF"), package="0805", P1=DAC_OUTL, P2=DAC_L_AC)
+Capacitor(name="C_DACR", value=Capacitance("10uF"), package="0805", P1=DAC_OUTR, P2=DAC_R_AC)
+
+# =============================================================================
+# Summing amplifier: OPA4134 quad op-amp
+# Two sections for L/R summing, two for output buffering
+# =============================================================================
+
+SUM_L = Net("SUM_L")
+SUM_R = Net("SUM_R")
+OUT_L = Net("OUT_L")
+OUT_R = Net("OUT_R")
+
+# The inverting_sum function creates input resistors + feedback resistor
+# and returns an Opamp interface. We'll use 4 input channels per sum.
+# For this board, we sum the DAC stereo with dry-through signals.
+# Simplified: L sum and R sum with unity gain.
+
+# Use 10k input resistors, gain = 1 (Rf = Ri for unity per-channel)
+opa_sum_l = inverting_sum(
+    name="SUM_L",
+    INPUTS=[DAC_L_AC, Net("DRY_L1"), Net("DRY_L2"), Net("DRY_L3")],
+    OUT=SUM_L,
+    GND=Ground(),
+    gain=1.0,
+    resistance="10k Ohms 1%",
+)
+
+opa_sum_r = inverting_sum(
+    name="SUM_R",
+    INPUTS=[DAC_R_AC, Net("DRY_R1"), Net("DRY_R2"), Net("DRY_R3")],
+    OUT=SUM_R,
+    GND=Ground(),
+    gain=1.0,
+    resistance="10k Ohms 1%",
+)
+
+# Output buffer sections (voltage followers)
+opa_buf_l = Opamp(name="BUF_L", IN_P=SUM_L, IN_N=OUT_L, OUT=OUT_L)
+opa_buf_r = Opamp(name="BUF_R", IN_P=SUM_R, IN_N=OUT_R, OUT=OUT_R)
+
+# Map all 4 sections to physical OPA4134
+U_SUM = OPA4134(
+    name="U_SUM",
+    VP=AVDD,
+    VN=GND,
+    OPA_A=opa_sum_l,
+    OPA_B=opa_sum_r,
+    OPA_C=opa_buf_l,
+    OPA_D=opa_buf_r,
+)
+
+Decoupling(name="DC_SUM", VCC=AVDD, GND=GND)
+
+# =============================================================================
+# Analog muxes: 2x CD4052B
+# Select between: bypass/dry, synth only, hybrid, wet/dry split
+# =============================================================================
+
+# Mux routing nets
+MUX1_X_OUT = Net("MUX1_X_OUT")
+MUX1_Y_OUT = Net("MUX1_Y_OUT")
+MUX2_X_OUT = Net("MUX2_X_OUT")
+MUX2_Y_OUT = Net("MUX2_Y_OUT")
+
+U_MUX1 = CD4052B(
+    name="U_MUX1",
+    VDD=AVDD,
+    VSS=GND,
+    VEE=GND,
+    A=MUX_A,
+    B=MUX_B,
+    INH=MUX_INH1,
+    # X channel inputs
+    X=MUX1_X_OUT,
+    X0=OUT_L,  # Position 0: buffered sum L
+    X1=DAC_L_AC,  # Position 1: synth only L
+    X2=OUT_L,  # Position 2: hybrid L
+    X3=Net("DRY_THRU_L"),  # Position 3: dry through L
+    # Y channel inputs
+    Y=MUX1_Y_OUT,
+    Y0=OUT_R,  # Position 0: buffered sum R
+    Y1=DAC_R_AC,  # Position 1: synth only R
+    Y2=OUT_R,  # Position 2: hybrid R
+    Y3=Net("DRY_THRU_R"),  # Position 3: dry through R
+)
+
+U_MUX2 = CD4052B(
+    name="U_MUX2",
+    VDD=AVDD,
+    VSS=GND,
+    VEE=GND,
+    A=MUX_A,
+    B=MUX_B,
+    INH=MUX_INH2,
+    # Secondary routing (wet/dry split outputs)
+    X=MUX2_X_OUT,
+    X0=Net("NC_MUX2_X0"),
+    X1=Net("NC_MUX2_X1"),
+    X2=DAC_L_AC,  # Wet-only L for split mode
+    X3=Net("NC_MUX2_X3"),
+    Y=MUX2_Y_OUT,
+    Y0=Net("NC_MUX2_Y0"),
+    Y1=Net("NC_MUX2_Y1"),
+    Y2=DAC_R_AC,  # Wet-only R for split mode
+    Y3=Net("NC_MUX2_Y3"),
+)
+
+Decoupling(name="DC_MUX1", VCC=AVDD, GND=GND)
+Decoupling(name="DC_MUX2", VCC=AVDD, GND=GND)
+
+# =============================================================================
+# Output stage (per channel): coupling cap + series resistor
+# =============================================================================
+
+JACK_L_TIP = Net("JACK_L_TIP")
+JACK_L_RING = Net("JACK_L_RING")
+JACK_R_TIP = Net("JACK_R_TIP")
+JACK_R_RING = Net("JACK_R_RING")
+
+# Left output
+OUT_L_AC = Net("OUT_L_AC")
+Capacitor(name="C_OUTL", value=Capacitance("100uF"), package="1210", P1=MUX1_X_OUT, P2=OUT_L_AC)
+Resistor(name="R_OUTL", value=Resistance("1k"), package="0603", P1=OUT_L_AC, P2=JACK_L_TIP)
+
+# Right output
+OUT_R_AC = Net("OUT_R_AC")
+Capacitor(name="C_OUTR", value=Capacitance("100uF"), package="1210", P1=MUX1_Y_OUT, P2=OUT_R_AC)
+Resistor(name="R_OUTR", value=Resistance("1k"), package="0603", P1=OUT_R_AC, P2=JACK_R_TIP)
+
+# 6.35mm TRS jacks (3-pin headers as placeholders: Tip, Ring, Sleeve)
+PinHeader(
+    name="J_OUT_L",
+    pins=3,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=JACK_L_TIP,
+    P2=JACK_L_RING,
+    P3=GND,
+)
+
+PinHeader(
+    name="J_OUT_R",
+    pins=3,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=JACK_R_TIP,
+    P2=JACK_R_RING,
+    P3=GND,
+)
+
+# Footswitch connectors
+PinHeader(name="J_FS1", pins=2, rows=1, mount="THT", pitch="2.54mm", P1=Net("FS1_A"), P2=Net("FS1_B"))
+PinHeader(name="J_FS2", pins=2, rows=1, mount="THT", pitch="2.54mm", P1=Net("FS2_A"), P2=Net("FS2_B"))
+
+# =============================================================================
+# Connectors
+# =============================================================================
+
+# J_MASTER: 2x5 header from master board
+PinHeader(
+    name="J_MASTER",
+    pins=5,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=BCK_DAC,
+    P2=LRCK_DAC,
+    P3=DOUT_DAC,
+    P4=MUX_A,
+    P5=MUX_B,
+    P6=MUX_INH1,
+    P7=MUX_INH2,
+    P8=AVDD,
+    P9=DVDD,
+    P10=GND,
+)
+
+# =============================================================================
+# Mounting holes
+# =============================================================================
+
+for i in range(4):
+    MountingHole(name="H" + str(i + 1), diameter="M3", P1=GND)
+
+# =============================================================================
+# Board definition
+# =============================================================================
+
+Board(
+    name="dac_router",
+    layout_path="layout",
+    layers=4,
+)

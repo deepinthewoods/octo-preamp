@@ -1,0 +1,8 @@
+[board]
+name = "adc"
+path = "adc.zen"
+
+[dependencies]
+"github.com/deepinthewoods/octo-preamp/components/es8388" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/decoupling" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/i2c_bus" = "0.1.0"

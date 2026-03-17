@@ -1,0 +1,131 @@
+"""ES8388 Audio Codec - 28-pin QFN with exposed pad."""
+
+
+# -----------------------------------------------------------------------------
+# IO ports
+# -----------------------------------------------------------------------------
+
+# Power pins
+SVDD = io("SVDD", Net)
+AVDD = io("AVDD", Net)
+DVDD = io("DVDD", Net)
+MICVDD = io("MICVDD", Net)
+
+# Ground pins
+AVSS = io("AVSS", Net)
+DVSS = io("DVSS", Net)
+
+# Analog inputs
+LIN1 = io("LIN1", Net)
+RIN1 = io("RIN1", Net)
+LIN2 = io("LIN2", Net)
+RIN2 = io("RIN2", Net)
+
+# Analog outputs
+LOUT1 = io("LOUT1", Net)
+ROUT1 = io("ROUT1", Net)
+LOUT2 = io("LOUT2", Net)
+ROUT2 = io("ROUT2", Net)
+MONOOUT = io("MONOOUT", Net)
+
+# I2S audio interface
+MCLK = io("MCLK", Net)
+SCLK = io("SCLK", Net)
+LRCK = io("LRCK", Net)
+DSDIN = io("DSDIN", Net)
+ASDOUT = io("ASDOUT", Net)
+
+# I2C interface
+SDA = io("SDA", Net)
+SCL = io("SCL", Net)
+
+# Control
+AD0 = io("AD0", Net)
+RESET_N = io("RESET_N", Net)
+
+# Reference pins
+DACVREF = io("DACVREF", Net)
+DACVRP = io("DACVRP", Net)
+ADCVREF = io("ADCVREF", Net)
+ADCVRP = io("ADCVRP", Net)
+
+# Exposed pad
+EP = io("EP", Net)
+
+# -----------------------------------------------------------------------------
+# Component definition
+# -----------------------------------------------------------------------------
+
+Component(
+    name="ES8388",
+    part=builtin.Part(mpn="ES8388", manufacturer="Everest Semiconductor"),
+    symbol=Symbol(library="@kicad-symbols/Audio.kicad_sym", name="ES8388"),
+    footprint=File("@kicad-footprints/Package_DFN_QFN.pretty/QFN-28-1EP_4x4mm_P0.4mm_EP2.4x2.4mm.kicad_mod"),
+    prefix="U",
+    pin_defs={
+        "SVDD": "1",
+        "LOUT1": "2",
+        "ROUT1": "3",
+        "AVDD": "4",
+        "AVSS": "5",
+        "ROUT2": "6",
+        "LOUT2": "7",
+        "DVDD": "8",
+        "DVSS": "9",
+        "DACVREF": "10",
+        "DACVRP": "11",
+        "MONOOUT": "12",
+        "ADCVRP": "13",
+        "ADCVREF": "14",
+        "MICVDD": "15",
+        "LIN2": "16",
+        "RIN2": "17",
+        "LIN1": "18",
+        "RIN1": "19",
+        "MCLK": "20",
+        "SCLK": "21",
+        "LRCK": "22",
+        "DSDIN": "23",
+        "ASDOUT": "24",
+        "SDA": "25",
+        "SCL": "26",
+        "AD0": "27",
+        "RESET_N": "28",
+        "EP": "29",
+    },
+    pins={
+        "SVDD": SVDD,
+        "LOUT1": LOUT1,
+        "ROUT1": ROUT1,
+        "AVDD": AVDD,
+        "AVSS": AVSS,
+        "ROUT2": ROUT2,
+        "LOUT2": LOUT2,
+        "DVDD": DVDD,
+        "DVSS": DVSS,
+        "DACVREF": DACVREF,
+        "DACVRP": DACVRP,
+        "MONOOUT": MONOOUT,
+        "ADCVRP": ADCVRP,
+        "ADCVREF": ADCVREF,
+        "MICVDD": MICVDD,
+        "LIN2": LIN2,
+        "RIN2": RIN2,
+        "LIN1": LIN1,
+        "RIN1": RIN1,
+        "MCLK": MCLK,
+        "SCLK": SCLK,
+        "LRCK": LRCK,
+        "DSDIN": DSDIN,
+        "ASDOUT": ASDOUT,
+        "SDA": SDA,
+        "SCL": SCL,
+        "AD0": AD0,
+        "RESET_N": RESET_N,
+        "EP": EP,
+    },
+    properties={
+        "value": "ES8388",
+        "package": "QFN-28",
+    },
+)

@@ -1,0 +1,10 @@
+[workspace]
+repository = "github.com/deepinthewoods/octo-preamp"
+pcb-version = "0.3"
+members = [
+    "components/*",
+    "modules/*",
+    "reference/*",
+    "boards/*",
+]
+vendor = ["github.com/diodeinc/registry/**"]

@@ -1,0 +1,356 @@
+"""
+Master Board - ESP32-S3 + Power Management + USB-C
+
+Central controller with USB-C power/data, LiPo charging (MCP73831),
+dual LDO regulation (LP2985 analog, AMS1117 digital), and ESP32-S3
+running I2S/I2C master to ADC board, UART to 3 slave ESP32s, and
+I2S output to DAC-router board.
+"""
+
+load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+PinHeader = Module("@stdlib/generics/PinHeader.zen")
+MountingHole = Module("@stdlib/generics/MountingHole.zen")
+FerriteBead = Module("@stdlib/generics/FerriteBead.zen")
+Led = Module("@stdlib/generics/Led.zen")
+
+ESP32S3 = Module("../../components/esp32_s3/esp32_s3.zen")
+MCP73831 = Module("../../components/mcp73831/mcp73831.zen")
+LP2985 = Module("../../components/lp2985/lp2985.zen")
+AMS1117 = Module("../../components/ams1117/ams1117.zen")
+UsbC = Module("../../components/usb_c/usb_c.zen")
+Decoupling = Module("../../modules/decoupling/decoupling.zen")
+
+# =============================================================================
+# Power nets
+# =============================================================================
+
+VBUS = Net("VBUS")
+VBAT = Net("VBAT")
+AVDD = Net("AVDD_3V3")
+DVDD = Net("DVDD_3V3")
+GND = Net("GND")
+
+# =============================================================================
+# USB-C receptacle
+# =============================================================================
+
+USB_DP = Net("USB_DP")
+USB_DN = Net("USB_DN")
+CC1 = Net("CC1")
+CC2 = Net("CC2")
+
+J_USB = UsbC(
+    name="J_USB",
+    VBUS=VBUS,
+    GND=GND,
+    CC1=CC1,
+    CC2=CC2,
+    DP=USB_DP,
+    DN=USB_DN,
+    SHIELD=GND,
+)
+
+# CC pull-downs for USB-C sink detection (5.1k per spec)
+Resistor(name="R_CC1", value=Resistance("5.1k"), package="0402", P1=CC1, P2=GND)
+Resistor(name="R_CC2", value=Resistance("5.1k"), package="0402", P1=CC2, P2=GND)
+
+# VBUS bulk decoupling
+Capacitor(name="C_VBUS_BULK", value=Capacitance("100uF"), package="1210", P1=VBUS, P2=GND)
+Capacitor(name="C_VBUS_BYP", value=Capacitance("100nF"), package="0603", P1=VBUS, P2=GND)
+
+# =============================================================================
+# LiPo charger (MCP73831)
+# =============================================================================
+
+STAT_N = Net("CHARGE_STAT")
+PROG_PIN = Net("PROG_PIN")
+
+U_CHG = MCP73831(
+    name="U_CHG",
+    VDD=VBUS,
+    VSS=GND,
+    VBAT=VBAT,
+    STAT=STAT_N,
+    PROG=PROG_PIN,
+)
+
+# RPROG = 2k for 500mA charge current (IREG = 1000V / RPROG)
+Resistor(name="R_PROG", value=Resistance("2k"), package="0603", P1=PROG_PIN, P2=GND)
+
+# Charge status LED (active low open-drain)
+LED_STAT = Net("LED_STAT")
+Resistor(name="R_LED", value=Resistance("1k"), package="0603", P1=VBUS, P2=LED_STAT)
+Led(name="D_STAT", package="0603", color="green", A=LED_STAT, K=STAT_N)
+
+# Battery connector
+PinHeader(
+    name="J_BAT",
+    pins=2,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=VBAT,
+    P2=GND,
+)
+
+# Battery decoupling
+Capacitor(name="C_BAT", value=Capacitance("10uF"), package="0805", P1=VBAT, P2=GND)
+
+# =============================================================================
+# Analog LDO: LP2985-3.3 (ultra-low noise, 150mA max)
+# =============================================================================
+
+BYP_PIN = Net("LP2985_BYP")
+
+U_AVDD = LP2985(
+    name="U_AVDD",
+    VIN=VBAT,
+    GND=GND,
+    EN=VBAT,  # Always enabled
+    BYP=BYP_PIN,
+    VOUT=AVDD,
+)
+
+# Bypass cap on BYP pin for noise reduction (datasheet: 10nF)
+Capacitor(name="C_BYP", value=Capacitance("10nF"), package="0402", dielectric="NP0", P1=BYP_PIN, P2=GND)
+
+Decoupling(name="DC_AVDD", VCC=AVDD, GND=GND)
+
+# =============================================================================
+# Digital LDO: AMS1117-3.3 (1A max)
+# =============================================================================
+
+U_DVDD = AMS1117(
+    name="U_DVDD",
+    VIN=VBAT,
+    VOUT=DVDD,
+    GND=GND,
+)
+
+Decoupling(name="DC_DVDD", VCC=DVDD, GND=GND)
+
+# Additional bulk cap for AMS1117 stability
+Capacitor(name="C_DVDD_BULK", value=Capacitance("22uF"), package="1206", P1=DVDD, P2=GND)
+
+# =============================================================================
+# Ferrite bead: AVDD/DVDD isolation
+# =============================================================================
+
+FerriteBead(
+    name="FB1",
+    package="0805",
+    value="220Ohm",
+    P1=DVDD,
+    P2=AVDD,
+)
+
+# =============================================================================
+# ESP32-S3-WROOM-1
+# =============================================================================
+
+# I2S master to ADC board
+MCLK = Net("MCLK")
+BCLK = Net("BCLK")
+LRCK = Net("LRCK")
+ADCDAT_A = Net("ADCDAT_A")
+ADCDAT_B = Net("ADCDAT_B")
+
+# I2C to ADC board
+SDA = Net("SDA")
+SCL = Net("SCL")
+
+# UART TX to slave boards
+TX_SLAVE_A = Net("TX_SLAVE_A")
+TX_SLAVE_B = Net("TX_SLAVE_B")
+TX_SLAVE_C = Net("TX_SLAVE_C")
+
+# I2S slave return bus (from slaves via DAC-router)
+BCLK_OUT = Net("BCLK_OUT")
+LRCK_OUT = Net("LRCK_OUT")
+DIN_A = Net("DIN_A")
+DIN_B = Net("DIN_B")
+DIN_C = Net("DIN_C")
+
+# I2S DAC output
+BCK_DAC = Net("BCK_DAC")
+LRCK_DAC = Net("LRCK_DAC")
+DOUT_DAC = Net("DOUT_DAC")
+
+# Mux control
+MUX_A = Net("MUX_A")
+MUX_B = Net("MUX_B")
+MUX_INH1 = Net("MUX_INH1")
+MUX_INH2 = Net("MUX_INH2")
+
+# ESP32 enable with RC reset delay
+ESP_EN = Net("ESP_EN")
+
+U_ESP = ESP32S3(
+    name="U_ESP",
+    VCC=DVDD,
+    GND=GND,
+    EN=ESP_EN,
+    # I2S master to ADC
+    IO0=MCLK,
+    IO1=BCLK,
+    IO2=LRCK,
+    IO3=ADCDAT_A,
+    IO4=ADCDAT_B,
+    # I2S slave return
+    IO5=BCLK_OUT,
+    IO6=LRCK_OUT,
+    IO7=DIN_A,
+    IO8=DIN_B,
+    IO9=DIN_C,
+    # I2S DAC output
+    IO10=BCK_DAC,
+    IO11=LRCK_DAC,
+    IO12=DOUT_DAC,
+    # Mux control
+    IO13=MUX_A,
+    IO14=MUX_B,
+    IO15=MUX_INH1,
+    IO16=MUX_INH2,
+    # UART TX to slaves
+    IO17=TX_SLAVE_A,
+    IO18=TX_SLAVE_B,
+    IO38=TX_SLAVE_C,
+    # USB native
+    IO19=USB_DN,
+    IO20=USB_DP,
+    # I2C
+    IO21=SDA,
+    IO47=SCL,
+    # Remaining GPIOs - not connected
+    IO35=Net("NC_IO35"),
+    IO36=Net("NC_IO36"),
+    IO37=Net("NC_IO37"),
+    IO39=Net("NC_IO39"),
+    IO40=Net("NC_IO40"),
+    IO41=Net("NC_IO41"),
+    IO42=Net("NC_IO42"),
+    IO45=Net("NC_IO45"),
+    IO46=Net("NC_IO46"),
+    IO48=Net("NC_IO48"),
+    TXD0=Net("NC_TXD0"),
+    RXD0=Net("NC_RXD0"),
+)
+
+# EN pin: 10k pull-up + 100nF to GND (RC delay for power-on reset)
+Resistor(name="R_EN", value=Resistance("10k"), package="0603", P1=DVDD, P2=ESP_EN)
+Capacitor(name="C_EN", value=Capacitance("100nF"), package="0603", P1=ESP_EN, P2=GND)
+
+# GPIO0 (BOOT): 10k pull-up (boot from flash by default)
+Resistor(name="R_BOOT", value=Resistance("10k"), package="0603", P1=DVDD, P2=MCLK)
+
+# ESP32 decoupling
+Decoupling(name="DC_ESP", VCC=DVDD, GND=GND)
+
+# =============================================================================
+# Connectors
+# =============================================================================
+
+# J_ADC: 2x6 header to ADC board
+PinHeader(
+    name="J_ADC",
+    pins=6,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=MCLK,
+    P2=BCLK,
+    P3=LRCK,
+    P4=ADCDAT_A,
+    P5=ADCDAT_B,
+    P6=SDA,
+    P7=SCL,
+    P8=AVDD,
+    P9=DVDD,
+    P10=GND,
+    P11=GND,
+    P12=Net("NC_J_ADC"),
+)
+
+# J_SLAVE_A: 1x6 header to slave A
+PinHeader(
+    name="J_SLAVE_A",
+    pins=6,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=TX_SLAVE_A,
+    P2=BCLK_OUT,
+    P3=LRCK_OUT,
+    P4=DIN_A,
+    P5=DVDD,
+    P6=GND,
+)
+
+# J_SLAVE_B: 1x6 header to slave B
+PinHeader(
+    name="J_SLAVE_B",
+    pins=6,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=TX_SLAVE_B,
+    P2=BCLK_OUT,
+    P3=LRCK_OUT,
+    P4=DIN_B,
+    P5=DVDD,
+    P6=GND,
+)
+
+# J_SLAVE_C: 1x6 header to slave C
+PinHeader(
+    name="J_SLAVE_C",
+    pins=6,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=TX_SLAVE_C,
+    P2=BCLK_OUT,
+    P3=LRCK_OUT,
+    P4=DIN_C,
+    P5=DVDD,
+    P6=GND,
+)
+
+# J_DAC: 2x5 header to DAC-router board
+PinHeader(
+    name="J_DAC",
+    pins=5,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=BCK_DAC,
+    P2=LRCK_DAC,
+    P3=DOUT_DAC,
+    P4=MUX_A,
+    P5=MUX_B,
+    P6=MUX_INH1,
+    P7=MUX_INH2,
+    P8=AVDD,
+    P9=DVDD,
+    P10=GND,
+)
+
+# =============================================================================
+# Mounting holes
+# =============================================================================
+
+for i in range(4):
+    MountingHole(name="H" + str(i + 1), diameter="M3", P1=GND)
+
+# =============================================================================
+# Board definition
+# =============================================================================
+
+Board(
+    name="master",
+    layout_path="layout",
+    layers=4,
+)

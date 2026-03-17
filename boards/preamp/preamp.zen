@@ -1,0 +1,188 @@
+"""
+AFE Board - 8-Channel Guitar Preamp
+
+8 per-string pickup channels with input coupling, buffer, gain stage,
+and anti-alias filtering. Powered from 3.3V analog rail with 1.65V
+virtual ground mid-rail reference.
+"""
+
+load("@stdlib/interfaces.zen", "Opamp")
+load("@stdlib/units.zen", "Resistance", "Capacitance", "Voltage")
+load("@stdlib/amplifiers.zen", "voltage_follower")
+
+Resistor = Module("@stdlib/generics/Resistor.zen")
+Capacitor = Module("@stdlib/generics/Capacitor.zen")
+PinHeader = Module("@stdlib/generics/PinHeader.zen")
+MountingHole = Module("@stdlib/generics/MountingHole.zen")
+
+OPA2134 = Module("../../components/opa2134/opa2134.zen")
+NE5532 = Module("../../components/ne5532/ne5532.zen")
+TL072 = Module("../../components/tl072/tl072.zen")
+Decoupling = Module("../../modules/decoupling/decoupling.zen")
+
+# =============================================================================
+# Power nets
+# =============================================================================
+
+AVDD = Net("AVDD")
+GND = Net("GND")
+VGND_NET = Net("VGND")
+
+# =============================================================================
+# Virtual ground generator (1.65V mid-rail)
+# 10k/10k divider -> TL072 voltage follower -> bulk/bypass decoupling
+# =============================================================================
+
+MID_NODE = Net("VGND_MID")
+Resistor(name="R_DIV_TOP", value=Resistance("10k"), package="0603", P1=AVDD, P2=MID_NODE)
+Resistor(name="R_DIV_BOT", value=Resistance("10k"), package="0603", P1=MID_NODE, P2=GND)
+
+vgnd_opa = voltage_follower("VGND_BUF", IN=MID_NODE, OUT=VGND_NET)
+
+Capacitor(name="C_VGND_BULK", value=Capacitance("100uF"), package="1206", P1=VGND_NET, P2=GND)
+Capacitor(name="C_VGND_BYP", value=Capacitance("100nF"), package="0603", P1=VGND_NET, P2=GND)
+
+TL072(
+    name="U_VGND",
+    VP=AVDD,
+    VN=GND,
+    OPA_A=vgnd_opa,
+    OPA_B=Opamp(),  # unused section
+)
+
+Decoupling(name="DC_VGND", VCC=AVDD, GND=GND)
+
+# =============================================================================
+# 8 preamp channels (inline circuit per channel)
+# Each channel: coupling -> bias -> buffer -> gain -> AA filter -> output
+# =============================================================================
+
+PICKUP = [Net("PICKUP_" + str(i + 1)) for i in range(8)]
+SIGNAL = [Net("SIGNAL_" + str(i + 1)) for i in range(8)]
+
+buf_opas = []
+gain_opas = []
+
+for i in range(8):
+    ch = str(i + 1)
+    COUPLED = Net("COUPLED_" + ch)
+    BUFFERED = Net("BUFFERED_" + ch)
+    FB_NODE = Net("FB_" + ch)
+    AMPLIFIED = Net("AMPLIFIED_" + ch)
+    FILTERED = Net("FILTERED_" + ch)
+
+    # Input coupling cap
+    Capacitor(name="C_IN" + ch, value=Capacitance("10nF"), package="0603", P1=PICKUP[i], P2=COUPLED)
+
+    # Input bias to virtual ground (1M sets input impedance)
+    Resistor(name="R_BIAS" + ch, value=Resistance("1M"), package="0603", P1=COUPLED, P2=VGND_NET)
+
+    # Buffer: voltage follower
+    buf_opa = voltage_follower("BUF" + ch, IN=COUPLED, OUT=BUFFERED)
+    buf_opas.append(buf_opa)
+
+    # Gain stage: non-inverting amp, gain = 1 + R_F/R_G = 1 + 10k/1k = 11
+    Resistor(name="R_G" + ch, value=Resistance("1k"), package="0603", P1=VGND_NET, P2=FB_NODE)
+    Resistor(name="R_F" + ch, value=Resistance("10k"), package="0603", P1=FB_NODE, P2=AMPLIFIED)
+
+    gain_opa = Opamp(name="GAIN" + ch, IN_P=BUFFERED, IN_N=FB_NODE, OUT=AMPLIFIED)
+    gain_opas.append(gain_opa)
+
+    # Anti-alias low-pass filter (fc ~ 1/(2*pi*22k*330pF) ≈ 22kHz)
+    Resistor(name="R_AA" + ch, value=Resistance("22k"), package="0603", P1=AMPLIFIED, P2=FILTERED)
+    Capacitor(name="C_AA" + ch, value=Capacitance("330pF"), package="0603", dielectric="NP0", P1=FILTERED, P2=GND)
+
+    # Output coupling cap
+    Capacitor(name="C_OUT" + ch, value=Capacitance("10uF"), package="0805", P1=FILTERED, P2=SIGNAL[i])
+
+# =============================================================================
+# Physical op-amp mapping
+# Buffer: 4x OPA2134 (channels paired 1+2, 3+4, 5+6, 7+8)
+# Gain:   4x NE5532  (channels paired 1+2, 3+4, 5+6, 7+8)
+# =============================================================================
+
+for pair_idx in range(4):
+    ch_a = pair_idx * 2
+    ch_b = pair_idx * 2 + 1
+    pair_name = str(pair_idx + 1)
+
+    OPA2134(
+        name="U_BUF" + pair_name,
+        VP=AVDD,
+        VN=GND,
+        OPA_A=buf_opas[ch_a],
+        OPA_B=buf_opas[ch_b],
+    )
+    Decoupling(name="DC_BUF" + pair_name, VCC=AVDD, GND=GND)
+
+    NE5532(
+        name="U_GAIN" + pair_name,
+        VP=AVDD,
+        VN=GND,
+        OPA_A=gain_opas[ch_a],
+        OPA_B=gain_opas[ch_b],
+    )
+    Decoupling(name="DC_GAIN" + pair_name, VCC=AVDD, GND=GND)
+
+# =============================================================================
+# Connectors
+# =============================================================================
+
+# J_IN: 8x 2-pin headers for pickup inputs
+for i in range(8):
+    PinHeader(
+        name="J_IN" + str(i + 1),
+        pins=2,
+        rows=1,
+        mount="THT",
+        pitch="2.54mm",
+        P1=PICKUP[i],
+        P2=GND,
+    )
+
+# J_OUT: 2x5 header to ADC board (8 signals + AVDD + GND)
+PinHeader(
+    name="J_OUT",
+    pins=5,
+    rows=2,
+    mount="THT",
+    pitch="2.54mm",
+    P1=SIGNAL[0],
+    P2=SIGNAL[1],
+    P3=SIGNAL[2],
+    P4=SIGNAL[3],
+    P5=SIGNAL[4],
+    P6=SIGNAL[5],
+    P7=SIGNAL[6],
+    P8=SIGNAL[7],
+    P9=AVDD,
+    P10=GND,
+)
+
+# J_PWR: 2-pin power input header
+PinHeader(
+    name="J_PWR",
+    pins=2,
+    rows=1,
+    mount="THT",
+    pitch="2.54mm",
+    P1=AVDD,
+    P2=GND,
+)
+
+# =============================================================================
+# Mounting holes (M3, 4 corners)
+# =============================================================================
+
+for i in range(4):
+    MountingHole(name="H" + str(i + 1), diameter="M3", P1=GND)
+
+# =============================================================================
+# Board definition
+# =============================================================================
+
+Board(
+    name="preamp",
+    layout_path="layout",
+    layers=4,
+)

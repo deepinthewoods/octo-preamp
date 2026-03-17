@@ -1,0 +1,11 @@
+[board]
+name = "preamp"
+path = "preamp.zen"
+
+[dependencies]
+"github.com/deepinthewoods/octo-preamp/components/ne5532" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/opa2134" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/tl072" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/decoupling" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/preamp_channel" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/vgnd" = "0.1.0"

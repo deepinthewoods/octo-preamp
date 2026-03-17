@@ -1,0 +1,9 @@
+{
+  "pcb": {
+    "command": "pcb",
+    "args": ["mcp"],
+    "includeTools": [
+      "execute_tools"
+    ]
+  }
+}

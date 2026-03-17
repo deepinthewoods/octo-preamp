@@ -1,0 +1,9 @@
+[board]
+name = "dac_router"
+path = "dac_router.zen"
+
+[dependencies]
+"github.com/deepinthewoods/octo-preamp/components/cd4052b" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/opa4134" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/components/pcm5102a" = "0.1.0"
+"github.com/deepinthewoods/octo-preamp/modules/decoupling" = "0.1.0"
