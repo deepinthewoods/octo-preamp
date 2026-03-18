@@ -4,7 +4,7 @@ MAIN Board v2.6 - Unified Master + ADC + DAC-Router + Slave Sockets
 Merges 4 formerly separate boards into one 4-layer PCB (~160x80mm).
 Three physical zones with ferrite bead bridge at star-point ground:
 
-  Zone A (Digital): ESP32-S3 master DevKit, USB-C, LiPo charger,
+  Zone A (Digital): ESP32-S3 master DevKit (USB-C on DevKit), LiPo charger,
     dual LDOs, 4x slave ESP32 DevKit sockets
 
   Zone B (ADC/DAC Analog): 4x ES8388 codecs (stereo = 2-ch ADC each,
@@ -36,7 +36,7 @@ ESP32DevKit = Module("../../components/esp32_s3_devkit/esp32_s3_devkit.zen")
 MCP73831 = Module("../../components/mcp73831/mcp73831.zen")
 LP2985 = Module("../../components/lp2985/lp2985.zen")
 AP2114H = Module("../../components/ap2114h/ap2114h.zen")
-UsbC = Module("../../components/usb_c/usb_c.zen")
+# UsbC removed — using DevKit's built-in USB-C
 BAT54 = Module("../../components/bat54/bat54.zen")
 ES8388 = Module("../../components/es8388/es8388.zen")
 CD4052B = Module("../../components/cd4052b/cd4052b.zen")
@@ -71,28 +71,10 @@ SIGNAL = [Net("SIG_CH" + str(i + 1)) for i in range(8)]
 ###############################################################################
 
 # =============================================================================
-# USB-C receptacle
+# 5V power from DevKit USB-C (via P_5V pin)
+# No separate USB-C on board — DevKit's built-in USB handles data + power.
+# VBUS net fed from DevKit P_5V pin, powers MCP73831 LiPo charger.
 # =============================================================================
-
-USB_DP = Net("USB_DP")
-USB_DN = Net("USB_DN")
-CC1 = Net("CC1")
-CC2 = Net("CC2")
-
-J_USB = UsbC(
-    name="J_USB",
-    VBUS=VBUS,
-    GND=DGND,
-    CC1=CC1,
-    CC2=CC2,
-    DP=USB_DP,
-    DN=USB_DN,
-    SHIELD=DGND,
-)
-
-# CC pull-downs for USB-C sink detection (5.1k per spec)
-Resistor(name="R_CC1", value=Resistance("5.1k"), package="0402", P1=CC1, P2=DGND)
-Resistor(name="R_CC2", value=Resistance("5.1k"), package="0402", P1=CC2, P2=DGND)
 
 # VBUS bulk decoupling
 Capacitor(name="C_VBUS_BULK", value=Capacitance("47uF"), package="0805", P1=VBUS, P2=DGND)
@@ -259,10 +241,10 @@ EN_SLAVE3 = Net("EN_SLAVE3")
 EN_SLAVE4 = Net("EN_SLAVE4")
 EN_SLAVE5 = Net("EN_SLAVE5")
 
-# Instantiate master DevKit header sockets with full GPIO mapping
+# Instantiate master DevKit (single 44-pin Espressif footprint with board outline)
 ESP32DevKit(
     name="DEVKIT_MASTER",
-    # Left header (1x20)
+    # Left header — pads 1-22 (top to bottom)
     P_3V3_1=DVDD,
     P_3V3_2=DVDD,
     RST=Net("ESP_RST"),
@@ -275,35 +257,39 @@ ESP32DevKit(
     GPIO17=SD_FWD_AB, # I2S forward: SD_FWD_AB to slaves 1+2 (pin-muxed UART TX for OTA)
     GPIO18=SD_FWD_CD, # I2S forward: SD_FWD_CD to slaves 3+4 (pin-muxed UART RX for OTA)
     GPIO8=BCLK_OUT,  # I2S slave return: BCLK_OUT
-    GPIO19=USB_DN,   # USB native D-
-    GPIO20=USB_DP,   # USB native D+
     GPIO3=Net("NC_GPIO3"),  # LOG — reserved, do not connect
     GPIO46=MUX_B,    # MUX address bit 1
     GPIO9=LRCK_OUT,  # I2S slave return: LRCK_OUT
     GPIO10=DIN_A,    # I2S slave return: DIN_A (slave A)
     GPIO11=DIN_B,    # I2S slave return: DIN_B (slave B)
     GPIO12=DIN_C,    # I2S slave return: DIN_C (slave C)
-    # Right header (1x20)
-    GND=DGND,
-    GPIO43=SDA2,     # I2C bus 1: SDA2 (ES8388 #3+#4)
-    GPIO44=SCL2,     # I2C bus 1: SCL2 (ES8388 #3+#4)
-    GPIO1=BOOT_SLAVE3,  # OTA: BOOT #3
-    GPIO2=BOOT_SLAVE2,  # OTA: BOOT #2
-    GPIO42=BOOT_SLAVE4, # OTA: BOOT #4
-    GPIO41=EN_SLAVE2,   # OTA: EN #2
-    GPIO40=EN_SLAVE3,   # OTA: EN #3
-    GPIO39=EN_SLAVE4,   # OTA: EN #4
-    GPIO38=SCL,      # I2C bus 0: SCL
-    GPIO37=EN_SLAVE5,   # OTA: EN #5
-    GPIO36=VBAT_MON, # Battery voltage monitor
-    GPIO35=MUX_INH,  # MUX inhibit
-    GPIO0=Net("NC_GPIO0"),  # BOOT — reserved
-    GPIO45=MUX_A,    # MUX address bit 0
-    GPIO48=ADCDAT_D, # I2S ADC: ADCDAT_D (ES8388 #4, CH7+8); shares DevKit RGB LED pin
-    GPIO47=BOOT_SLAVE5, # OTA: BOOT #5
-    GPIO21=SDA,      # I2C bus 0: SDA
-    GPIO14=DIN_D,    # I2S slave return: DIN_D (slave D)
     GPIO13=DACDAT,   # I2S DAC output to ES8388 #3 DSDIN
+    GPIO14=DIN_D,    # I2S slave return: DIN_D (slave D)
+    P_5V=VBUS,  # 5V from DevKit USB-C -> MCP73831 LiPo charger
+    GND=DGND,
+    # Right header — pads 23-44 (bottom to top)
+    GND2=DGND,
+    GND3=DGND,
+    GPIO19=Net("NC_GPIO19"),  # USB D- — used internally by DevKit USB-C
+    GPIO20=Net("NC_GPIO20"),  # USB D+ — used internally by DevKit USB-C
+    GPIO21=SDA,      # I2C bus 0: SDA
+    GPIO47=BOOT_SLAVE5, # OTA: BOOT #5
+    GPIO48=ADCDAT_D, # I2S ADC: ADCDAT_D (ES8388 #4, CH7+8); shares DevKit RGB LED pin
+    GPIO45=MUX_A,    # MUX address bit 0
+    GPIO0=Net("NC_GPIO0"),  # BOOT — reserved
+    GPIO35=MUX_INH,  # MUX inhibit
+    GPIO36=VBAT_MON, # Battery voltage monitor
+    GPIO37=EN_SLAVE5,   # OTA: EN #5
+    GPIO38=SCL,      # I2C bus 0: SCL
+    GPIO39=EN_SLAVE4,   # OTA: EN #4
+    GPIO40=EN_SLAVE3,   # OTA: EN #3
+    GPIO41=EN_SLAVE2,   # OTA: EN #2
+    GPIO42=BOOT_SLAVE4, # OTA: BOOT #4
+    GPIO2=BOOT_SLAVE2,  # OTA: BOOT #2
+    GPIO1=BOOT_SLAVE3,  # OTA: BOOT #3
+    GPIO44=SCL2,     # I2C bus 1: SCL2 (ES8388 #3+#4)
+    GPIO43=SDA2,     # I2C bus 1: SDA2 (ES8388 #3+#4)
+    GND4=DGND,
 )
 
 # UART TX pull-up (wired-OR debug bus from slave GPIO41, 10k to DVDD)
@@ -896,9 +882,6 @@ PinHeader(name="J_FS2", pins=2, rows=1, mount="THT", pitch="2.54mm", P1=Net("FS2
 #                                                                             #
 ###############################################################################
 
-# Mounting holes (2 diagonal corners)
-for i in range(2):
-    MountingHole(name="H" + str(i + 1), diameter="M3", P1=DGND)
 
 Board(
     name="main",

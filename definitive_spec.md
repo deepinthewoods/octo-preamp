@@ -1,8 +1,15 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.8 — 18 March 2026**
+**Version 2.9 — 18 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.9 changes (remove board USB-C):**
+- Removed separate USB-C connector (J_USB) from MAIN board — DevKit's built-in USB-C handles both data and power
+- DevKit P_5V pin now feeds VBUS net (MCP73831 LiPo charger)
+- GPIO19/GPIO20 no longer routed to board — used internally by DevKit USB-C
+- Removed R_CC1, R_CC2 (CC pull-downs), UsbC module import
+- Saves ~5 components and board space
 
 **v2.8 changes (mixed-signal routing strategy):**
 - Added DGND copper pour on In1.Cu covering digital zone (x=10–75mm)
@@ -120,10 +127,10 @@ Mode is selectable at runtime via footswitch. UART command switches slaves betwe
 
 ### Architecture
 
-The system runs entirely from a single-cell LiPo battery (3.7V nominal). USB-C is for charging only. There is no 5V rail. Slave ESP32 DevKits are powered directly from the 3.3V DVDD rail, bypassing their onboard LDOs.
+The system runs entirely from a single-cell LiPo battery (3.7V nominal). USB-C on the DevKit provides both programming/debug and 5V charging power. There is no separate USB-C connector on the MAIN board. There is no 5V rail. Slave ESP32 DevKits are powered directly from the 3.3V DVDD rail, bypassing their onboard LDOs.
 
 ```
-USB-C VBUS (5V)
+DevKit USB-C (5V via P_5V pin)
   |
   v
 MCP73831T-2ACI/OT (SOT-23-5, ~210mA charge current)
@@ -356,8 +363,8 @@ Board: ESP32-S3 DevKit N16R8 (16MB flash, 8MB PSRAM), mounted in 2x 20-pin machi
 | GPIO | Signal | Notes |
 |------|--------|-------|
 | 36 | VBAT_MON | Battery voltage divider (100k/100k, VBAT * 0.5) |
-| 19 | USB_DN | USB native D- |
-| 20 | USB_DP | USB native D+ |
+| 19 | NC | USB D- — used internally by DevKit USB-C |
+| 20 | NC | USB D+ — used internally by DevKit USB-C |
 | 48 | RGB LED | Onboard status LED |
 | 43 | U0TXD | Reserved for USB debug |
 | 44 | U0RXD | Reserved for USB debug |
@@ -675,7 +682,7 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | 8 | Gain trimpot | Bourns 3314J-1-103E (SMD, 10k) | Per-channel gain trim |
 | 1 | Ferrite bead | 220 Ohm, 0805 | AGND/DGND bridge |
 | 2 | Audio pot | 10k audio taper | Headphone volume (dual ganged) |
-| 1 | USB-C connector | — | Charging only |
+| — | ~~USB-C connector~~ | — | Removed — DevKit USB-C provides charging + data |
 | 1 | Battery connector | JST-PH 2.0mm 2-pin | LiPo connection |
 | 8 | Solder pad header | 2-pin 2.54mm THT | Direct outputs (Preamp) |
 | 2 | Stereo jack | 3.5mm TRS | Line + headphone out (MAIN) |
@@ -735,4 +742,4 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 ---
 
-*End of Definitive Specification — Version 2.8*
+*End of Definitive Specification — Version 2.9*

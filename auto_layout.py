@@ -14,6 +14,7 @@ from pathlib import Path
 
 BOARDS_DIR = Path(__file__).parent / "boards"
 KICAD_FP_DIR = Path("/usr/share/kicad/footprints")
+LOCAL_FP_DIR = Path(__file__).parent / "footprints"
 CACHE_FP_DIR = Path(__file__).parent / ".pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3"
 
 # Map footprint library names from netlist to actual .pretty directories
@@ -27,6 +28,7 @@ FPLIB_MAP = {
     "PinHeader_2x06_P2.54mm_Vertical": ("Connector_PinHeader_2.54mm.pretty", "PinHeader_2x06_P2.54mm_Vertical"),
     "PinHeader_1x20_P2.54mm_Vertical": ("Connector_PinHeader_2.54mm.pretty", "PinHeader_1x20_P2.54mm_Vertical"),
     "PinSocket_1x20_P2.54mm_Vertical": ("Connector_PinSocket_2.54mm.pretty", "PinSocket_1x20_P2.54mm_Vertical"),
+    "ESP32-S3-DevKitC": ("Espressif.pretty", "ESP32-S3-DevKitC"),
 }
 
 
@@ -42,13 +44,13 @@ def find_footprint_lib(fpid_str):
     # Check our explicit map — prioritize system KiCad 7 libs over cache (KiCad 9 format)
     if fp_name in FPLIB_MAP:
         pretty_dir, actual_fp = FPLIB_MAP[fp_name]
-        for base in [KICAD_FP_DIR, CACHE_FP_DIR]:
+        for base in [LOCAL_FP_DIR, KICAD_FP_DIR, CACHE_FP_DIR]:
             lib_path = base / pretty_dir
             if lib_path.exists() and (lib_path / f"{actual_fp}.kicad_mod").exists():
                 return str(lib_path), actual_fp
 
-    # Try to find by searching .pretty directories — system first
-    for base in [KICAD_FP_DIR, CACHE_FP_DIR]:
+    # Try to find by searching .pretty directories — local first, then system
+    for base in [LOCAL_FP_DIR, KICAD_FP_DIR, CACHE_FP_DIR]:
         if not base.exists():
             continue
         for pretty in base.iterdir():
@@ -261,7 +263,7 @@ def add_silkscreen_labels(board, components, placed_fps, layout):
         'J_RIGHT_C': 'SLAVE C R',
         'J_LEFT_D': 'SLAVE D L',
         'J_RIGHT_D': 'SLAVE D R',
-        # MAIN board master ESP32 (DevKit creates J_LEFT and J_RIGHT sub-components)
+        # MAIN board master ESP32 (single 44-pin Espressif footprint)
         'DEVKIT_MASTER': 'MASTER ESP32',
         # MAIN board volume pots
         'RV_HPL': 'HP VOL L',
@@ -469,14 +471,14 @@ def assign_passives_to_anchors(fps, nets, anchor_positions):
         if best_anchor is None:
             my_power = my_nets & POWER_NETS
             if 'AVDD' in my_power or 'AGND' in my_power:
-                analog_ics = [c for c in ['U1', 'U2', 'U3', 'U4', 'U5', 'U10', 'U11', 'U8', 'U9']
+                analog_ics = [c for c in ['U2', 'U3', 'U4', 'U5', 'U6', 'U11', 'U12', 'U9', 'U10']
                               if c in anchor_refs]
                 if analog_ics:
                     idx = _power_rr_counters.get('analog', 0) % len(analog_ics)
                     best_anchor = analog_ics[idx]
                     _power_rr_counters['analog'] = idx + 1
             elif 'DVDD' in my_power or 'DGND' in my_power:
-                digital_ics = [c for c in ['U7', 'U6', 'U1', 'U2', 'U3', 'U4']
+                digital_ics = [c for c in ['U8', 'U7', 'U1', 'U2', 'U3', 'U4', 'U5']
                                if c in anchor_refs]
                 if digital_ics:
                     idx = _power_rr_counters.get('digital', 0) % len(digital_ics)
@@ -519,7 +521,14 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
     native = None
 
     # Footprint-string-based detection first (board-independent)
-    if 'Bourns_3314J' in fp_str:
+    if 'USB_C' in fp_str or 'USB4085' in fp_str:
+        # USB-C receptacle (GCT USB4085): large asymmetric footprint
+        # Native (0° rotation): ref point near top-left, body extends right and down
+        native = (-2.4, 8.3, -1.2, 9.2)
+    elif 'SOT-223' in fp_str:
+        # SOT-223-3 (e.g. AP2114H LDO): ~8.8x7.3mm courtyard
+        native = (-4.5, 4.5, -3.8, 3.7)
+    elif 'Bourns_3314J' in fp_str:
         # Bourns 3314J Vertical SMD: F.CrtYd (-2.5,-3.25) to (2.5,3.25)
         native = (-2.5, 2.5, -3.25, 3.25)
     elif 'Bourns_3296' in fp_str:
@@ -568,9 +577,6 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
             else:
                 # SOIC-8 / QFN-28: roughly ±3.5 symmetric
                 native = (-3.5, 3.5, -3.5, 3.5)
-        elif ref.startswith('H'):
-            # Mounting hole: ~5mm diameter courtyard
-            native = (-2.5, 2.5, -2.5, 2.5)
         elif ref.startswith(('FB', 'D')):
             # Ferrite / diode: ~4x3mm
             native = (-2.0, 2.0, -1.5, 1.5)
@@ -599,7 +605,7 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
     return (min(rxs) - margin, max(rxs) + margin, min(rys) - margin, max(rys) + margin)
 
 
-def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=None, x_min_offset=70):
+def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=None, x_min_offset=70, bounds=None):
     """Place passives near their parent anchor, avoiding overlaps.
 
     Uses AABB collision detection with actual footprint courtyard dimensions so
@@ -610,10 +616,14 @@ def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=
         layout: shared layout dict (modified in place)
         fps: dict of ref -> footprint object (used to determine passive sizes)
         x_min_offset: left boundary offset from ox (default 70 for main board right section)
+        bounds: optional (x_min, x_max, y_min, y_max) to override calculated bounds
     """
     # Board bounds, inset from board edge
-    x_min, x_max = ox + x_min_offset, ox + bw - 3
-    y_min, y_max = oy + 2, oy + bh - 2
+    if bounds:
+        x_min, x_max, y_min, y_max = bounds
+    else:
+        x_min, x_max = ox + x_min_offset, ox + bw - 3
+        y_min, y_max = oy + 2, oy + bh - 2
 
     # Candidate grid with 2.0mm step — AABB check handles per-footprint clearance
     # so mixed 0402/0603/0805 are correctly spaced regardless of grid density
@@ -721,118 +731,106 @@ def layout_main():
     # Explicit IC and connector placement by reference designator
     # =================================================================
     #
-    # Ref mapping (from netlist analysis, v2.6):
-    #   J19 = USB-C          J4 = Battery connector
-    #   U6 = MCP73831        U5 = LP2985 (AVDD)     U7 = AP2114H (DVDD)
+    # Ref mapping (from netlist analysis, v2.7 — single DevKit footprint):
+    #   U1 = ESP32-S3-DevKitC-1 (master, 44-pin Espressif footprint)
+    #   J17 = USB-C          J2 = Battery connector
+    #   U7 = MCP73831        U6 = LP2985 (AVDD)     U8 = AP2114H (DVDD)
     #   D1 = BAT54           D2 = LED (charge status)
-    #   J1 = Master left socket (1x20)   J2 = Master right socket (1x20)
-    #   J8/J15 = Slave A     J9/J16 = Slave B
-    #   J10/J17 = Slave C    J11/J18 = Slave D
-    #   U1 = ES8388 #1 (CH1+2)   U2 = ES8388 #2 (CH3+4)
-    #   U3 = ES8388 #3 (CH5+6 + DAC out)   U4 = ES8388 #4 (CH7+8)
-    #   J3 = J_AFE (2x5 preamp cable)
-    #   U11 = NE5532 summing   U10 = NE5532 output buf
-    #   U8 = CD4052B mux #1    U9 = CD4052B mux #2
-    #   J7 = HP jack           J12 = Line jack
+    #   J6/J13 = Slave A     J7/J14 = Slave B
+    #   J8/J15 = Slave C     J9/J16 = Slave D
+    #   U2 = ES8388 #1 (CH1+2)   U3 = ES8388 #2 (CH3+4)
+    #   U4 = ES8388 #3 (CH5+6 + DAC out)   U5 = ES8388 #4 (CH7+8)
+    #   J1 = J_AFE (2x5 preamp cable)
+    #   U12 = NE5532 summing   U11 = NE5532 output buf
+    #   U9 = CD4052B mux #1    U10 = CD4052B mux #2
+    #   J5 = HP jack           J10 = Line jack
     #   RV1/RV2 = Volume pots
-    #   J13/J14 = Output headers   J5/J6 = Footswitch connectors
+    #   J11/J12 = Output headers   J3/J4 = Footswitch connectors
     #   FB1 = Ferrite bead (AGND-DGND bridge)
 
     # ================================================================
     # ZONE A — DIGITAL (left ~70mm, x: ox to ox+70)
     # ================================================================
 
-    # --- Master ESP32 DevKit sockets (centered in Y, at left edge, USB side left) ---
-    master_cx = ox + 4         # near left edge, dev board hangs over left
-    master_cy = oy + bh / 2    # centered in board Y
-    layout['J1'] = (master_cx, master_cy - 12.7, 90)  # Top row (1x20)
-    layout['J2'] = (master_cx, master_cy + 12.7, 90)  # Bottom row (1x20)
+    # --- Master ESP32-S3-DevKitC-1 (single 44-pin Espressif footprint) ---
+    # Rotated 90° CW: USB points right, pins run right-to-left
+    # After rotation, pad area is 53.3mm wide x 22.9mm tall
+    # Pad1 (origin) ends up at the RIGHT end; leftmost pad is 53.3mm left of pad1
+    # Place with leftmost pad at board left edge, centered vertically
+    devkit_x = ox + 56.3   # pad1 at right end, leftmost pad at ox+3
+    devkit_y = oy + bh / 2 - 11.4  # center pad area at board center Y
+    layout['U1'] = (devkit_x, devkit_y, -90)  # ESP32-S3-DevKitC-1, rotated 90° CW
 
-    # --- Power supply section (centered Y, spread across X right of headers) ---
-    # Headers J1/J2 are at x=ox+4; start power components at ox+18 to clear them
-    # Two tight rows centered on master_cy, spread wide in X
+    master_cy = oy + bh / 2    # centered in board Y
+
+    # --- Power supply section (right of DevKit, centered Y) ---
     pwr_row1 = master_cy - 3     # upper row
     pwr_row2 = master_cy + 3     # lower row
-    layout['J19'] = (ox + 18, pwr_row1, 270)     # USB-C
-    layout['U6']  = (ox + 28, pwr_row1, 0)       # MCP73831 charger
-    layout['D2']  = (ox + 38, pwr_row1, 0)       # Charge status LED
+    layout['J17'] = (16.025, 45.525, -90)            # USB-C (hand-placed, edge-mount, plug from left)
+    layout['U7']  = (ox + 28, pwr_row1, 0)       # MCP73831 charger
+    layout['D2']  = (13.7875, 41.5, 0)            # Charge status LED (hand-placed)
     layout['D1']  = (ox + 44, pwr_row1, 0)       # BAT54 reverse protection
-    layout['J4']  = (ox + 18, pwr_row2, 0)       # Battery connector
-    layout['U7']  = (ox + 48, pwr_row2, 0)       # AP2114H digital LDO
+    layout['J2']  = (33.5, 55.5, 0)                # Battery connector (hand-placed)
+    layout['U8']  = (24, 48.5, 0)                  # AP2114H digital LDO (hand-placed)
 
     # Ferrite bead at analog/digital zone boundary — placed in moat center (ox+67 = x=77)
-    # Moat: x=[ox+65, ox+69] = [75, 79]; FB1 straddles it, one pad in DGND, one in AGND
     layout['FB1'] = (ox + 67, oy + 32, 0)
 
     # --- Slave DevKit sockets (2x2 grid, devboards hang over top/bottom edges) ---
-    # 30mm X spacing between adjacent pairs; 25.4mm between LEFT/RIGHT within each pair
-    # Top row: pairs A+B near top edge; Bottom row: pairs C+D near bottom edge
     slave_x0 = ox + 4          # first pair LEFT socket X
     slave_y_top = oy + 4       # top row Y (devboards hang over top)
     slave_y_bot = oy + bh - 20 # bottom row Y (devboards hang over bottom)
     slave_pairs = [
-        ('J8',  'J15', slave_x0,      slave_y_top),   # Slave A (top-left)
-        ('J9',  'J16', slave_x0 + 30, slave_y_top),   # Slave B (top-right)
-        ('J10', 'J17', slave_x0,      slave_y_bot),   # Slave C (bottom-left)
-        ('J11', 'J18', slave_x0 + 30, slave_y_bot),   # Slave D (bottom-right)
+        ('J6',  'J13', slave_x0,      slave_y_top),   # Slave A (top-left)
+        ('J7',  'J14', slave_x0 + 30, slave_y_top),   # Slave B (top-right)
+        ('J8',  'J15', slave_x0,      slave_y_bot),   # Slave C (bottom-left)
+        ('J9',  'J16', slave_x0 + 30, slave_y_bot),   # Slave D (bottom-right)
     ]
     for left, right, sx, sy in slave_pairs:
-        layout[left]  = (sx, sy, 0)                # LEFT (3V3)
-        layout[right] = (sx + 25.4, sy, 0)         # RIGHT (GND) 25.4mm to the right
+        layout[left]  = (sx, sy, 0)
+        layout[right] = (sx + 25.4, sy, 0)
 
     # ================================================================
     # RIGHT SECTION — ANALOG (x: ox+69 to ox+100, 31mm wide)
-    # Moat (no copper) at x: [ox+65, ox+69] = [75, 79] — 4mm gap
-    # FB1 bridges DGND/AGND at moat center (x=77)
-    # Connectors/jacks on edges, ICs in interior
     # ================================================================
 
-    # --- Right edge connectors (inset for footprint clearance) ---
-    layout['J7']  = (104.5, 35.5, 90)              # Headphone jack (90° CCW)
-    layout['J12'] = (104.5, 49.5, 90)              # Line output jack (90° CCW)
-    layout['J13'] = (107, 63, 0)                   # J_OUT_L
-    layout['J14'] = (107, 73.92, 0)               # J_OUT_R
+    # --- Right edge connectors ---
+    layout['J5']  = (104.5, 35.5, 90)              # Headphone jack (90° CCW)
+    layout['J10'] = (104.5, 49.5, 90)              # Line output jack (90° CCW)
+    layout['J11'] = (107, 63, 0)                   # J_OUT_L
+    layout['J12'] = (107, 73.92, 0)               # J_OUT_R
 
     # --- Bottom of right section: AFE preamp cable (2x5) ---
-    layout['J3']  = (85, 87.54, 90)               # J_AFE preamp cable — in analog zone (x>84)
+    layout['J1']  = (82.46, 87.5, 90)             # J_AFE preamp cable (hand-placed)
 
-    # --- Top edge: volume pots (inset from edge) ---
-    layout['RV1'] = (ox + 75, oy + 6, 0)         # HP VOL L — in analog zone, clears RV2 courtyard
+    # --- Top edge: volume pots ---
+    layout['RV1'] = (ox + 75, oy + 6, 0)         # HP VOL L
     layout['RV2'] = (ox + 86, oy + 6, 0)         # HP VOL R
 
-    # --- Bottom edge: footswitch connectors (right side) ---
-    layout['J5'] = (ox + 86, oy + bh - 6, 0)     # Footswitch 1
-    layout['J6'] = (ox + bw - 8, oy + bh - 6, 0) # Footswitch 2
+    # --- Bottom edge: footswitch connectors ---
+    layout['J3'] = (98.5, 85, 0)                  # Footswitch 1 (hand-placed)
+    layout['J4'] = (102, 85, 0)                   # Footswitch 2 (hand-placed)
 
     # --- Interior ICs ---
-    # ADCs on the LEFT of the analog section, rotated 90° CCW:
-    #   LEFT  (was TOP):    LRCK, ASDOUT, SDA, SCL, AD0, RESET_N → faces moat (~1mm crossing)
-    #   TOP   (was RIGHT):  SCLK, MCLK at left end (near moat); LIN1, RIN1 further right (in AGND zone)
-    #   BOTTOM (was LEFT):  LOUT1, ROUT1, AVDD, AVSS → analog outputs face south toward NE5532s
-    #   RIGHT (was BOTTOM): DVDD, DVSS, refs → local decoupling in AGND zone
-    layout['U1']  = (82,      30.1,    90)         # ES8388 ADC #1 (CH1+2)
-    layout['U2']  = (82,      35.9375, 90)         # ES8388 ADC #2 (CH3+4)
-    layout['U3']  = (82,      42,      90)         # ES8388 ADC #3 (CH5+6 + DAC)
-    layout['U4']  = (82,      47.9375, 90)         # ES8388 ADC #4 (CH7+8)
-    # Downstream analog processing — further right
-    layout['U5']  = (93,      57,      0)          # LP2985 AVDD analog LDO
-    layout['U11'] = (93,      64.4,    0)          # NE5532 summing amp
-    layout['U10'] = (93,      74.5,    0)          # NE5532 output buffer
+    layout['U2']  = (82,      30.1,    90)         # ES8388 ADC #1 (CH1+2)
+    layout['U3']  = (82,      35.9375, 90)         # ES8388 ADC #2 (CH3+4)
+    layout['U4']  = (82,      42,      90)         # ES8388 ADC #3 (CH5+6 + DAC)
+    layout['U5']  = (82,      47.9375, 90)         # ES8388 ADC #4 (CH7+8)
+    # Downstream analog processing
+    layout['U6']  = (93,      57,      0)          # LP2985 AVDD analog LDO
+    layout['U12'] = (93,      64.4,    0)          # NE5532 summing amp
+    layout['U11'] = (93,      74.5,    0)          # NE5532 output buffer
 
-    # Muxes — right of IC column
-    layout['U8']  = (100.025, 63.635, 0)           # CD4052B mux #1
-    layout['U9']  = (100.025, 75.635, 0)           # CD4052B mux #2
+    # Muxes
+    layout['U9']  = (100.025, 63.635, 0)           # CD4052B mux #1
+    layout['U10'] = (100.025, 75.635, 0)           # CD4052B mux #2
 
     # ================================================================
-    # Mounting holes (2 diagonal corners)
+    # Hand-placed passives (override auto-placement)
     # ================================================================
-    mh_refs = sorted([r for r in fps if r.startswith('H')])
-    mh_positions = [
-        (ox + 3, oy + 3),
-        (ox + bw - 3, oy + bh - 3),
-    ]
-    for i, ref in enumerate(mh_refs[:2]):
-        layout[ref] = (mh_positions[i][0], mh_positions[i][1], 0)
+    layout['R8']  = (33.99, 48, 0)               # RPROG for MCP73831 (hand-placed)
+    layout['R19'] = (85.49, 81.5, 0)             # Summing resistor (hand-placed)
+    layout['R23'] = (88.49, 81.5, 0)             # Summing resistor (hand-placed)
 
     # ================================================================
     # Passive component clustering (net-based, near parent ICs)
@@ -842,6 +840,11 @@ def layout_main():
 
     assignments = assign_passives_to_anchors(fps, nets, anchor_positions)
 
+    # Remove hand-placed passives from auto-assignment
+    hand_placed = {r for r in layout if r.startswith(('R', 'C'))}
+    for anchor_ref in list(assignments.keys()):
+        assignments[anchor_ref] = [r for r in assignments[anchor_ref] if r not in hand_placed]
+
     print(f"  Passive assignments:")
     for k, v in sorted(assignments.items()):
         print(f"    {k}: {sorted(v)}")
@@ -849,6 +852,7 @@ def layout_main():
     # Separate right-section passives from left-section passives
     right_section_x = ox + 65  # boundary between left and right sections (moat left edge)
     right_assignments = {}
+    left_assignments = {}
     for anchor_ref, passive_list in assignments.items():
         if anchor_ref == 'UNASSIGNED' or anchor_ref not in layout:
             continue
@@ -856,7 +860,16 @@ def layout_main():
         if ax >= right_section_x:
             right_assignments[anchor_ref] = passive_list
         else:
-            place_passives_near_anchor(ax, ay, passive_list, layout, x_dir=1)
+            left_assignments[anchor_ref] = passive_list
+
+    # Place left-section passives right of DevKit, between it and the moat
+    if left_assignments:
+        total = sum(len(v) for v in left_assignments.values())
+        print(f"  Left-section passives ({total}) across {len(left_assignments)} anchors")
+        # DevKit right edge is at ~ox+25; constrain to area right of it to moat
+        left_bounds = (ox + 26, ox + 63, master_cy - 11, master_cy + 11)
+        place_passives_right_section(left_assignments, layout, ox, oy, bw, bh, fps=fps,
+                                     bounds=left_bounds)
 
     # Place right-section passives near their parent anchors
     if right_assignments:
@@ -899,12 +912,12 @@ def layout_main():
     add_ground_pour(board, "DGND", "In1.Cu", ox,           oy, MOAT_LEFT,          bh)
     # DGND corridor on In1.Cu extending through moat into analog zone.
     # Provides digital return current path for I2S/I2C traces routed on In1.Cu
-    # to ES8388 codecs (U1-U4 at x=82, y=30..48). Digital traces should be
+    # to ES8388 codecs (U2-U5 at x=82, y=30..48). Digital traces should be
     # routed on In1.Cu so return currents stay on DGND, not AGND.
     CORRIDOR_X = ox + MOAT_LEFT  # starts at moat left edge (x=75)
     CORRIDOR_W = 11              # extends to x=86, past ES8388 DGND pads
-    CORRIDOR_Y = 27              # above U1 (y=30.1)
-    CORRIDOR_H = 24              # down to y=51, below U4 (y=47.9)
+    CORRIDOR_Y = 27              # above U2 (y=30.1)
+    CORRIDOR_H = 24              # down to y=51, below U5 (y=47.9)
     add_ground_pour(board, "DGND", "In1.Cu", CORRIDOR_X, CORRIDOR_Y, CORRIDOR_W, CORRIDOR_H)
     # AGND: right (analog) section — F.Cu, B.Cu, and In2.Cu
     add_ground_pour(board, "AGND", "F.Cu",  ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT,  bh)
@@ -1008,14 +1021,6 @@ def layout_preamp():
         layout[ref] = (ox + bw - 6, oy + 6 + i * 9, 0)
 
     # ================================================================
-    # Mounting holes (2 diagonal corners)
-    # ================================================================
-    mh_refs = sorted([r for r in fps if r.startswith('H')])
-    mh_positions = [(ox + 3, oy + 3), (ox + bw - 3, oy + bh - 3)]
-    for i, ref in enumerate(mh_refs[:2]):
-        layout[ref] = (mh_positions[i][0], mh_positions[i][1], 0)
-
-    # ================================================================
     # Passive placement — same AABB strategy as main board right side
     # ================================================================
     anchor_positions = {ref: (x, y) for ref, (x, y, _) in layout.items()
@@ -1087,6 +1092,16 @@ def main():
             print(f"  ERROR: {e}")
             import traceback
             traceback.print_exc()
+
+    # Route moat-crossing digital traces on MAIN board
+    print("\n--- MAIN Board: Moat Routing ---")
+    try:
+        from route_moat import main as route_moat_main
+        route_moat_main()
+    except Exception as e:
+        print(f"  ERROR: {e}")
+        import traceback
+        traceback.print_exc()
 
     print("\n" + "=" * 60)
     print("Auto-layout complete!")
