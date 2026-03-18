@@ -506,22 +506,44 @@ Output buffers: NE5532 voltage followers (U_OUTBUF)
 
 ### Analog Routing Matrix (2x CD4052B)
 
-Two CD4052B dual 4:1 analog muxes with shared control lines.
+Two CD4052B dual 4:1 analog muxes with shared control lines. MUX1 selects the primary signal; MUX2 provides the synth signal for passive summing in Hybrid mode. Both mux outputs are summed through matched 1k resistors at a common filter node before the output stage.
 
-**Output Mode Truth Table:**
+**MUX1 Input Wiring:**
+
+| MUX_A | MUX_B | MUX1 X (→ Output A) | MUX1 Y (→ Output B) |
+|-------|-------|---------------------|---------------------|
+| 0 | 0 | Dry sum A | Dry sum B |
+| 1 | 0 | DAC synth L | DAC synth R |
+| 0 | 1 | Dry sum A | Dry sum B |
+| 1 | 1 | Dry sum A | DAC synth R |
+
+**MUX2 Input Wiring:**
+
+| MUX_A | MUX_B | MUX2 X | MUX2 Y | Purpose |
+|-------|-------|--------|--------|---------|
+| 0 | 0 | AGND | AGND | Silent — no contribution |
+| 1 | 0 | AGND | AGND | Silent — MUX1 handles synth |
+| 0 | 1 | DAC synth L | DAC synth R | Summed with MUX1 dry signal |
+| 1 | 1 | AGND | AGND | Silent — MUX1 handles split |
+
+**Combined Output (after passive summing):**
 
 | MUX_A | MUX_B | Mode | J_OUT_A | J_OUT_B |
 |-------|-------|------|---------|---------|
 | 0 | 0 | Dry only | Summed dry A | Summed dry B |
 | 1 | 0 | Synth only | DAC synth L | DAC synth R |
-| 0 | 1 | Hybrid | Dry + synth A | Dry + synth B |
+| 0 | 1 | Hybrid | Dry A + synth L | Dry B + synth R |
 | 1 | 1 | Wet/dry split | Dry A | Synth (DAC R) |
 
-MUX_INH asserted briefly during switching to prevent clicks. RC click suppression (1k + 100nF) on mux outputs.
+**Passive summing topology:** MUX1 and MUX2 outputs each pass through a 1k resistor to a common summing node. In non-hybrid modes, MUX2 outputs AGND (0V AC), contributing nothing. In hybrid mode, both dry (MUX1) and synth (MUX2) signals are summed at equal levels. A 100nF shunt cap on the summing node provides RC click suppression.
+
+**Hybrid mix ratio control:** The synth level in the mix is digitally controllable via ES8388 #3 LOUT2/ROUT2 output volume registers (I2C, 0 to -46.5dB in 1.5dB steps). The dry signal level is fixed. This also affects J_LINE level since LOUT2/ROUT2 feed both paths, but J_LINE is not typically used in hybrid mode.
+
+MUX_INH asserted briefly during switching to prevent clicks.
 
 ### Main Output Stage
 
-- Mux output -> 1k RC filter -> 47uF coupling cap -> 1k series resistor -> 6.35mm TS jack
+- Summing node -> 47uF coupling cap -> 1k series resistor -> 6.35mm TS jack
 - Two outputs: J_OUT_A and J_OUT_B (2-pin headers: Tip + GND)
 - Two footswitch connectors: J_FS1, J_FS2 (2-pin headers)
 
@@ -660,8 +682,8 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 | Direct outs | 8 | 2-pin solder pads | Preamp | Per-string pickup tap |
 | Main A | 1 | 6.35mm TS | MAIN | Routing matrix output A (ch 1-4 dry sum) |
 | Main B | 1 | 6.35mm TS | MAIN | Routing matrix output B (ch 5-8 dry sum) |
-| Line out | 1 | 3.5mm TRS stereo | MAIN | HT8988A line output |
-| Headphone | 1 | 3.5mm TRS stereo | MAIN | HT8988A HP output (with pot) |
+| Line out | 1 | 3.5mm TRS stereo | MAIN | ES8388 #3 DAC line output |
+| Headphone | 1 | 3.5mm TRS stereo | MAIN | ES8388 #3 DAC HP output (with pot) |
 | Footswitches | 2 | 2-pin headers | MAIN | Mode selection |
 
 ---

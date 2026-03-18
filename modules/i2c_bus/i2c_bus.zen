@@ -9,7 +9,7 @@ SCL = io("SCL", Net)
 Resistor(
     name="R_SDA",
     value=Resistance("4.7k"),
-    package="0603",
+    package="0402",
     P1=VCC,
     P2=SDA,
 )
@@ -17,7 +17,7 @@ Resistor(
 Resistor(
     name="R_SCL",
     value=Resistance("4.7k"),
-    package="0603",
+    package="0402",
     P1=VCC,
     P2=SCL,
 )

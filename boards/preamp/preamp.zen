@@ -116,7 +116,7 @@ for i in range(8):
     FILTERED = Net("FILTERED_" + ch)
 
     # Input coupling cap
-    Capacitor(name="C_IN" + ch, value=Capacitance("10nF"), package="0402", P1=PICKUP[i], P2=COUPLED)
+    Capacitor(name="C_IN" + ch, value=Capacitance("10nF"), package="0402", dielectric="NP0", P1=PICKUP[i], P2=COUPLED)
 
     # Input bias to virtual ground (1M sets input impedance)
     Resistor(name="R_BIAS" + ch, value=Resistance("1M"), package="0402", P1=COUPLED, P2=VGND_NET)

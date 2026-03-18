@@ -802,7 +802,11 @@ U_MUX1 = CD4052B(
     Y3=DAC_R_AC,    # 11: Synth only for wet/dry split B
 )
 
-# MUX2: Secondary routing for wet/dry split mode
+# MUX2: Synth signal source for hybrid mode (passive summing with MUX1)
+# In mode 01 (Hybrid), MUX2 selects DAC synth signal which is passively
+# summed with MUX1's dry signal at the RC filter node via 1k resistors.
+# All other modes: MUX2 selects AGND (silence, no contribution to sum).
+# Mix ratio controllable via ES8388 #3 LOUT2/ROUT2 volume registers (I2C).
 U_MUX2 = CD4052B(
     name="U_MUX2",
     VDD=AVDD,
@@ -812,32 +816,40 @@ U_MUX2 = CD4052B(
     B=MUX_B,
     INH=MUX_INH,
     X=MUX2_X_OUT,
-    X0=Net("NC_MUX2_X0"),
-    X1=Net("NC_MUX2_X1"),
-    X2=DAC_L_AC,    # Wet-only (DAC L) for split mode
-    X3=Net("NC_MUX2_X3"),
+    X0=AGND,        # 00: Dry only — MUX2 silent
+    X1=AGND,        # 10: Synth only — MUX1 handles it
+    X2=DAC_L_AC,    # 01: Hybrid — synth L summed with MUX1 dry A
+    X3=AGND,        # 11: Wet/dry split — MUX1 handles it
     Y=MUX2_Y_OUT,
-    Y0=Net("NC_MUX2_Y0"),
-    Y1=Net("NC_MUX2_Y1"),
-    Y2=DAC_R_AC,    # Wet-only (DAC R) for split mode
-    Y3=Net("NC_MUX2_Y3"),
+    Y0=AGND,        # 00: Dry only — MUX2 silent
+    Y1=AGND,        # 10: Synth only — MUX1 handles it
+    Y2=DAC_R_AC,    # 01: Hybrid — synth R summed with MUX1 dry B
+    Y3=AGND,        # 11: Wet/dry split — MUX1 handles it
 )
 
 Decoupling(name="DC_MUX1", VCC=AVDD, GND=AGND)
 Decoupling(name="DC_MUX2", VCC=AVDD, GND=AGND)
 
 # =============================================================================
-# RC click suppression after each mux output
-# 1k + 100nF RC low-pass before coupling caps
+# Passive summing + RC click suppression
+# MUX1 and MUX2 outputs summed at filter node via matched 1k resistors.
+# In non-hybrid modes MUX2 outputs AGND (0V AC), contributing nothing.
+# 100nF shunt cap provides RC click suppression on combined output.
 # =============================================================================
 
 MUX1_X_FILT = Net("MUX1_X_FILT")
 MUX1_Y_FILT = Net("MUX1_Y_FILT")
 
+# MUX1 -> summing node (1k)
 Resistor(name="R_RC_AX", value=Resistance("1k"), package="0402", P1=MUX1_X_OUT, P2=MUX1_X_FILT)
-Capacitor(name="C_RC_AX", value=Capacitance("100nF"), package="0402", P1=MUX1_X_FILT, P2=AGND)
-
 Resistor(name="R_RC_BY", value=Resistance("1k"), package="0402", P1=MUX1_Y_OUT, P2=MUX1_Y_FILT)
+
+# MUX2 -> summing node (1k, matched)
+Resistor(name="R_MUX2_X", value=Resistance("1k"), package="0402", P1=MUX2_X_OUT, P2=MUX1_X_FILT)
+Resistor(name="R_MUX2_Y", value=Resistance("1k"), package="0402", P1=MUX2_Y_OUT, P2=MUX1_Y_FILT)
+
+# RC shunt caps (click suppression)
+Capacitor(name="C_RC_AX", value=Capacitance("100nF"), package="0402", P1=MUX1_X_FILT, P2=AGND)
 Capacitor(name="C_RC_BY", value=Capacitance("100nF"), package="0402", P1=MUX1_Y_FILT, P2=AGND)
 
 # =============================================================================

@@ -3,7 +3,6 @@
   (lib (name "C_0402_1005Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
   (lib (name "C_0603_1608Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
   (lib (name "C_0805_2012Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Capacitor_SMD.pretty/") (options "") (descr ""))
-  (lib (name "MountingHole_3.2mm_M3_DIN965_Pad_TopBottom") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/MountingHole.pretty/") (options "") (descr ""))
   (lib (name "PinHeader_1x02_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.54mm.pretty/") (options "") (descr ""))
   (lib (name "PinHeader_2x05_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.54mm.pretty/") (options "") (descr ""))
   (lib (name "Potentiometer_Bourns_3314J_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Potentiometer_SMD.pretty/") (options "") (descr ""))

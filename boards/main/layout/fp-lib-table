@@ -13,7 +13,6 @@
   (lib (name "Potentiometer_Alps_RK09K_Single_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Potentiometer_THT.pretty/") (options "") (descr ""))
   (lib (name "QFN-28-1EP_4x4mm_P0.4mm_EP2.4x2.4mm") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Package_DFN_QFN.pretty/") (options "") (descr ""))
   (lib (name "R_0402_1005Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Resistor_SMD.pretty/") (options "") (descr ""))
-  (lib (name "R_0603_1608Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Resistor_SMD.pretty/") (options "") (descr ""))
   (lib (name "R_0805_2012Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Resistor_SMD.pretty/") (options "") (descr ""))
   (lib (name "SOIC-16_3.9x9.9mm_P1.27mm") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Package_SO.pretty/") (options "") (descr ""))
   (lib (name "SOIC-8_3.9x4.9mm_P1.27mm") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Package_SO.pretty/") (options "") (descr ""))
