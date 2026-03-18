@@ -141,8 +141,8 @@ def create_board(board_name, components, nets, board_config):
     ds = board.GetDesignSettings()
     ds.SetCopperLayerCount(board_config.get('layers', 2))
     ds.m_TrackMinWidth = pcbnew.FromMM(0.2)
-    ds.m_ViasMinSize = pcbnew.FromMM(0.6)
-    ds.m_ViasMinDrill = pcbnew.FromMM(0.3)
+    ds.m_ViasMinSize = pcbnew.FromMM(0.45)
+    ds.m_ViasMinDrill = pcbnew.FromMM(0.2)
     ds.m_CopperEdgeClearance = pcbnew.FromMM(0.25)
 
     # Set default track width and clearance
@@ -633,9 +633,18 @@ def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=
         fp_str = fps[ref].GetFPIDAsString() if fps and ref in fps else ''
         occupied.append(_footprint_aabb(ref, lx, ly, rot, fp_str))
 
+    # Moat-crossing routing corridor: vias and F.Cu stubs at x=77-82, y=26-49.
+    # Passives must not be placed here or they'll short with routed vias.
+    ROUTING_CORRIDOR = (77.0, 82.5, 26.0, 49.0)  # (xmin, xmax, ymin, ymax)
+
     def is_free(cx, cy, fp_str):
-        """Return True if placing a passive at (cx,cy) doesn't overlap any occupied AABB."""
+        """Return True if placing a passive at (cx,cy) doesn't overlap any occupied AABB
+        or the moat-crossing routing corridor."""
         cmin_x, cmax_x, cmin_y, cmax_y = _footprint_aabb('passive', cx, cy, 0, fp_str)
+        # Check routing corridor exclusion
+        rc = ROUTING_CORRIDOR
+        if cmin_x < rc[1] and cmax_x > rc[0] and cmin_y < rc[3] and cmax_y > rc[2]:
+            return False
         for omin_x, omax_x, omin_y, omax_y in occupied:
             if cmin_x < omax_x and cmax_x > omin_x and cmin_y < omax_y and cmax_y > omin_y:
                 return False
@@ -882,11 +891,21 @@ def layout_main():
     # Digital traces must NOT cross the moat; only FB1 and the ADC I2S/SPI signals
     # cross the boundary (at the ADC pads themselves, never in open routing).
     #
-    # DGND: left (digital) section only — F.Cu and B.Cu
+    # DGND: left (digital) section only — F.Cu, B.Cu, and In1.Cu
     MOAT_LEFT = 65   # mm from ox — moat left edge
     MOAT_RIGHT = 69  # mm from ox — moat right edge (4mm moat)
     add_ground_pour(board, "DGND", "F.Cu",  ox,            oy, MOAT_LEFT,          bh)
     add_ground_pour(board, "DGND", "B.Cu",  ox,            oy, MOAT_LEFT,          bh)
+    add_ground_pour(board, "DGND", "In1.Cu", ox,           oy, MOAT_LEFT,          bh)
+    # DGND corridor on In1.Cu extending through moat into analog zone.
+    # Provides digital return current path for I2S/I2C traces routed on In1.Cu
+    # to ES8388 codecs (U1-U4 at x=82, y=30..48). Digital traces should be
+    # routed on In1.Cu so return currents stay on DGND, not AGND.
+    CORRIDOR_X = ox + MOAT_LEFT  # starts at moat left edge (x=75)
+    CORRIDOR_W = 11              # extends to x=86, past ES8388 DGND pads
+    CORRIDOR_Y = 27              # above U1 (y=30.1)
+    CORRIDOR_H = 24              # down to y=51, below U4 (y=47.9)
+    add_ground_pour(board, "DGND", "In1.Cu", CORRIDOR_X, CORRIDOR_Y, CORRIDOR_W, CORRIDOR_H)
     # AGND: right (analog) section — F.Cu, B.Cu, and In2.Cu
     add_ground_pour(board, "AGND", "F.Cu",  ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT,  bh)
     add_ground_pour(board, "AGND", "B.Cu",  ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT,  bh)

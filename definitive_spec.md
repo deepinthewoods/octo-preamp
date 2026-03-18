@@ -1,8 +1,15 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.7 — 17 March 2026**
+**Version 2.8 — 18 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.8 changes (mixed-signal routing strategy):**
+- Added DGND copper pour on In1.Cu covering digital zone (x=10–75mm)
+- Added DGND corridor strip on In1.Cu (x=75–86, y=27–51) extending through moat into analog zone under ES8388 codecs
+- Digital traces to ES8388s (I2S, I2C) must be routed on In1.Cu so return currents stay on DGND, not AGND
+- Updated 4-layer stackup: F.Cu/B.Cu = signal + ground pours, In1.Cu = DGND plane + corridor, In2.Cu = AGND plane
+- ESP32-S3 antenna clearance is inherently met (devkit on pin headers elevates antenna >3mm above PCB copper)
 
 **v2.7 changes (preamp board local LDO):**
 - Added LP2985-33DBVR to preamp board for local AVDD generation (from VBAT)
@@ -171,13 +178,25 @@ Two instances of LP2985-33DBVR, one per board:
 
 ### Ground Planes (CRITICAL)
 
-- AGND and DGND are separate copper pours on all boards
-- Connected at exactly ONE star point via ferrite bead FB1 (220 Ohm, 0805) on the MAIN board
-- No digital traces cross the AGND pour
-- No analog traces cross the DGND pour
+- AGND and DGND are separate copper pours on the MAIN board
+- Connected at exactly ONE star point via ferrite bead FB1 (220 Ohm, 0805) at the moat boundary
+- 4mm moat (no copper) separates digital (left) and analog (right) zones on F.Cu/B.Cu
 - ES8388 AGND/DGND pins connect to their respective pours
 - All op-amp ground pins connect to AGND only
 - Preamp board uses single `GND` net (pure analog)
+
+**MAIN board 4-layer ground pour assignment:**
+
+| Layer | Digital zone (x=10–75) | Moat (x=75–79) | Analog zone (x=79–110) |
+|-------|----------------------|-----------------|----------------------|
+| F.Cu | DGND pour | No copper | AGND pour |
+| In1.Cu | DGND pour | DGND corridor (y=27–51) | DGND corridor (to x=86, y=27–51) |
+| In2.Cu | — | — | AGND pour |
+| B.Cu | DGND pour | No copper | AGND pour |
+
+**Digital corridor on In1.Cu:** A narrow DGND pour strip extends from the digital zone through the moat into the analog zone (x=75–86, y=27–51), directly under the four ES8388 codecs. This provides a continuous DGND return path for I2S and I2C traces routed on In1.Cu, preventing digital return currents from flowing through the AGND pours on adjacent layers.
+
+**Routing rule:** All digital traces crossing into the analog zone (I2S: MCLK, BCLK, LRCK, ADCDAT_A-D, DACDAT; I2C: SDA, SCL, SDA2, SCL2; power: DVDD, DGND) must be routed on In1.Cu where the DGND corridor provides a co-planar return path. Surface layers (F.Cu, B.Cu) in the analog zone are reserved for analog signals with AGND reference.
 
 ### Battery
 
@@ -666,14 +685,17 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 ## 12. PCB Layout Rules
 
-- 4-layer stackup: Signal / GND / PWR / Signal
-- Separate AGND and DGND pours, star connection via ferrite bead
-- No digital traces cross AGND pour
-- No copper pour under ESP32-S3 antenna clearance zone (3mm min)
+- 4-layer stackup: F.Cu (signal+ground pours) / In1.Cu (DGND plane+corridor) / In2.Cu (AGND plane) / B.Cu (signal+ground pours)
+- Separate AGND and DGND pours, star connection via ferrite bead FB1
+- 4mm moat between digital and analog zones on F.Cu/B.Cu
+- Digital traces to ES8388 codecs routed on In1.Cu with DGND corridor as return path
+- No digital traces on F.Cu/B.Cu in the analog zone (x>79mm)
+- ESP32-S3 antenna clearance: met by devkit-on-headers elevation (>3mm above PCB copper)
 - Slave ESP32 sockets placed at board edges — DevKits overhang top (slaves A+B) and bottom (slaves C+D)
 - ESP32-S3 USB-C ports must remain accessible after assembly (initial flash)
-- I2S clock lines (BCLK, LRCK, MCLK) routed short, matched length
+- I2S clock lines (BCLK, LRCK, MCLK) routed short, matched length, on In1.Cu
 - ES8388 power pins: 100nF ceramic + 10uF as close as possible
+- ES8388 DVDD/DGND decoupling routed back through DGND corridor, not tied to AGND locally
 - I2S forward data lines (GPIO17/18): keep short, avoid adjacent noisy lines
 
 ### JLCPCB Assembly Notes
@@ -713,4 +735,4 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 ---
 
-*End of Definitive Specification — Version 2.7*
+*End of Definitive Specification — Version 2.8*

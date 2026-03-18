@@ -1,22 +1,24 @@
 {
   "board": "/media/niz/Samsung SSD/_dev/preamp/preamp-zener/boards/main/layout/layout.kicad_pcb",
-  "timestamp": "2026-03-17T17:15:24+0000",
-  "total_violations": 204,
+  "timestamp": "2026-03-18T03:06:05+0000",
+  "total_violations": 503,
   "violation_counts": {
-    "solder_mask_bridge": 14,
-    "invalid_outline": 4,
-    "copper_edge_clearance": 3,
-    "courtyards_overlap": 16,
-    "clearance": 84,
-    "shorting_items": 4,
-    "silk_overlap": 33,
-    "silk_over_copper": 25,
+    "solder_mask_bridge": 25,
+    "invalid_outline": 6,
+    "courtyards_overlap": 19,
+    "clearance": 159,
+    "shorting_items": 11,
+    "hole_clearance": 3,
+    "zones_intersect": 1,
+    "silk_overlap": 129,
+    "silk_over_copper": 104,
     "hole_to_hole": 2,
-    "silk_edge_clearance": 19
+    "silk_edge_clearance": 19,
+    "track_dangling": 25
   },
   "severity_counts": {
-    "error": 125,
-    "warning": 79,
+    "error": 224,
+    "warning": 279,
     "info": 0
   },
   "violations": [
@@ -25,8 +27,58 @@
       "severity": "error",
       "message": "Front solder mask aperture bridges items with different nets",
       "location": {
-        "x": 55.0,
-        "y": 88.9,
+        "x": 77.5,
+        "y": 41.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 77.5,
+        "y": 41.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 77.5,
+        "y": 42.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 77.5,
+        "y": 42.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 14.0,
+        "y": 14.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
@@ -35,38 +87,8 @@
       "severity": "error",
       "message": "Rear solder mask aperture bridges items with different nets",
       "location": {
-        "x": 55.0,
-        "y": 88.9,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "solder_mask_bridge",
-      "severity": "error",
-      "message": "Front solder mask aperture bridges items with different nets",
-      "location": {
-        "x": 63.95,
-        "y": 46.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "solder_mask_bridge",
-      "severity": "error",
-      "message": "Front solder mask aperture bridges items with different nets",
-      "location": {
-        "x": 73.775,
-        "y": 32.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "solder_mask_bridge",
-      "severity": "error",
-      "message": "Front solder mask aperture bridges items with different nets",
-      "location": {
-        "x": 78.0,
-        "y": 85.08,
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
@@ -75,8 +97,8 @@
       "severity": "error",
       "message": "Rear solder mask aperture bridges items with different nets",
       "location": {
-        "x": 78.0,
-        "y": 85.08,
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
@@ -85,18 +107,8 @@
       "severity": "error",
       "message": "Front solder mask aperture bridges items with different nets",
       "location": {
-        "x": 95.0,
-        "y": 82.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "solder_mask_bridge",
-      "severity": "error",
-      "message": "Rear solder mask aperture bridges items with different nets",
-      "location": {
-        "x": 95.0,
-        "y": 82.5,
+        "x": 28.0,
+        "y": 53.0,
         "unit": "mm"
       }
     },
@@ -105,8 +117,8 @@
       "severity": "error",
       "message": "Front solder mask aperture bridges items with different nets",
       "location": {
-        "x": 105.0,
-        "y": 82.5,
+        "x": 28.0,
+        "y": 53.0,
         "unit": "mm"
       }
     },
@@ -115,8 +127,18 @@
       "severity": "error",
       "message": "Rear solder mask aperture bridges items with different nets",
       "location": {
-        "x": 105.0,
-        "y": 82.5,
+        "x": 28.0,
+        "y": 53.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Rear solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 28.0,
+        "y": 53.0,
         "unit": "mm"
       }
     },
@@ -125,8 +147,18 @@
       "severity": "error",
       "message": "Front solder mask aperture bridges items with different nets",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 28.0,
+        "y": 55.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Rear solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 28.0,
+        "y": 55.0,
         "unit": "mm"
       }
     },
@@ -135,8 +167,68 @@
       "severity": "error",
       "message": "Front solder mask aperture bridges items with different nets",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 84.49,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 85.51,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 87.51,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 54.51,
+        "y": 47.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 48.7875,
+        "y": 47.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 89.51,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 95.16,
+        "y": 87.54,
         "unit": "mm"
       }
     },
@@ -145,8 +237,18 @@
       "severity": "error",
       "message": "Rear solder mask aperture bridges items with different nets",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 95.16,
+        "y": 87.54,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 95.16,
+        "y": 85.0,
         "unit": "mm"
       }
     },
@@ -155,8 +257,18 @@
       "severity": "error",
       "message": "Rear solder mask aperture bridges items with different nets",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 95.16,
+        "y": 85.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "solder_mask_bridge",
+      "severity": "error",
+      "message": "Front solder mask aperture bridges items with different nets",
+      "location": {
+        "x": 39.1375,
+        "y": 46.05,
         "unit": "mm"
       }
     },
@@ -165,8 +277,8 @@
       "severity": "error",
       "message": "Board has malformed outline (not a closed shape)",
       "location": {
-        "x": 102.2,
-        "y": 84.5,
+        "x": 109.0,
+        "y": 47.3,
         "unit": "mm"
       }
     },
@@ -175,8 +287,18 @@
       "severity": "error",
       "message": "Board has malformed outline (self-intersecting)",
       "location": {
-        "x": 97.8,
-        "y": 84.5,
+        "x": 108.000001,
+        "y": 51.299999,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "invalid_outline",
+      "severity": "error",
+      "message": "Board has malformed outline (self-intersecting)",
+      "location": {
+        "x": 109.0,
+        "y": 51.7,
         "unit": "mm"
       }
     },
@@ -185,8 +307,8 @@
       "severity": "error",
       "message": "Board has malformed outline (not a closed shape)",
       "location": {
-        "x": 102.2,
-        "y": 91.5,
+        "x": 109.0,
+        "y": 33.3,
         "unit": "mm"
       }
     },
@@ -195,38 +317,18 @@
       "severity": "error",
       "message": "Board has malformed outline (self-intersecting)",
       "location": {
-        "x": 97.8,
-        "y": 91.5,
+        "x": 108.000001,
+        "y": 37.299999,
         "unit": "mm"
       }
     },
     {
-      "type": "copper_edge_clearance",
+      "type": "invalid_outline",
       "severity": "error",
-      "message": "Board edge clearance violation (board setup constraints edge clearance 0.2500 mm; actual 0.0000 mm)",
+      "message": "Board has malformed outline (self-intersecting)",
       "location": {
-        "x": 10.0,
-        "y": 10.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "copper_edge_clearance",
-      "severity": "error",
-      "message": "Board edge clearance violation (board setup constraints edge clearance 0.2500 mm; actual 0.0000 mm)",
-      "location": {
-        "x": 10.0,
-        "y": 110.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "copper_edge_clearance",
-      "severity": "error",
-      "message": "Board edge clearance violation (board setup constraints edge clearance 0.2500 mm; actual 0.0000 mm)",
-      "location": {
-        "x": 10.0,
-        "y": 110.0,
+        "x": 109.0,
+        "y": 37.7,
         "unit": "mm"
       }
     },
@@ -235,8 +337,8 @@
       "severity": "error",
       "message": "Courtyards overlap",
       "location": {
-        "x": 73.0,
-        "y": 80.0,
+        "x": 20.0,
+        "y": 61.2,
         "unit": "mm"
       }
     },
@@ -245,8 +347,98 @@
       "severity": "error",
       "message": "Courtyards overlap",
       "location": {
-        "x": 80.4,
-        "y": 90.0,
+        "x": 14.0,
+        "y": 14.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 85.0,
+        "y": 16.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 28.0,
+        "y": 53.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 64.0,
+        "y": 55.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 85.0,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 14.0,
+        "y": 62.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 14.0,
+        "y": 62.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 83.0,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 87.0,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 54.0,
+        "y": 47.0,
         "unit": "mm"
       }
     },
@@ -256,7 +448,7 @@
       "message": "Courtyards overlap",
       "location": {
         "x": 48.0,
-        "y": 82.0,
+        "y": 47.0,
         "unit": "mm"
       }
     },
@@ -265,47 +457,7 @@
       "severity": "error",
       "message": "Courtyards overlap",
       "location": {
-        "x": 63.0,
-        "y": 46.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 63.0,
-        "y": 46.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 73.0,
-        "y": 32.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 12.0,
-        "y": 47.3,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 64.0,
+        "x": 89.0,
         "y": 84.0,
         "unit": "mm"
       }
@@ -315,7 +467,37 @@
       "severity": "error",
       "message": "Courtyards overlap",
       "location": {
-        "x": 64.0,
+        "x": 85.0,
+        "y": 87.54,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 38.0,
+        "y": 47.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 100.025,
+        "y": 75.635,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 102.0,
         "y": 84.0,
         "unit": "mm"
       }
@@ -325,78 +507,328 @@
       "severity": "error",
       "message": "Courtyards overlap",
       "location": {
-        "x": 64.0,
+        "x": 100.025,
+        "y": 63.635,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "courtyards_overlap",
+      "severity": "error",
+      "message": "Courtyards overlap",
+      "location": {
+        "x": 99.0,
         "y": 84.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 80.4,
-        "y": 12.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 78.0,
-        "y": 32.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 78.0,
-        "y": 80.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 100.0,
-        "y": 80.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 100.0,
-        "y": 80.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "courtyards_overlap",
-      "severity": "error",
-      "message": "Courtyards overlap",
-      "location": {
-        "x": 15.0,
-        "y": 12.0,
         "unit": "mm"
       }
     },
     {
       "type": "clearance",
       "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1250 mm)",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1320 mm)",
       "location": {
-        "x": 72.175,
-        "y": 80.0,
+        "x": 77.5,
+        "y": 29.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 79.5,
+        "y": 28.1625,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1170 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 40.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 34.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1364 mm)",
+      "location": {
+        "x": 79.5,
+        "y": 40.0625,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 35.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 79.5,
+        "y": 40.0625,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 47.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 81.5,
+        "y": 32.799999,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 47.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 79.5,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 28.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 47.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 31.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0800 mm)",
+      "location": {
+        "x": 81.6,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 79.5,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 81.5,
+        "y": 27.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0750 mm)",
+      "location": {
+        "x": 71.0,
+        "y": 39.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1952 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 40.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.8,
+        "y": 40.0625,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1264 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 35.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 41.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1135 mm)",
+      "location": {
+        "x": 81.2,
+        "y": 32.0375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0554 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 43.2,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets ADCDAT_C and DGND)",
+      "location": {
+        "x": 77.5,
+        "y": 41.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1514 mm)",
+      "location": {
+        "x": 81.5,
+        "y": 44.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 36.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 29.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1952 mm)",
+      "location": {
+        "x": 77.5,
+        "y": 43.2,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 48.3375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets SDA2 and DGND)",
+      "location": {
+        "x": 77.5,
+        "y": 42.4,
         "unit": "mm"
       }
     },
@@ -405,38 +837,48 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)",
       "location": {
-        "x": 55.0,
-        "y": 88.9,
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
     {
       "type": "clearance",
       "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0250 mm)",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)",
       "location": {
-        "x": 62.05,
-        "y": 46.0,
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
     {
       "type": "shorting_items",
       "severity": "error",
-      "message": "Items shorting two nets (nets DGND and AGND)",
+      "message": "Items shorting two nets (nets DVDD and DGND)",
       "location": {
-        "x": 63.95,
-        "y": 46.0,
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
     {
-      "type": "shorting_items",
+      "type": "clearance",
       "severity": "error",
-      "message": "Items shorting two nets (nets DGND and SIG_CH3)",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0285 mm)",
       "location": {
-        "x": 73.775,
-        "y": 32.0,
+        "x": 14.0,
+        "y": 16.54,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0285 mm)",
+      "location": {
+        "x": 14.0,
+        "y": 16.54,
         "unit": "mm"
       }
     },
@@ -445,8 +887,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 66.0625,
-        "y": 35.8,
+        "x": 80.8,
+        "y": 32.0375,
         "unit": "mm"
       }
     },
@@ -455,8 +897,18 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 66.0625,
-        "y": 36.2,
+        "x": 81.2,
+        "y": 32.0375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "hole_clearance",
+      "severity": "error",
+      "message": "Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.2017 mm)",
+      "location": {
+        "x": 81.6,
+        "y": 32.0375,
         "unit": "mm"
       }
     },
@@ -465,8 +917,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 66.0625,
-        "y": 36.6,
+        "x": 81.6,
+        "y": 32.0375,
         "unit": "mm"
       }
     },
@@ -475,8 +927,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 66.0625,
-        "y": 37.0,
+        "x": 82.0,
+        "y": 32.0375,
         "unit": "mm"
       }
     },
@@ -485,258 +937,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 66.0625,
-        "y": 37.4,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 66.0625,
-        "y": 37.8,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 66.8,
-        "y": 38.9375,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 67.2,
-        "y": 38.9375,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 67.6,
-        "y": 38.9375,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 68.0,
-        "y": 38.9375,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 68.4,
-        "y": 38.9375,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 68.8,
-        "y": 38.9375,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.9375,
-        "y": 38.2,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.9375,
-        "y": 37.8,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.9375,
-        "y": 37.4,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.9375,
-        "y": 37.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.9375,
-        "y": 36.6,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.9375,
-        "y": 36.2,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 69.2,
-        "y": 35.0625,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 68.8,
-        "y": 35.0625,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 68.4,
-        "y": 35.0625,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 68.0,
-        "y": 35.0625,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 67.6,
-        "y": 35.0625,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 67.2,
-        "y": 35.0625,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 82.0625,
-        "y": 35.8,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 82.0625,
-        "y": 36.2,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 82.0625,
-        "y": 36.6,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 82.0625,
-        "y": 37.0,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 82.0625,
-        "y": 37.4,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "clearance",
-      "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
-      "location": {
-        "x": 82.0625,
-        "y": 37.8,
+        "x": 82.4,
+        "y": 32.0375,
         "unit": "mm"
       }
     },
@@ -746,7 +948,67 @@
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
         "x": 82.8,
-        "y": 38.9375,
+        "y": 32.0375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 31.3,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 30.9,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 30.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 30.1,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 29.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 29.3,
         "unit": "mm"
       }
     },
@@ -756,7 +1018,7 @@
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
         "x": 83.2,
-        "y": 38.9375,
+        "y": 28.1625,
         "unit": "mm"
       }
     },
@@ -765,8 +1027,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 83.6,
-        "y": 38.9375,
+        "x": 82.8,
+        "y": 28.1625,
         "unit": "mm"
       }
     },
@@ -775,8 +1037,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 84.0,
-        "y": 38.9375,
+        "x": 82.4,
+        "y": 28.1625,
         "unit": "mm"
       }
     },
@@ -785,8 +1047,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 84.4,
-        "y": 38.9375,
+        "x": 82.0,
+        "y": 28.1625,
         "unit": "mm"
       }
     },
@@ -795,8 +1057,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 84.8,
-        "y": 38.9375,
+        "x": 81.6,
+        "y": 28.1625,
         "unit": "mm"
       }
     },
@@ -805,8 +1067,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.9375,
-        "y": 38.2,
+        "x": 81.2,
+        "y": 28.1625,
         "unit": "mm"
       }
     },
@@ -815,8 +1077,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.9375,
-        "y": 37.8,
+        "x": 80.0625,
+        "y": 28.9,
         "unit": "mm"
       }
     },
@@ -825,8 +1087,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.9375,
-        "y": 37.4,
+        "x": 80.0625,
+        "y": 29.3,
         "unit": "mm"
       }
     },
@@ -835,8 +1097,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.9375,
-        "y": 37.0,
+        "x": 80.0625,
+        "y": 29.7,
         "unit": "mm"
       }
     },
@@ -845,8 +1107,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.9375,
-        "y": 36.6,
+        "x": 80.0625,
+        "y": 30.1,
         "unit": "mm"
       }
     },
@@ -855,8 +1117,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.9375,
-        "y": 36.2,
+        "x": 80.0625,
+        "y": 30.5,
         "unit": "mm"
       }
     },
@@ -865,8 +1127,78 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 85.2,
-        "y": 35.0625,
+        "x": 80.0625,
+        "y": 30.9,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 53.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.2750 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 53.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1750 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 53.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 55.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets SIG_CH1 and SIG_CH2)",
+      "location": {
+        "x": 84.49,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets SUM_FB_A and SIG_CH2)",
+      "location": {
+        "x": 85.51,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets SUM_FB_A and SIG_CH4)",
+      "location": {
+        "x": 87.51,
+        "y": 84.0,
         "unit": "mm"
       }
     },
@@ -875,8 +1207,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 84.8,
-        "y": 35.0625,
+        "x": 80.8,
+        "y": 49.875,
         "unit": "mm"
       }
     },
@@ -885,8 +1217,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 84.4,
-        "y": 35.0625,
+        "x": 81.2,
+        "y": 49.875,
         "unit": "mm"
       }
     },
@@ -895,8 +1227,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 84.0,
-        "y": 35.0625,
+        "x": 81.6,
+        "y": 49.875,
         "unit": "mm"
       }
     },
@@ -905,8 +1237,88 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 83.6,
-        "y": 35.0625,
+        "x": 82.0,
+        "y": 49.875,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.4,
+        "y": 49.875,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.8,
+        "y": 49.875,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 49.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 48.7375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 48.3375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 47.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 47.5375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 47.1375,
         "unit": "mm"
       }
     },
@@ -916,17 +1328,117 @@
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
         "x": 83.2,
-        "y": 35.0625,
+        "y": 46.0,
         "unit": "mm"
       }
     },
     {
-      "type": "shorting_items",
+      "type": "clearance",
       "severity": "error",
-      "message": "Items shorting two nets (nets AGND and JACK_R_TIP)",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 78.0,
-        "y": 85.08,
+        "x": 82.8,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.4,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.0,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 81.6,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 81.2,
+        "y": 46.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 46.7375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 47.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 47.5375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 47.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 48.3375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 48.7375,
         "unit": "mm"
       }
     },
@@ -935,28 +1447,198 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 54.51,
+        "y": 47.0,
         "unit": "mm"
       }
     },
     {
       "type": "clearance",
       "severity": "error",
-      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 28.0,
+        "y": 47.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 47.85,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 48.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 49.55,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 50.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 51.25,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 28.0,
+        "y": 52.1,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 52.95,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 52.1,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 51.25,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 50.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 49.55,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 48.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 26.65,
+        "y": 47.85,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0741 mm)",
+      "location": {
+        "x": 47.2125,
+        "y": 47.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0939 mm)",
+      "location": {
+        "x": 48.7875,
+        "y": 47.0,
         "unit": "mm"
       }
     },
     {
       "type": "shorting_items",
       "severity": "error",
-      "message": "Items shorting two nets (nets DVDD and DGND)",
+      "message": "Items shorting two nets (nets LED_STAT and DGND)",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 48.7875,
+        "y": 47.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1676 mm)",
+      "location": {
+        "x": 88.49,
+        "y": 84.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets SUM_FB_B and SIG_CH6)",
+      "location": {
+        "x": 89.51,
+        "y": 84.0,
         "unit": "mm"
       }
     },
@@ -965,8 +1647,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 36.0,
+        "x": 80.8,
+        "y": 43.9375,
         "unit": "mm"
       }
     },
@@ -975,8 +1657,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 36.85,
+        "x": 81.2,
+        "y": 43.9375,
         "unit": "mm"
       }
     },
@@ -985,8 +1667,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 37.7,
+        "x": 81.6,
+        "y": 43.9375,
         "unit": "mm"
       }
     },
@@ -995,8 +1677,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 38.55,
+        "x": 82.0,
+        "y": 43.9375,
         "unit": "mm"
       }
     },
@@ -1005,8 +1687,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 39.4,
+        "x": 82.4,
+        "y": 43.9375,
         "unit": "mm"
       }
     },
@@ -1015,8 +1697,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 40.25,
+        "x": 82.8,
+        "y": 43.9375,
         "unit": "mm"
       }
     },
@@ -1025,8 +1707,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 15.0,
-        "y": 41.1,
+        "x": 83.9375,
+        "y": 43.2,
         "unit": "mm"
       }
     },
@@ -1035,8 +1717,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 41.95,
+        "x": 83.9375,
+        "y": 42.8,
         "unit": "mm"
       }
     },
@@ -1045,8 +1727,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 41.1,
+        "x": 83.9375,
+        "y": 42.4,
         "unit": "mm"
       }
     },
@@ -1055,8 +1737,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 40.25,
+        "x": 83.9375,
+        "y": 42.0,
         "unit": "mm"
       }
     },
@@ -1065,8 +1747,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 39.4,
+        "x": 83.9375,
+        "y": 41.6,
         "unit": "mm"
       }
     },
@@ -1075,8 +1757,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 38.55,
+        "x": 83.9375,
+        "y": 41.2,
         "unit": "mm"
       }
     },
@@ -1085,8 +1767,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 37.7,
+        "x": 83.2,
+        "y": 40.0625,
         "unit": "mm"
       }
     },
@@ -1095,8 +1777,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 13.65,
-        "y": 36.85,
+        "x": 82.8,
+        "y": 40.0625,
         "unit": "mm"
       }
     },
@@ -1105,8 +1787,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 70.0625,
-        "y": 51.6,
+        "x": 82.4,
+        "y": 40.0625,
         "unit": "mm"
       }
     },
@@ -1115,8 +1797,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 70.0625,
-        "y": 52.4,
+        "x": 82.0,
+        "y": 40.0625,
         "unit": "mm"
       }
     },
@@ -1125,8 +1807,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 70.0625,
-        "y": 52.8,
+        "x": 81.6,
+        "y": 40.0625,
         "unit": "mm"
       }
     },
@@ -1135,8 +1817,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 70.8,
-        "y": 53.9375,
+        "x": 81.2,
+        "y": 40.0625,
         "unit": "mm"
       }
     },
@@ -1145,8 +1827,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 71.2,
-        "y": 53.9375,
+        "x": 80.0625,
+        "y": 40.8,
         "unit": "mm"
       }
     },
@@ -1155,8 +1837,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 71.6,
-        "y": 53.9375,
+        "x": 80.0625,
+        "y": 41.2,
         "unit": "mm"
       }
     },
@@ -1165,8 +1847,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 72.0,
-        "y": 53.9375,
+        "x": 80.0625,
+        "y": 41.6,
         "unit": "mm"
       }
     },
@@ -1175,8 +1857,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 72.4,
-        "y": 53.9375,
+        "x": 80.0625,
+        "y": 42.0,
         "unit": "mm"
       }
     },
@@ -1185,8 +1867,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 72.8,
-        "y": 53.9375,
+        "x": 80.0625,
+        "y": 42.4,
         "unit": "mm"
       }
     },
@@ -1195,8 +1877,138 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 73.9375,
-        "y": 53.2,
+        "x": 80.0625,
+        "y": 42.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets VBAT and FS1_B)",
+      "location": {
+        "x": 95.16,
+        "y": 87.54,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets AGND and FS1_A)",
+      "location": {
+        "x": 95.16,
+        "y": 85.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0542 mm)",
+      "location": {
+        "x": 95.16,
+        "y": 85.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "shorting_items",
+      "severity": "error",
+      "message": "Items shorting two nets (nets PROG_PIN and DGND)",
+      "location": {
+        "x": 39.1375,
+        "y": 46.05,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1250 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 72.46,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1250 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 73.73,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1250 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 75.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1250 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 76.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "hole_clearance",
+      "severity": "error",
+      "message": "Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.0000 mm)",
+      "location": {
+        "x": 77.9125,
+        "y": 42.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "hole_clearance",
+      "severity": "error",
+      "message": "Hole clearance violation (board setup constraints hole clearance 0.2500 mm; actual 0.0000 mm)",
+      "location": {
+        "x": 77.9125,
+        "y": 42.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1719 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 63.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1719 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 64.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1719 mm)",
+      "location": {
+        "x": 97.55,
+        "y": 65.54,
         "unit": "mm"
       }
     },
@@ -1205,8 +2017,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 73.9375,
-        "y": 52.4,
+        "x": 80.8,
+        "y": 37.875,
         "unit": "mm"
       }
     },
@@ -1215,8 +2027,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 73.9375,
-        "y": 52.0,
+        "x": 81.2,
+        "y": 37.875,
         "unit": "mm"
       }
     },
@@ -1225,8 +2037,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 73.9375,
-        "y": 51.6,
+        "x": 81.6,
+        "y": 37.875,
         "unit": "mm"
       }
     },
@@ -1235,8 +2047,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 73.9375,
-        "y": 51.2,
+        "x": 82.0,
+        "y": 37.875,
         "unit": "mm"
       }
     },
@@ -1245,8 +2057,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 72.4,
-        "y": 50.0625,
+        "x": 82.4,
+        "y": 37.875,
         "unit": "mm"
       }
     },
@@ -1255,8 +2067,8 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 71.6,
-        "y": 50.0625,
+        "x": 82.8,
+        "y": 37.875,
         "unit": "mm"
       }
     },
@@ -1265,8 +2077,188 @@
       "severity": "error",
       "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
       "location": {
-        "x": 71.2,
-        "y": 50.0625,
+        "x": 83.9375,
+        "y": 37.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 36.7375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 36.3375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 35.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 35.5375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.9375,
+        "y": 35.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 83.2,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.8,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.4,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 82.0,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 81.6,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 81.2,
+        "y": 34.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 34.7375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 35.1375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 35.5375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 35.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 36.3375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "clearance",
+      "severity": "error",
+      "message": "Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.1500 mm)",
+      "location": {
+        "x": 80.0625,
+        "y": 36.7375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "zones_intersect",
+      "severity": "error",
+      "message": "Copper zones intersect (intersecting zones must have distinct priorities)",
+      "location": {
+        "x": 75.0,
+        "y": 27.0,
         "unit": "mm"
       }
     },
@@ -1275,8 +2267,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 106.0,
-        "y": 72.3,
+        "x": 39.4,
+        "y": 17.0,
         "unit": "mm"
       }
     },
@@ -1285,8 +2277,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 94.0,
-        "y": 83.3,
+        "x": 44.0,
+        "y": 17.0,
         "unit": "mm"
       }
     },
@@ -1295,8 +2287,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 95.5,
-        "y": 83.3,
+        "x": 38.07,
+        "y": 15.27,
         "unit": "mm"
       }
     },
@@ -1305,8 +2297,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 106.0,
-        "y": 72.3,
+        "x": 44.0,
+        "y": 17.0,
         "unit": "mm"
       }
     },
@@ -1315,8 +2307,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 106.0,
-        "y": 83.3,
+        "x": 39.4,
+        "y": 17.0,
         "unit": "mm"
       }
     },
@@ -1325,8 +2317,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 80.4,
-        "y": 87.67,
+        "x": 70.73,
+        "y": 15.27,
         "unit": "mm"
       }
     },
@@ -1335,8 +2327,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 79.33,
-        "y": 87.27,
+        "x": 69.4,
+        "y": 17.0,
         "unit": "mm"
       }
     },
@@ -1345,8 +2337,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 79.07,
-        "y": 91.27,
+        "x": 44.0,
+        "y": 17.0,
         "unit": "mm"
       }
     },
@@ -1355,8 +2347,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 91.738748,
-        "y": 71.735,
+        "x": 12.67,
+        "y": 15.27,
         "unit": "mm"
       }
     },
@@ -1365,8 +2357,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 94.0,
-        "y": 83.3,
+        "x": 15.33,
+        "y": 15.27,
         "unit": "mm"
       }
     },
@@ -1375,8 +2367,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 49.0,
-        "y": 33.7,
+        "x": 58.0,
+        "y": 56.0,
         "unit": "mm"
       }
     },
@@ -1385,8 +2377,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 16.8,
-        "y": 38.975,
+        "x": 59.91,
+        "y": 56.41,
         "unit": "mm"
       }
     },
@@ -1395,8 +2387,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 16.8,
-        "y": 38.975,
+        "x": 48.0,
+        "y": 45.57,
         "unit": "mm"
       }
     },
@@ -1405,8 +2397,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 16.8,
-        "y": 38.975,
+        "x": 48.8,
+        "y": 46.265,
         "unit": "mm"
       }
     },
@@ -1415,8 +2407,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 68.0,
-        "y": 33.7,
+        "x": 38.0,
+        "y": 44.6,
         "unit": "mm"
       }
     },
@@ -1425,8 +2417,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 64.0,
-        "y": 44.35,
+        "x": 38.346359,
+        "y": 45.12,
         "unit": "mm"
       }
     },
@@ -1435,8 +2427,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 79.07,
-        "y": 91.27,
+        "x": 15.27,
+        "y": 64.03,
         "unit": "mm"
       }
     },
@@ -1445,8 +2437,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 73.184,
-        "y": 81.479,
+        "x": 54.0,
+        "y": 45.44,
         "unit": "mm"
       }
     },
@@ -1455,8 +2447,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 59.762742,
-        "y": 66.5225,
+        "x": 54.0,
+        "y": 45.83,
         "unit": "mm"
       }
     },
@@ -1465,8 +2457,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 76.67,
-        "y": 87.27,
+        "x": 28.68,
+        "y": 45.5,
         "unit": "mm"
       }
     },
@@ -1475,8 +2467,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 77.12,
-        "y": 81.479,
+        "x": 28.68,
+        "y": 45.5,
         "unit": "mm"
       }
     },
@@ -1485,8 +2477,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 76.67,
-        "y": 86.0,
+        "x": 28.0,
+        "y": 50.94,
         "unit": "mm"
       }
     },
@@ -1495,8 +2487,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 77.12,
-        "y": 81.479,
+        "x": 54.0,
+        "y": 45.83,
         "unit": "mm"
       }
     },
@@ -1505,8 +2497,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 76.67,
-        "y": 87.27,
+        "x": 68.07,
+        "y": 71.27,
         "unit": "mm"
       }
     },
@@ -1515,8 +2507,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 77.12,
-        "y": 81.479,
+        "x": 69.4,
+        "y": 73.0,
         "unit": "mm"
       }
     },
@@ -1525,8 +2517,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 76.67,
-        "y": 84.67,
+        "x": 80.85942,
+        "y": 56.51,
         "unit": "mm"
       }
     },
@@ -1535,8 +2527,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 13.27,
-        "y": 74.03,
+        "x": 80.738748,
+        "y": 58.735,
         "unit": "mm"
       }
     },
@@ -1545,8 +2537,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 73.0,
-        "y": 30.57,
+        "x": 93.0,
+        "y": 68.84,
         "unit": "mm"
       }
     },
@@ -1555,8 +2547,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 78.0,
-        "y": 30.32,
+        "x": 103.33,
+        "y": 85.27,
         "unit": "mm"
       }
     },
@@ -1565,8 +2557,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 84.0,
-        "y": 33.7,
+        "x": 106.738748,
+        "y": 80.735,
         "unit": "mm"
       }
     },
@@ -1575,8 +2567,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 60.0,
-        "y": 64.57,
+        "x": 107.0,
+        "y": 78.32,
         "unit": "mm"
       }
     },
@@ -1585,8 +2577,8 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 80.0,
-        "y": 58.57,
+        "x": 93.0,
+        "y": 77.06,
         "unit": "mm"
       }
     },
@@ -1595,38 +2587,968 @@
       "severity": "warning",
       "message": "Silkscreen overlap",
       "location": {
-        "x": 70.0,
-        "y": 58.57,
+        "x": 93.0,
+        "y": 77.06,
         "unit": "mm"
       }
     },
     {
-      "type": "silk_over_copper",
+      "type": "silk_overlap",
       "severity": "warning",
-      "message": "Silkscreen clipped by solder mask",
+      "message": "Silkscreen overlap",
       "location": {
-        "x": 60.0,
-        "y": 66.7,
+        "x": 93.0,
+        "y": 77.5,
         "unit": "mm"
       }
     },
     {
-      "type": "silk_over_copper",
+      "type": "silk_overlap",
       "severity": "warning",
-      "message": "Silkscreen clipped by solder mask",
+      "message": "Silkscreen overlap",
       "location": {
-        "x": 62.738748,
+        "x": 92.85942,
+        "y": 80.51,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 85.0,
+        "y": 82.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 84.846359,
+        "y": 83.62,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 85.0,
+        "y": 82.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 83.67,
+        "y": 83.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 82.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 83.67,
+        "y": 83.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 83.67,
+        "y": 83.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.67,
+        "y": 85.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.67,
+        "y": 87.87,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 81.0,
+        "y": 84.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 81.0,
+        "y": 86.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 83.0,
+        "y": 82.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 81.0,
+        "y": 86.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 96.0,
+        "y": 87.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 96.0,
+        "y": 87.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 97.33,
+        "y": 85.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 96.0,
+        "y": 87.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 96.0,
+        "y": 87.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 102.0,
+        "y": 87.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 93.0,
+        "y": 66.96,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 107.0,
+        "y": 66.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 107.0,
+        "y": 66.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 107.0,
+        "y": 66.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 106.846359,
+        "y": 68.38,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 93.0,
+        "y": 67.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 93.0,
+        "y": 67.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 80.738748,
+        "y": 54.735,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 88.738748,
         "y": 45.265,
         "unit": "mm"
       }
     },
     {
-      "type": "silk_over_copper",
+      "type": "silk_overlap",
       "severity": "warning",
-      "message": "Silkscreen clipped by solder mask",
+      "message": "Silkscreen overlap",
       "location": {
-        "x": 62.738748,
-        "y": 46.735,
+        "x": 82.0,
+        "y": 45.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 93.0,
+        "y": 40.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 40.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 40.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 88.738748,
+        "y": 50.735,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 91.0,
+        "y": 50.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 50.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 50.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 92.738748,
+        "y": 38.735,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 92.738748,
+        "y": 34.735,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 28.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 28.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 34.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 34.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 26.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 88.846359,
+        "y": 26.38,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 26.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 38.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 38.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 95.7,
+        "y": 49.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.762742,
+        "y": 48.5225,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 95.7,
+        "y": 49.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.846359,
+        "y": 49.62,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.846359,
+        "y": 50.38,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.846359,
+        "y": 50.38,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 93.0,
+        "y": 50.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 92.762742,
+        "y": 28.5225,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 82.0,
+        "y": 45.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 93.0,
+        "y": 60.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 86.892164,
+        "y": 60.36,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 62.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 56.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 68.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 66.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 91.0,
+        "y": 68.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 87.0,
+        "y": 64.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 86.892164,
+        "y": 68.36,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 86.846359,
+        "y": 66.38,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 95.7,
+        "y": 49.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 106.738748,
+        "y": 58.735,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 107.0,
+        "y": 60.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 91.0,
+        "y": 50.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 81.0,
+        "y": 60.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 28.0,
+        "y": 56.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 28.0,
+        "y": 56.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 28.0,
+        "y": 56.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 29.8,
+        "y": 49.975,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 28.0,
+        "y": 50.94,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 12.67,
+        "y": 71.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 38.07,
+        "y": 71.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 44.0,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 40.73,
+        "y": 71.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 44.0,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 42.67,
+        "y": 71.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 44.0,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 82.0,
+        "y": 38.9375,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 89.0,
+        "y": 24.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 85.0,
+        "y": 19.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 85.0,
+        "y": 19.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 96.88,
+        "y": 19.371,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.184,
+        "y": 13.479,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.184,
+        "y": 13.479,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 98.12,
+        "y": 13.479,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 96.88,
+        "y": 13.479,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.184,
+        "y": 23.52,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_overlap",
+      "severity": "warning",
+      "message": "Silkscreen overlap",
+      "location": {
+        "x": 94.184,
+        "y": 23.52,
         "unit": "mm"
       }
     },
@@ -1635,8 +3557,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 84.0,
-        "y": 33.7,
+        "x": 28.0,
+        "y": 56.0,
         "unit": "mm"
       }
     },
@@ -1645,8 +3567,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 13.27,
-        "y": 45.97,
+        "x": 58.0,
+        "y": 56.0,
         "unit": "mm"
       }
     },
@@ -1655,8 +3577,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 61.59,
-        "y": 48.63,
+        "x": 96.0,
+        "y": 87.0,
         "unit": "mm"
       }
     },
@@ -1665,7 +3587,367 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 80.0,
+        "x": 82.0,
+        "y": 45.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 96.0,
+        "y": 19.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 85.0,
+        "y": 19.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 44.0,
+        "y": 17.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 69.4,
+        "y": 17.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 100.025,
+        "y": 78.635,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 69.4,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 44.0,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 82.0,
+        "y": 33.1,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 67.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 39.4,
+        "y": 17.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 28.0,
+        "y": 50.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 100.025,
+        "y": 66.634999,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 77.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 14.0,
+        "y": 17.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 102.0,
+        "y": 87.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 39.4,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 14.0,
+        "y": 73.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 14.0,
+        "y": 11.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 12.67,
+        "y": 12.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 12.67,
+        "y": 14.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 12.67,
+        "y": 15.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 12.67,
+        "y": 15.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 28.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 81.0,
+        "y": 84.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 28.0,
+        "y": 50.94,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 26.94,
+        "y": 51.94,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 26.94,
+        "y": 53.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 26.94,
+        "y": 54.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 26.94,
+        "y": 54.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 95.7,
+        "y": 49.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 32.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 84.846359,
+        "y": 84.38,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 15.27,
+        "y": 61.37,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 91.0,
+        "y": 46.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 44.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 81.0,
         "y": 58.57,
         "unit": "mm"
       }
@@ -1675,8 +3957,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 77.12,
-        "y": 81.479,
+        "x": 86.846359,
+        "y": 84.38,
         "unit": "mm"
       }
     },
@@ -1685,8 +3967,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 76.67,
-        "y": 86.41,
+        "x": 89.0,
+        "y": 50.83,
         "unit": "mm"
       }
     },
@@ -1695,8 +3977,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 60.0,
-        "y": 64.57,
+        "x": 95.0,
+        "y": 48.83,
         "unit": "mm"
       }
     },
@@ -1705,8 +3987,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 55.0,
-        "y": 87.67,
+        "x": 95.0,
+        "y": 50.84,
         "unit": "mm"
       }
     },
@@ -1715,8 +3997,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 53.67,
-        "y": 88.67,
+        "x": 93.0,
+        "y": 28.32,
         "unit": "mm"
       }
     },
@@ -1725,8 +4007,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 53.67,
-        "y": 90.0,
+        "x": 54.0,
+        "y": 45.83,
         "unit": "mm"
       }
     },
@@ -1735,8 +4017,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 92.0,
-        "y": 71.67,
+        "x": 28.68,
+        "y": 45.5,
         "unit": "mm"
       }
     },
@@ -1745,8 +4027,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 49.0,
-        "y": 33.7,
+        "x": 89.0,
+        "y": 48.32,
         "unit": "mm"
       }
     },
@@ -1755,8 +4037,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 15.0,
-        "y": 9.67,
+        "x": 107.0,
+        "y": 66.83,
         "unit": "mm"
       }
     },
@@ -1765,8 +4047,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 13.67,
-        "y": 10.67,
+        "x": 81.0,
+        "y": 56.32,
         "unit": "mm"
       }
     },
@@ -1775,8 +4057,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 13.67,
-        "y": 12.0,
+        "x": 46.515,
+        "y": 47.735,
         "unit": "mm"
       }
     },
@@ -1785,8 +4067,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 63.772936,
-        "y": 45.265,
+        "x": 89.0,
+        "y": 34.84,
         "unit": "mm"
       }
     },
@@ -1795,8 +4077,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 63.772936,
-        "y": 46.735,
+        "x": 87.0,
+        "y": 58.84,
         "unit": "mm"
       }
     },
@@ -1805,8 +4087,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 70.0,
-        "y": 58.57,
+        "x": 78.7,
+        "y": 42.0,
         "unit": "mm"
       }
     },
@@ -1815,8 +4097,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 92.0,
-        "y": 69.32,
+        "x": 87.0,
+        "y": 50.84,
         "unit": "mm"
       }
     },
@@ -1825,7 +4107,17 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 78.0,
+        "x": 87.0,
+        "y": 64.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 83.67,
         "y": 83.67,
         "unit": "mm"
       }
@@ -1835,8 +4127,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 76.67,
-        "y": 84.67,
+        "x": 83.67,
+        "y": 86.27,
         "unit": "mm"
       }
     },
@@ -1845,8 +4137,458 @@
       "severity": "warning",
       "message": "Silkscreen clipped by solder mask",
       "location": {
-        "x": 16.8,
-        "y": 38.975,
+        "x": 96.49,
+        "y": 88.87,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 26.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 38.0,
+        "y": 45.44,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 38.0,
+        "y": 45.44,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 20.0,
+        "y": 63.53,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 38.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 54.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 91.0,
+        "y": 30.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 40.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 91.0,
+        "y": 42.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 66.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 36.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 38.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 38.346359,
+        "y": 45.88,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 81.0,
+        "y": 86.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 48.5,
+        "y": 46.33,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 48.346359,
+        "y": 47.12,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 107.0,
+        "y": 58.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 95.0,
+        "y": 46.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 107.0,
+        "y": 60.67,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 68.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 42.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 80.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 26.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 60.83,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 85.0,
+        "y": 52.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 38.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 107.0,
+        "y": 80.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 81.0,
+        "y": 60.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 95.0,
+        "y": 30.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 62.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 34.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 32.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 30.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 91.0,
+        "y": 50.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 46.84,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 87.0,
+        "y": 56.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 44.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 81.0,
+        "y": 54.57,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 94.67,
+        "y": 85.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 94.67,
+        "y": 85.27,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 94.67,
+        "y": 87.87,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 40.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 107.0,
+        "y": 68.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 89.0,
+        "y": 36.32,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_over_copper",
+      "severity": "warning",
+      "message": "Silkscreen clipped by solder mask",
+      "location": {
+        "x": 93.0,
+        "y": 34.57,
         "unit": "mm"
       }
     },
@@ -1855,18 +4597,18 @@
       "severity": "warning",
       "message": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
       "location": {
-        "x": 78.0,
-        "y": 86.0,
+        "x": 14.0,
+        "y": 14.0,
         "unit": "mm"
       }
     },
     {
       "type": "hole_to_hole",
       "severity": "warning",
-      "message": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.1361 mm)",
+      "message": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
       "location": {
-        "x": 15.0,
-        "y": 12.0,
+        "x": 28.0,
+        "y": 53.0,
         "unit": "mm"
       }
     },
@@ -1876,7 +4618,7 @@
       "message": "Silkscreen clipped by board edge",
       "location": {
         "x": 10.0,
-        "y": 10.0,
+        "y": 90.0,
         "unit": "mm"
       }
     },
@@ -1886,6 +4628,36 @@
       "message": "Silkscreen clipped by board edge",
       "location": {
         "x": 10.0,
+        "y": 90.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_edge_clearance",
+      "severity": "warning",
+      "message": "Silkscreen clipped by board edge",
+      "location": {
+        "x": 110.0,
+        "y": 90.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_edge_clearance",
+      "severity": "warning",
+      "message": "Silkscreen clipped by board edge",
+      "location": {
+        "x": 109.0,
+        "y": 47.3,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_edge_clearance",
+      "severity": "warning",
+      "message": "Silkscreen clipped by board edge",
+      "location": {
+        "x": 110.0,
         "y": 10.0,
         "unit": "mm"
       }
@@ -1895,7 +4667,17 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 10.0,
+        "x": 109.0,
+        "y": 47.3,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_edge_clearance",
+      "severity": "warning",
+      "message": "Silkscreen clipped by board edge",
+      "location": {
+        "x": 110.0,
         "y": 10.0,
         "unit": "mm"
       }
@@ -1905,7 +4687,27 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 10.0,
+        "x": 109.0,
+        "y": 51.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_edge_clearance",
+      "severity": "warning",
+      "message": "Silkscreen clipped by board edge",
+      "location": {
+        "x": 109.0,
+        "y": 51.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "silk_edge_clearance",
+      "severity": "warning",
+      "message": "Silkscreen clipped by board edge",
+      "location": {
+        "x": 110.0,
         "y": 10.0,
         "unit": "mm"
       }
@@ -1915,67 +4717,7 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 97.8,
-        "y": 84.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "silk_edge_clearance",
-      "severity": "warning",
-      "message": "Silkscreen clipped by board edge",
-      "location": {
-        "x": 97.8,
-        "y": 84.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "silk_edge_clearance",
-      "severity": "warning",
-      "message": "Silkscreen clipped by board edge",
-      "location": {
-        "x": 97.8,
-        "y": 84.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "silk_edge_clearance",
-      "severity": "warning",
-      "message": "Silkscreen clipped by board edge",
-      "location": {
-        "x": 102.2,
-        "y": 84.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "silk_edge_clearance",
-      "severity": "warning",
-      "message": "Silkscreen clipped by board edge",
-      "location": {
-        "x": 102.2,
-        "y": 84.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "silk_edge_clearance",
-      "severity": "warning",
-      "message": "Silkscreen clipped by board edge",
-      "location": {
-        "x": 102.2,
-        "y": 84.5,
-        "unit": "mm"
-      }
-    },
-    {
-      "type": "silk_edge_clearance",
-      "severity": "warning",
-      "message": "Silkscreen clipped by board edge",
-      "location": {
-        "x": 10.0,
+        "x": 110.0,
         "y": 10.0,
         "unit": "mm"
       }
@@ -1985,8 +4727,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 97.8,
-        "y": 84.5,
+        "x": 109.0,
+        "y": 33.3,
         "unit": "mm"
       }
     },
@@ -1995,8 +4737,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 97.8,
-        "y": 91.5,
+        "x": 110.0,
+        "y": 10.0,
         "unit": "mm"
       }
     },
@@ -2005,8 +4747,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 97.8,
-        "y": 91.5,
+        "x": 109.0,
+        "y": 33.3,
         "unit": "mm"
       }
     },
@@ -2015,8 +4757,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 97.8,
-        "y": 91.5,
+        "x": 110.0,
+        "y": 10.0,
         "unit": "mm"
       }
     },
@@ -2025,8 +4767,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 102.2,
-        "y": 91.5,
+        "x": 109.0,
+        "y": 37.7,
         "unit": "mm"
       }
     },
@@ -2035,8 +4777,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 102.2,
-        "y": 91.5,
+        "x": 109.0,
+        "y": 37.7,
         "unit": "mm"
       }
     },
@@ -2045,8 +4787,8 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 102.2,
-        "y": 91.5,
+        "x": 110.0,
+        "y": 10.0,
         "unit": "mm"
       }
     },
@@ -2055,8 +4797,258 @@
       "severity": "warning",
       "message": "Silkscreen clipped by board edge",
       "location": {
-        "x": 102.2,
-        "y": 84.5,
+        "x": 110.0,
+        "y": 10.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 29.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 35.2,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 41.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 47.1,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 27.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 33.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 39.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 45.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 40.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 28.6,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 34.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 40.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 46.3,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 32.799999,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 27.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 38.9,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 44.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 36.8,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 31.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 43.2,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 48.7,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 30.2,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 36.0,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 42.4,
+        "unit": "mm"
+      }
+    },
+    {
+      "type": "track_dangling",
+      "severity": "warning",
+      "message": "Track has unconnected end",
+      "location": {
+        "x": 71.0,
+        "y": 47.9,
         "unit": "mm"
       }
     }
