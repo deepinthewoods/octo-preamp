@@ -191,7 +191,12 @@ FerriteBead(
 # Master ESP32-S3-DevKitC-1 in 2x 20-pin machined header sockets
 # =============================================================================
 
-# I2S master clocks (on-board to ES8388s — no cable!)
+# I2S master clocks — source nets from ESP32 (before series termination)
+MCLK_SRC = Net("MCLK_SRC")
+BCLK_SRC = Net("BCLK_SRC")
+LRCK_SRC = Net("LRCK_SRC")
+
+# I2S master clocks — terminated nets (to all ES8388s)
 MCLK = Net("MCLK")
 BCLK = Net("BCLK")
 LRCK = Net("LRCK")
@@ -249,9 +254,9 @@ ESP32DevKit(
     P_3V3_2=DVDD,
     RST=Net("ESP_RST"),
     GPIO4=ADCDAT_C,  # I2S ADC: ADCDAT_C (ES8388 #3, CH5+6)
-    GPIO5=MCLK,      # I2S ADC: MCLK (shared to all ES8388s)
-    GPIO6=BCLK,      # I2S ADC: BCLK
-    GPIO7=LRCK,      # I2S ADC: LRCK
+    GPIO5=MCLK_SRC,  # I2S ADC: MCLK (via 33R series termination)
+    GPIO6=BCLK_SRC,  # I2S ADC: BCLK (via 33R series termination)
+    GPIO7=LRCK_SRC,  # I2S ADC: LRCK (via 33R series termination)
     GPIO15=ADCDAT_A, # I2S ADC: ADCDAT_A (ES8388 #1, CH1+2)
     GPIO16=ADCDAT_B, # I2S ADC: ADCDAT_B (ES8388 #2, CH3+4)
     GPIO17=SD_FWD_AB, # I2S forward: SD_FWD_AB to slaves 1+2 (pin-muxed UART TX for OTA)
@@ -291,6 +296,13 @@ ESP32DevKit(
     GPIO43=SDA2,     # I2C bus 1: SDA2 (ES8388 #3+#4)
     GND4=DGND,
 )
+
+# I2S clock series termination (33R near ESP32 source, reduces edge rate and EMI)
+# Placed in digital zone before moat crossing — slows rise/fall times to reduce
+# ringing on 10mm+ In1.Cu trunks and broadband noise coupling into analog zone.
+Resistor(name="R_MCLK_TERM", value=Resistance("33"), package="0402", P1=MCLK_SRC, P2=MCLK)
+Resistor(name="R_BCLK_TERM", value=Resistance("33"), package="0402", P1=BCLK_SRC, P2=BCLK)
+Resistor(name="R_LRCK_TERM", value=Resistance("33"), package="0402", P1=LRCK_SRC, P2=LRCK)
 
 # UART TX pull-up (wired-OR debug bus from slave GPIO41, 10k to DVDD)
 Resistor(name="R_UART_PU", value=Resistance("10k"), package="0402", P1=DVDD, P2=UART_SLAVE_TX)
@@ -680,6 +692,20 @@ PinHeader(
 ###############################################################################
 
 # =============================================================================
+# Virtual ground (1.65V mid-rail reference for single-supply NE5532 summing amps)
+# Simple 10k/10k divider — no buffer needed since the only load is 2 op-amp
+# non-inverting inputs (negligible current). 47uF + 100nF bypass keeps the
+# reference low-impedance at audio frequencies.
+# =============================================================================
+
+VGND = Net("VGND")
+
+Resistor(name="R_VGND_TOP", value=Resistance("10k"), package="0402", P1=AVDD, P2=VGND)
+Resistor(name="R_VGND_BOT", value=Resistance("10k"), package="0402", P1=VGND, P2=AGND)
+Capacitor(name="C_VGND_BULK", value=Capacitance("47uF"), package="0805", P1=VGND, P2=AGND)
+Capacitor(name="C_VGND_BYP", value=Capacitance("100nF"), package="0402", P1=VGND, P2=AGND)
+
+# =============================================================================
 # Headphone output stage
 # ES8388 #3 LOUT1/ROUT1 -> 47uF AC coupling caps -> 10k volume pots -> 3.5mm TRS
 # =============================================================================
@@ -742,9 +768,9 @@ for i in range(4, 8):
 # Output B feedback resistor
 Resistor(name="R_FB_B", value=Resistance("1.2k"), package="0402", P1=FB_B, P2=SUM_B)
 
-# Summing amp sections (inverting)
-opa_sum_a = Opamp(name="SUM_A", IN_P=AGND, IN_N=FB_A, OUT=SUM_A)
-opa_sum_b = Opamp(name="SUM_B", IN_P=AGND, IN_N=FB_B, OUT=SUM_B)
+# Summing amp sections (inverting, referenced to VGND mid-rail)
+opa_sum_a = Opamp(name="SUM_A", IN_P=VGND, IN_N=FB_A, OUT=SUM_A)
+opa_sum_b = Opamp(name="SUM_B", IN_P=VGND, IN_N=FB_B, OUT=SUM_B)
 
 # Output buffer sections (voltage followers)
 opa_buf_a = Opamp(name="BUF_A", IN_P=SUM_A, IN_N=OUT_A, OUT=OUT_A)

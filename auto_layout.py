@@ -525,6 +525,9 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
         # USB-C receptacle (GCT USB4085): large asymmetric footprint
         # Native (0° rotation): ref point near top-left, body extends right and down
         native = (-2.4, 8.3, -1.2, 9.2)
+    elif 'Jack_3.5mm' in fp_str or 'SJ1-3523N' in fp_str:
+        # CUI SJ1-3523N Horizontal 3.5mm jack: F.CrtYd (-6.25,-7.95) to (6.25,6.55)
+        native = (-6.25, 6.25, -7.95, 6.55)
     elif 'SOT-223' in fp_str:
         # SOT-223-3 (e.g. AP2114H LDO): ~8.8x7.3mm courtyard
         native = (-4.5, 4.5, -3.8, 3.7)
@@ -558,24 +561,15 @@ def _footprint_aabb(ref, lx, ly, rot, fp_str=''):
         if ref.startswith('RV'):
             # Alps RK09K Vertical: F.CrtYd (-1.15,-4.15) to (13.25,9.15)
             native = (-1.15, 13.25, -4.15, 9.15)
-        elif ref in ('J7', 'J12'):
-            # CUI SJ1-3523N Horizontal: F.CrtYd (-6.25,-7.95) to (6.25,6.55)
-            native = (-6.25, 6.25, -7.95, 6.55)
-        elif ref in ('J3',):
-            # PinHeader_2x05 at 90°: ~12.7mm long, 5mm wide (native: long in Y)
-            native = (-2.54, 2.54, -1.27, 11.43)
-        elif ref in ('J13', 'J14'):
-            # PinHeader_1x03: 2.54mm wide, ~7.62mm long
-            native = (-1.27, 1.27, -1.27, 6.35)
-        elif ref in ('J5', 'J6'):
-            # PinHeader_1x02: 2.54mm wide, 5.08mm long
-            native = (-1.27, 1.27, -1.27, 3.81)
         elif ref.startswith('U'):
             if 'SOIC-16' in fp_str or '3.9x9.9' in fp_str:
                 # SOIC-16_3.9x9.9mm: courtyard roughly ±4.2 x ±5.7 (symmetric)
                 native = (-4.2, 4.2, -5.7, 5.7)
+            elif 'QFN-28' in fp_str and '4x4mm' in fp_str:
+                # QFN-28-1EP_4x4mm_P0.4mm_EP2.4x2.4mm: courtyard ~5.1x5.1mm
+                native = (-2.55, 2.55, -2.55, 2.55)
             else:
-                # SOIC-8 / QFN-28: roughly ±3.5 symmetric
+                # SOIC-8 and other small ICs: roughly ±3.5 symmetric
                 native = (-3.5, 3.5, -3.5, 3.5)
         elif ref.startswith(('FB', 'D')):
             # Ferrite / diode: ~4x3mm
@@ -643,18 +637,21 @@ def place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=
         fp_str = fps[ref].GetFPIDAsString() if fps and ref in fps else ''
         occupied.append(_footprint_aabb(ref, lx, ly, rot, fp_str))
 
-    # Moat-crossing routing corridor: vias and F.Cu stubs at x=77-82, y=26-49.
+    # Moat-crossing routing corridors: vias and F.Cu stubs.
     # Passives must not be placed here or they'll short with routed vias.
-    ROUTING_CORRIDOR = (77.0, 82.5, 26.0, 49.0)  # (xmin, xmax, ymin, ymax)
+    ROUTING_CORRIDORS = [
+        (74.0, 82.5, 25.0, 49.5),   # ES8388 I2S/I2C moat-crossing routes + stitching vias
+        (71.0, 88.5, 59.0, 77.0),   # MUX control moat-crossing routes
+    ]
 
     def is_free(cx, cy, fp_str):
         """Return True if placing a passive at (cx,cy) doesn't overlap any occupied AABB
-        or the moat-crossing routing corridor."""
+        or the moat-crossing routing corridors."""
         cmin_x, cmax_x, cmin_y, cmax_y = _footprint_aabb('passive', cx, cy, 0, fp_str)
-        # Check routing corridor exclusion
-        rc = ROUTING_CORRIDOR
-        if cmin_x < rc[1] and cmax_x > rc[0] and cmin_y < rc[3] and cmax_y > rc[2]:
-            return False
+        # Check routing corridor exclusions
+        for rc in ROUTING_CORRIDORS:
+            if cmin_x < rc[1] and cmax_x > rc[0] and cmin_y < rc[3] and cmax_y > rc[2]:
+                return False
         for omin_x, omax_x, omin_y, omax_y in occupied:
             if cmin_x < omax_x and cmax_x > omin_x and cmin_y < omax_y and cmax_y > omin_y:
                 return False
@@ -804,8 +801,10 @@ def layout_main():
     layout['J1']  = (82.46, 87.5, 90)             # J_AFE preamp cable (hand-placed)
 
     # --- Top edge: volume pots ---
-    layout['RV1'] = (ox + 75, oy + 6, 0)         # HP VOL L
-    layout['RV2'] = (ox + 86, oy + 6, 0)         # HP VOL R
+    # Alps RK09K body extends 14.4mm in X from ref point (-1.15 to +13.25)
+    # Need 15mm center-to-center minimum. Board right edge at ox+100=110.
+    layout['RV1'] = (ox + 70, oy + 6, 0)         # HP VOL L (courtyard to x=93.25)
+    layout['RV2'] = (ox + 85, oy + 6, 0)         # HP VOL R (courtyard to x=108.25)
 
     # --- Bottom edge: footswitch connectors ---
     layout['J3'] = (98.5, 85, 0)                  # Footswitch 1 (hand-placed)
@@ -821,9 +820,9 @@ def layout_main():
     layout['U12'] = (93,      64.4,    0)          # NE5532 summing amp
     layout['U11'] = (93,      74.5,    0)          # NE5532 output buffer
 
-    # Muxes
-    layout['U9']  = (100.025, 63.635, 0)           # CD4052B mux #1
-    layout['U10'] = (100.025, 75.635, 0)           # CD4052B mux #2
+    # Muxes (moved closer to ES8388 column for shorter moat-crossing routes)
+    layout['U9']  = (82.975, 58.595, 0)            # CD4052B mux #1
+    layout['U10'] = (82.975, 70.595, 0)            # CD4052B mux #2
 
     # ================================================================
     # Hand-placed passives (override auto-placement)
@@ -911,13 +910,15 @@ def layout_main():
     add_ground_pour(board, "DGND", "B.Cu",  ox,            oy, MOAT_LEFT,          bh)
     add_ground_pour(board, "DGND", "In1.Cu", ox,           oy, MOAT_LEFT,          bh)
     # DGND corridor on In1.Cu extending through moat into analog zone.
-    # Provides digital return current path for I2S/I2C traces routed on In1.Cu
-    # to ES8388 codecs (U2-U5 at x=82, y=30..48). Digital traces should be
-    # routed on In1.Cu so return currents stay on DGND, not AGND.
+    # Provides digital return current path for I2S and data traces on In1.Cu
+    # to ES8388 codecs (U2-U5 at x=82, y=30..48) and CD4052B muxes.
+    # Extended north to y=25 to cover clock fan-out trunks at y=26-27.
+    # I2C now routed on In2.Cu (separate from I2S) but corridor still needed
+    # for I2S clocks, data, and MUX control signals.
     CORRIDOR_X = ox + MOAT_LEFT  # starts at moat left edge (x=75)
-    CORRIDOR_W = 11              # extends to x=86, past ES8388 DGND pads
-    CORRIDOR_Y = 27              # above U2 (y=30.1)
-    CORRIDOR_H = 24              # down to y=51, below U5 (y=47.9)
+    CORRIDOR_W = 14              # extends to x=89, past ES8388 DGND pads and MUX via columns
+    CORRIDOR_Y = 25              # above clock fan-out trunks (MCLK trunk at y=26)
+    CORRIDOR_H = 52              # down to y=77, below U10 mux (y=70.6) MUX_B pad at y=75
     add_ground_pour(board, "DGND", "In1.Cu", CORRIDOR_X, CORRIDOR_Y, CORRIDOR_W, CORRIDOR_H)
     # AGND: right (analog) section — F.Cu, B.Cu, and In2.Cu
     add_ground_pour(board, "AGND", "F.Cu",  ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT,  bh)

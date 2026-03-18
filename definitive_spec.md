@@ -1,8 +1,17 @@
 # 8-Channel Per-String Guitar Pickup System — Definitive Specification
 
-**Version 2.9 — 18 March 2026**
+**Version 2.10 — 18 March 2026**
 
 Consolidates: `pcb_spec_v2.0.md`, `pcb_revision_brief_v2.1.md`, `pcb_revision_brief_v2.2.md`
+
+**v2.10 changes (noise-optimized moat crossing):**
+- I2S clocks (MCLK, BCLK, LRCK) now cross moat once each via fan-out topology (was 12 individual crossings, now 3 trunks + vertical backbones)
+- Added 33R series termination resistors (R_MCLK_TERM, R_BCLK_TERM, R_LRCK_TERM) on I2S clocks near ESP32 source to reduce edge rate and EMI
+- I2C signals (SDA, SCL, SDA2, SCL2) moved to In2.Cu — physically separated from I2S clocks/data on In1.Cu
+- Added 13 DGND stitching vias at x=74.5 (moat boundary) for low-impedance return path
+- Added 6 DGND ground guard traces on In1.Cu between signal groups
+- DGND corridor on In1.Cu extended north to y=25 to cover clock fan-out trunks
+- Total moat crossings reduced from 35 to 22 (12 clock→3, I2C remains 8 but on separate layer)
 
 **v2.9 changes (remove board USB-C):**
 - Removed separate USB-C connector (J_USB) from MAIN board — DevKit's built-in USB-C handles both data and power
@@ -70,7 +79,7 @@ The system uses 4x ES8388 codec ICs (stereo ADC+DAC, 2 channels each = 8 ADC cha
 
 | Board | Source | Components | Layers | Size | Description |
 |-------|--------|------------|--------|------|-------------|
-| **MAIN** | `boards/main/main.zen` | ~120 | 4 | ~160x80mm | Merged master + ADC + DAC-router + 4x slave sockets |
+| **MAIN** | `boards/main/main.zen` | ~124 | 4 | ~160x80mm | Merged master + ADC + DAC-router + 4x slave sockets |
 | **Preamp/AFE** | `boards/preamp/preamp.zen` | ~151 | 4 | ~100x60mm | Pure analog front-end, 13x NE5532 dual op-amps |
 
 Single cable between boards: Preamp `J_OUT` -> MAIN `J_AFE` (2x5 header: 8 signals + AVDD + AGND).
@@ -197,13 +206,22 @@ Two instances of LP2985-33DBVR, one per board:
 | Layer | Digital zone (x=10–75) | Moat (x=75–79) | Analog zone (x=79–110) |
 |-------|----------------------|-----------------|----------------------|
 | F.Cu | DGND pour | No copper | AGND pour |
-| In1.Cu | DGND pour | DGND corridor (y=27–51) | DGND corridor (to x=86, y=27–51) |
+| In1.Cu | DGND pour | DGND corridor (y=25–77) | DGND corridor (to x=89, y=25–77) |
 | In2.Cu | — | — | AGND pour |
 | B.Cu | DGND pour | No copper | AGND pour |
 
-**Digital corridor on In1.Cu:** A narrow DGND pour strip extends from the digital zone through the moat into the analog zone (x=75–86, y=27–51), directly under the four ES8388 codecs. This provides a continuous DGND return path for I2S and I2C traces routed on In1.Cu, preventing digital return currents from flowing through the AGND pours on adjacent layers.
+**Digital corridor on In1.Cu:** A DGND pour strip extends from the digital zone through the moat into the analog zone (x=75–89, y=25–77), covering the ES8388 codecs and CD4052B muxes. Provides a continuous DGND return path for I2S clock/data traces on In1.Cu. Extended north to y=25 to cover clock fan-out trunks entering at y=26–27.
 
-**Routing rule:** All digital traces crossing into the analog zone (I2S: MCLK, BCLK, LRCK, ADCDAT_A-D, DACDAT; I2C: SDA, SCL, SDA2, SCL2; power: DVDD, DGND) must be routed on In1.Cu where the DGND corridor provides a co-planar return path. Surface layers (F.Cu, B.Cu) in the analog zone are reserved for analog signals with AGND reference.
+**DGND stitching vias:** A column of 13 DGND through vias at x=74.5 (just inside the digital zone boundary) connects F.Cu, In1.Cu, and B.Cu DGND pours. Creates a low-impedance ground wall at the moat entry for digital return currents.
+
+**Ground guard traces:** Six DGND traces on In1.Cu run horizontally between signal groups (at y=25, 28, 33, 38.5, 44.5, 49.5), ensuring continuous ground reference between adjacent signal trunks even where the DGND corridor pour is slotted.
+
+**Routing rules:**
+- I2S clocks (MCLK, BCLK, LRCK): routed on In1.Cu as single fan-out trunks. One horizontal trunk crosses the moat, then a vertical backbone distributes to all 4 ES8388 vias. Backbone columns: LRCK at x=78.5, BCLK at x=79.5, MCLK at x=81.5.
+- I2S data (ADCDAT_A-D, DACDAT): routed on In1.Cu as individual trunks to each ES8388.
+- I2C (SDA, SCL, SDA2, SCL2): routed on **In2.Cu** (separate layer from I2S) to prevent coupling from I2S clock edges. Individual trunks, vias at x=76.5 (SDA) and x=75.5 (SCL).
+- MUX control (MUX_A, MUX_B, MUX_INH): routed on In1.Cu as individual trunks.
+- F.Cu in the analog zone reserved for short via-to-pad stubs only (1–3mm). No long digital runs on surface layers in the analog zone.
 
 ### Battery
 
@@ -306,9 +324,9 @@ Board: ESP32-S3 DevKit N16R8 (16MB flash, 8MB PSRAM), mounted in 2x 20-pin machi
 
 | GPIO | Signal | Notes |
 |------|--------|-------|
-| 5 | MCLK | 12.288MHz at 48kHz Fs |
-| 6 | BCLK | Bit clock |
-| 7 | LRCK | Word select |
+| 5 | MCLK | 12.288MHz at 48kHz Fs (via 33R series termination) |
+| 6 | BCLK | Bit clock (via 33R series termination) |
+| 7 | LRCK | Word select (via 33R series termination) |
 | 15 | ADCDAT_A | ES8388 #1 data out (CH 1-2) |
 | 16 | ADCDAT_B | ES8388 #2 data out (CH 3-4) |
 | 4 | ADCDAT_C | ES8388 #3 data out (CH 5-6) |
@@ -495,12 +513,19 @@ ES8388 #3 (U_ADC3) provides the stereo DAC output. Its DAC section is enabled vi
 
 - ES8388 #3 LOUT2/ROUT2 -> 10uF AC coupling caps -> 3.5mm TRS stereo jack (J_LINE)
 
+### Virtual Ground Generation (MAIN Board)
+
+- 10k/10k divider from AVDD to AGND -> 1.65V mid-rail (VGND)
+- No buffer needed — only load is 2 op-amp non-inverting inputs (negligible current)
+- Decoupled with 47uF + 100nF to AGND (low impedance at audio frequencies)
+- AC reference for summing amplifier inverting stages (single-supply NE5532 requires mid-rail bias)
+
 ### Analog Summing Amplifier (Dry Path)
 
-Two NE5532 dual op-amps sum 8 channels to two mono outputs:
+Two NE5532 dual op-amps sum 8 channels to two mono outputs. Summing amp non-inverting inputs reference VGND (1.65V mid-rail) for correct bipolar signal swing with single-supply AVDD/AGND.
 
-- **Output A:** SIG_CH1-CH4 through 10k input resistors -> inverting summing node -> 1.2k feedback (unity gain of 4-input sum)
-- **Output B:** SIG_CH5-CH8 through 10k input resistors -> inverting summing node -> 1.2k feedback
+- **Output A:** SIG_CH1-CH4 through 10k input resistors -> inverting summing node (virtual ground at VGND) -> 1.2k feedback (unity gain of 4-input sum)
+- **Output B:** SIG_CH5-CH8 through 10k input resistors -> inverting summing node (virtual ground at VGND) -> 1.2k feedback
 
 Output buffers: NE5532 voltage followers (U_OUTBUF)
 
@@ -717,12 +742,16 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 - 4-layer stackup: F.Cu (signal+ground pours) / In1.Cu (DGND plane+corridor) / In2.Cu (AGND plane) / B.Cu (signal+ground pours)
 - Separate AGND and DGND pours, star connection via ferrite bead FB1
 - 4mm moat between digital and analog zones on F.Cu/B.Cu
-- Digital traces to ES8388 codecs routed on In1.Cu with DGND corridor as return path
-- No digital traces on F.Cu/B.Cu in the analog zone (x>79mm)
+- I2S clocks cross moat via fan-out: 1 trunk + vertical backbone per clock on In1.Cu (3 crossings total, not 12)
+- I2S data (ADCDAT, DACDAT) routed on In1.Cu as individual trunks with DGND corridor return path
+- I2C (SDA, SCL, SDA2, SCL2) routed on In2.Cu — separate layer from I2S to prevent clock coupling
+- 33R series termination resistors on MCLK, BCLK, LRCK near ESP32 source (reduces edge rate and EMI)
+- DGND stitching vias (13x) at moat boundary (x=74.5) for low-impedance return path
+- DGND guard traces on In1.Cu between signal groups
+- No long digital traces on F.Cu/B.Cu in the analog zone (x>79mm) — stubs only
 - ESP32-S3 antenna clearance: met by devkit-on-headers elevation (>3mm above PCB copper)
 - Slave ESP32 sockets placed at board edges — DevKits overhang top (slaves A+B) and bottom (slaves C+D)
 - ESP32-S3 USB-C ports must remain accessible after assembly (initial flash)
-- I2S clock lines (BCLK, LRCK, MCLK) routed short, matched length, on In1.Cu
 - ES8388 power pins: 100nF ceramic + 10uF as close as possible
 - ES8388 DVDD/DGND decoupling routed back through DGND corridor, not tied to AGND locally
 - I2S forward data lines (GPIO17/18): keep short, avoid adjacent noisy lines
@@ -764,4 +793,4 @@ Uses esp-serial-flasher library (Espressif). Update takes ~5 seconds.
 
 ---
 
-*End of Definitive Specification — Version 2.9*
+*End of Definitive Specification — Version 2.10*
