@@ -8,7 +8,6 @@
   (lib (name "MountingHole_3.2mm_M3_DIN965_Pad_TopBottom") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/MountingHole.pretty/") (options "") (descr ""))
   (lib (name "PinHeader_1x02_P2.00mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.00mm.pretty/") (options "") (descr ""))
   (lib (name "PinHeader_1x02_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.54mm.pretty/") (options "") (descr ""))
-  (lib (name "PinHeader_1x03_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.54mm.pretty/") (options "") (descr ""))
   (lib (name "PinHeader_1x08_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.54mm.pretty/") (options "") (descr ""))
   (lib (name "PinHeader_2x05_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinHeader_2.54mm.pretty/") (options "") (descr ""))
   (lib (name "PinSocket_1x20_P2.54mm_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Connector_PinSocket_2.54mm.pretty/") (options "") (descr ""))

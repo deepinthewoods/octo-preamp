@@ -9,4 +9,5 @@
   (lib (name "Potentiometer_Bourns_3314J_Vertical") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Potentiometer_SMD.pretty/") (options "") (descr ""))
   (lib (name "R_0402_1005Metric") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Resistor_SMD.pretty/") (options "") (descr ""))
   (lib (name "SOIC-8_3.9x4.9mm_P1.27mm") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Package_SO.pretty/") (options "") (descr ""))
+  (lib (name "SOT-23-5") (type "KiCad") (uri "${KIPRJMOD}/../../../.pcb/cache/gitlab.com/kicad/libraries/kicad-footprints/9.0.3/Package_TO_SOT_SMD.pretty/") (options "") (descr ""))
 )

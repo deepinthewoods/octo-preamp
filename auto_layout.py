@@ -751,8 +751,9 @@ def layout_main():
     layout['J4']  = (ox + 18, pwr_row2, 0)       # Battery connector
     layout['U7']  = (ox + 48, pwr_row2, 0)       # AP2114H digital LDO
 
-    # Ferrite bead at analog/digital zone boundary
-    layout['FB1'] = (ox + 69, oy + 32, 0)
+    # Ferrite bead at analog/digital zone boundary — placed in moat center (ox+67 = x=77)
+    # Moat: x=[ox+65, ox+69] = [75, 79]; FB1 straddles it, one pad in DGND, one in AGND
+    layout['FB1'] = (ox + 67, oy + 32, 0)
 
     # --- Slave DevKit sockets (2x2 grid, devboards hang over top/bottom edges) ---
     # 30mm X spacing between adjacent pairs; 25.4mm between LEFT/RIGHT within each pair
@@ -771,7 +772,9 @@ def layout_main():
         layout[right] = (sx + 25.4, sy, 0)         # RIGHT (GND) 25.4mm to the right
 
     # ================================================================
-    # RIGHT SECTION — ANALOG (x: ox+70 to ox+100, 30mm wide)
+    # RIGHT SECTION — ANALOG (x: ox+69 to ox+100, 31mm wide)
+    # Moat (no copper) at x: [ox+65, ox+69] = [75, 79] — 4mm gap
+    # FB1 bridges DGND/AGND at moat center (x=77)
     # Connectors/jacks on edges, ICs in interior
     # ================================================================
 
@@ -782,24 +785,30 @@ def layout_main():
     layout['J14'] = (107, 73.92, 0)               # J_OUT_R
 
     # --- Bottom of right section: AFE preamp cable (2x5) ---
-    layout['J3']  = (79.46, 87.54, 90)            # J_AFE preamp cable
+    layout['J3']  = (85, 87.54, 90)               # J_AFE preamp cable — in analog zone (x>84)
 
     # --- Top edge: volume pots (inset from edge) ---
-    layout['RV1'] = (ox + 69, oy + 6, 0)         # HP VOL L — moved left to clear RV2 courtyard (gap ~2.6mm)
+    layout['RV1'] = (ox + 75, oy + 6, 0)         # HP VOL L — in analog zone, clears RV2 courtyard
     layout['RV2'] = (ox + 86, oy + 6, 0)         # HP VOL R
 
     # --- Bottom edge: footswitch connectors (right side) ---
     layout['J5'] = (ox + 86, oy + bh - 6, 0)     # Footswitch 1
     layout['J6'] = (ox + bw - 8, oy + bh - 6, 0) # Footswitch 2
 
-    # --- Interior ICs — 4x ES8388 column + analog LDO (user-placed positions) ---
-    layout['U1']  = (90.4,    30.1,    0)          # ES8388 ADC #1 (CH1+2)
-    layout['U2']  = (90.4,    35.9375, 0)          # ES8388 ADC #2 (CH3+4)
-    layout['U3']  = (90.4375, 42,      0)          # ES8388 ADC #3 (CH5+6 + DAC)
-    layout['U4']  = (90.7,    47.9375, 0)          # ES8388 ADC #4 (CH7+8)
-    layout['U5']  = (91.6375, 57,      0)          # LP2985 AVDD analog LDO
-    layout['U11'] = (90,      64.4,    0)          # NE5532 summing amp
-    layout['U10'] = (90,      74.5,    0)          # NE5532 output buffer
+    # --- Interior ICs ---
+    # ADCs on the LEFT of the analog section, rotated 90° CCW:
+    #   LEFT  (was TOP):    LRCK, ASDOUT, SDA, SCL, AD0, RESET_N → faces moat (~1mm crossing)
+    #   TOP   (was RIGHT):  SCLK, MCLK at left end (near moat); LIN1, RIN1 further right (in AGND zone)
+    #   BOTTOM (was LEFT):  LOUT1, ROUT1, AVDD, AVSS → analog outputs face south toward NE5532s
+    #   RIGHT (was BOTTOM): DVDD, DVSS, refs → local decoupling in AGND zone
+    layout['U1']  = (82,      30.1,    90)         # ES8388 ADC #1 (CH1+2)
+    layout['U2']  = (82,      35.9375, 90)         # ES8388 ADC #2 (CH3+4)
+    layout['U3']  = (82,      42,      90)         # ES8388 ADC #3 (CH5+6 + DAC)
+    layout['U4']  = (82,      47.9375, 90)         # ES8388 ADC #4 (CH7+8)
+    # Downstream analog processing — further right
+    layout['U5']  = (93,      57,      0)          # LP2985 AVDD analog LDO
+    layout['U11'] = (93,      64.4,    0)          # NE5532 summing amp
+    layout['U10'] = (93,      74.5,    0)          # NE5532 output buffer
 
     # Muxes — right of IC column
     layout['U8']  = (100.025, 63.635, 0)           # CD4052B mux #1
@@ -829,7 +838,7 @@ def layout_main():
         print(f"    {k}: {sorted(v)}")
 
     # Separate right-section passives from left-section passives
-    right_section_x = ox + 70  # boundary between left and right sections
+    right_section_x = ox + 65  # boundary between left and right sections (moat left edge)
     right_assignments = {}
     for anchor_ref, passive_list in assignments.items():
         if anchor_ref == 'UNASSIGNED' or anchor_ref not in layout:
@@ -844,7 +853,7 @@ def layout_main():
     if right_assignments:
         total = sum(len(v) for v in right_assignments.values())
         print(f"  Right-section passives ({total}) across {len(right_assignments)} anchors")
-        place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=fps)
+        place_passives_right_section(right_assignments, layout, ox, oy, bw, bh, fps=fps, x_min_offset=69)
 
     # Handle unassigned passives — place in left section available space
     unassigned = assignments.get('UNASSIGNED', [])
@@ -853,7 +862,7 @@ def layout_main():
         for i, ref in enumerate(sorted(unassigned)):
             col = i % 8
             row = i // 8
-            layout[ref] = (ox + 71 + col * 4, oy + 30 + row * 3, 0)
+            layout[ref] = (ox + 70 + col * 4, oy + 30 + row * 3, 0)
 
     # Any remaining unplaced components
     remaining = [r for r in fps if r not in layout]
@@ -866,12 +875,22 @@ def layout_main():
     add_board_outline(board, ox, oy, bw, bh, corner_radius=2)
     add_silkscreen_labels(board, components, fps, layout)
 
-    # Ground copper pours
-    # DGND on F.Cu and B.Cu (full board — connects through ferrite to AGND)
-    add_ground_pour(board, "DGND", "F.Cu", ox, oy, bw, bh)
-    add_ground_pour(board, "DGND", "B.Cu", ox, oy, bw, bh)
-    # AGND pour on inner layer In2.Cu for analog right half
-    add_ground_pour(board, "AGND", "In2.Cu", ox + 62, oy, bw - 62, bh)  # covers right 38mm
+    # Ground copper pours — mixed-signal moat topology
+    #
+    # Moat (no copper) at x = [ox+65, ox+69] = [75, 79] — 4mm gap on all layers
+    # FB1 bridges DGND↔AGND at x=77 (moat center)
+    # Digital traces must NOT cross the moat; only FB1 and the ADC I2S/SPI signals
+    # cross the boundary (at the ADC pads themselves, never in open routing).
+    #
+    # DGND: left (digital) section only — F.Cu and B.Cu
+    MOAT_LEFT = 65   # mm from ox — moat left edge
+    MOAT_RIGHT = 69  # mm from ox — moat right edge (4mm moat)
+    add_ground_pour(board, "DGND", "F.Cu",  ox,            oy, MOAT_LEFT,          bh)
+    add_ground_pour(board, "DGND", "B.Cu",  ox,            oy, MOAT_LEFT,          bh)
+    # AGND: right (analog) section — F.Cu, B.Cu, and In2.Cu
+    add_ground_pour(board, "AGND", "F.Cu",  ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT,  bh)
+    add_ground_pour(board, "AGND", "B.Cu",  ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT,  bh)
+    add_ground_pour(board, "AGND", "In2.Cu", ox + MOAT_RIGHT, oy, bw - MOAT_RIGHT, bh)
 
     out_path = str(board_dir / "layout.kicad_pcb")
     pcbnew.SaveBoard(out_path, board)
@@ -910,30 +929,36 @@ def layout_preamp():
     layout['J17'] = (79.46, 87.54, 90)
 
     # ================================================================
-    # Pickup input pads (J9-J16) — along bottom edge, left side
+    # Pickup input pads (J9-J16) — along bottom-left edge, 2.54mm pitch
+    # Rotation=90 places pins horizontally: pin1 (signal) left, pin2 (GND) right.
+    # 8 headers at 5.08mm X spacing form a contiguous 1x16 array at 2.54mm pitch.
     # ================================================================
     input_refs = sorted([r for r in fps if ref_to_zen.get(r, '').startswith('J_IN')])
     for i, ref in enumerate(input_refs):
-        layout[ref] = (ox + 3 + i * 4.5, oy + bh - 4, 0)
+        layout[ref] = (ox + 5 + i * 5.08, oy + bh - 3.8, 90)
 
     # ================================================================
-    # Direct output pads (J1-J8) — along left edge, towards top
+    # Direct output pads (J1-J8) — along left edge, 2.54mm pitch
+    # Rotation=0 places pins horizontally: col 0 = signals, col 1 = GND.
+    # 8 headers at 2.54mm Y spacing form a 2x8 grid compatible with
+    # a single 2x8 2.54mm pitch connector.
     # ================================================================
     dout_refs = sorted([r for r in fps if ref_to_zen.get(r, '').startswith('J_DOUT')])
     for i, ref in enumerate(dout_refs):
-        layout[ref] = (ox + 4, oy + 13 + i * 4.5, 0)
+        layout[ref] = (ox + 3.8, oy + 15 + i * 5.08, 0)
 
     # ================================================================
-    # Power input J18 — near J17
+    # Power input J18 — user-placed position (preserved from KiCad)
     # ================================================================
     for ref in fps:
         if ref_to_zen.get(ref, '') == 'J_PWR':
-            layout[ref] = (50, 70, 0)
+            layout[ref] = (94.96, 87.00, 90)
 
     # ================================================================
     # ICs — evenly spaced grid
     # Signal flow: buffer (U5-U8) -> gain (U9-U12) -> filter (U1-U4)
     # U13 = VGND reference, placed near power
+    # U14 = local LP2985 AVDD LDO — user-placed position (preserved from KiCad)
     # ================================================================
     ic_rows = [
         ['U5', 'U6', 'U7', 'U8'],       # Input buffers
@@ -951,6 +976,10 @@ def layout_preamp():
     # U13 (VGND) near power/output connector
     if 'U13' in fps:
         layout['U13'] = (55, 62, 0)
+
+    # U14 (local LP2985 AVDD LDO) — user-placed, near J18 (J_PWR)
+    if 'U14' in fps:
+        layout['U14'] = (90.53, 76.41, 0)
 
     # ================================================================
     # Trimpots (RV1-RV8) — right edge column

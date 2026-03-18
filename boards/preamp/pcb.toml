@@ -3,6 +3,7 @@ name = "preamp"
 path = "preamp.zen"
 
 [dependencies]
+"github.com/deepinthewoods/octo-preamp/components/lp2985" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/mono_jack" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/ne5532" = "0.1.0"
 "github.com/deepinthewoods/octo-preamp/components/trimpot" = "0.1.0"
